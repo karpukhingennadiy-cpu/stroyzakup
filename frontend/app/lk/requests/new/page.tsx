@@ -1,6 +1,31 @@
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { createRequest } from "@/lib/api";
 import { IconPlus, IconHardHat } from "@/components/icons";
 
 export default function NewRequestPage() {
+  const router = useRouter();
+  const [rawText, setRawText] = useState("");
+  const [comment, setComment] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!rawText.trim()) return;
+    setError("");
+    setLoading(true);
+    try {
+      const req = await createRequest(rawText, comment || undefined);
+      router.push("/lk/requests/" + req.id);
+    } catch (err: any) {
+      setError(err.message || "Ошибка создания заявки");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="max-w-2xl mx-auto">
       <div className="mb-8">
@@ -21,24 +46,24 @@ export default function NewRequestPage() {
           </div>
         </div>
 
-        <form className="p-6 space-y-5">
-          <div>
-            <textarea name="raw_text" required rows={10}
-              placeholder="Керамогранит серый 600x600 — 150 м² | Плиточный клей KNAUF Fliesen 25 кг — 100 мешков | Доставка: г. Подольск"
-              className="w-full px-4 py-3 bg-[#f5f7fa] border border-[#e2e8f0] rounded-xl focus:bg-white focus:border-[#1e3a5f] transition resize-y text-sm leading-relaxed" />
-          </div>
+        {error && (
+          <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">{error}</div>
+        )}
 
-          <div>
-            <label className="block text-sm font-semibold text-[#1a1a2e] mb-1.5">Комментарий</label>
-            <input name="comment" type="text"
-              placeholder="Например: срочная закупка, нужна доставка до пятницы"
-              className="w-full px-4 py-3 bg-[#f5f7fa] border border-[#e2e8f0] rounded-xl focus:bg-white focus:border-[#1e3a5f] transition" />
-          </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          <textarea value={rawText} onChange={(e) => setRawText(e.target.value)}
+            required rows={10}
+            placeholder="Керамогранит серый 600x600 — 150 м² | Плиточный клей KNAUF Fliesen 25 кг — 100 мешков | Доставка: г. Подольск"
+            className="w-full px-4 py-3 bg-[#f5f7fa] border border-[#e2e8f0] rounded-xl focus:bg-white focus:border-[#1e3a5f] transition resize-y text-sm leading-relaxed" />
 
-          <button type="submit"
-            className="w-full flex items-center justify-center gap-2 py-3.5 bg-[#f0a500] text-[#1a1a2e] rounded-xl font-bold text-base hover:bg-[#fcc419] hover:shadow-lg transition">
+          <input value={comment} onChange={(e) => setComment(e.target.value)}
+            type="text" placeholder="Комментарий (необязательно)"
+            className="w-full px-4 py-3 bg-[#f5f7fa] border border-[#e2e8f0] rounded-xl focus:bg-white focus:border-[#1e3a5f] transition" />
+
+          <button type="submit" disabled={loading || !rawText.trim()}
+            className="w-full flex items-center justify-center gap-2 py-3.5 bg-[#f0a500] text-[#1a1a2e] rounded-xl font-bold text-base hover:bg-[#fcc419] hover:shadow-lg transition disabled:opacity-50">
             <IconPlus className="w-5 h-5" />
-            Создать заявку
+            {loading ? "Создаём..." : "Создать заявку"}
           </button>
         </form>
       </div>

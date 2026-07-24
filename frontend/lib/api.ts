@@ -7,17 +7,17 @@ function getToken() {
   return localStorage.getItem("access_token");
 }
 
-function setTokens(access, refresh) {
+export function setTokens(access, refresh) {
   localStorage.setItem("access_token", access);
   localStorage.setItem("refresh_token", refresh);
 }
 
-function clearTokens() {
+export function clearTokens() {
   localStorage.removeItem("access_token");
   localStorage.removeItem("refresh_token");
 }
 
-async function refreshToken() {
+async function refreshAccessToken() {
   var refresh = localStorage.getItem("refresh_token");
   if (!refresh) return null;
   try {
@@ -36,64 +36,56 @@ async function refreshToken() {
   }
 }
 
-async function api(path, options) {
+export async function api(path, options) {
   if (!options) options = {};
   var token = getToken();
   var headers = Object.assign({ "Content-Type": "application/json" }, options.headers || {});
   if (token) headers["Authorization"] = "Bearer " + token;
-
   var res = await fetch(API_BASE + path, Object.assign({}, options, { headers: headers }));
-
   if (res.status === 401 && token) {
-    var newToken = await refreshToken();
+    var newToken = await refreshAccessToken();
     if (newToken) {
       headers["Authorization"] = "Bearer " + newToken;
       res = await fetch(API_BASE + path, Object.assign({}, options, { headers: headers }));
     }
   }
-
   if (!res.ok) {
-    var error = await res.json().catch(function() { return { error: res.statusText }; });
-    throw new Error(error.error || error.detail || "Request failed");
+    var error = await res.json().catch(function() { return { detail: res.statusText }; });
+    throw new Error(error.detail || error.error || "HTTP " + res.status);
   }
-
   return res.json();
 }
 
-async function login(email, password) {
-  var data = await api("/auth/login/", {
-    method: "POST",
-    body: JSON.stringify({ email: email, password: password }),
-  });
+export async function login(email, password) {
+  var data = await api("/auth/login/", { method: "POST", body: JSON.stringify({ email: email, password: password }) });
   setTokens(data.access, data.refresh);
   return data;
 }
 
-async function registerUser(data) {
+export async function registerUser(data) {
   return api("/auth/register/", { method: "POST", body: JSON.stringify(data) });
 }
 
-async function getMe() { return api("/auth/me/"); }
-async function getRequests() { return api("/requests/"); }
-async function getRequest(id) { return api("/requests/" + id + "/"); }
-async function createRequest(raw_text, comment) {
+export async function getMe() { return api("/auth/me/"); }
+export async function getRequests() { return api("/requests/"); }
+export async function getRequest(id) { return api("/requests/" + id + "/"); }
+export async function createRequest(raw_text, comment) {
   return api("/requests/", { method: "POST", body: JSON.stringify({ raw_text: raw_text, comment: comment }) });
 }
-async function parseRequest(id) {
+export async function parseRequest(id) {
   return api("/requests/" + id + "/parse/", { method: "POST" });
 }
-async function getSuppliers(params) {
+export async function getSuppliers(params) {
   var qs = params ? "?" + new URLSearchParams(params).toString() : "";
   return api("/suppliers/" + qs);
 }
-async function searchSuppliersByRadius(lat, lon, radius) {
+export async function searchSuppliersRadius(lat, lon, radius) {
   if (!radius) radius = 150;
   return api("/suppliers/search_radius/?lat=" + lat + "&lon=" + lon + "&radius=" + radius);
 }
-async function getQuotes(requestId) {
-  var qs = requestId ? "?request_id=" + requestId : "";
-  return api("/quotes/" + qs);
+export async function getQuotes(requestId) {
+  return api("/quotes/" + (requestId ? "?request_id=" + requestId : ""));
 }
-async function getCompetitiveSheet(requestId) {
+export async function getCompetitiveSheet(requestId) {
   return api("/quotes/competitive_sheet/?request_id=" + requestId);
 }
