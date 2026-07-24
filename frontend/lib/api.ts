@@ -1,136 +1,99 @@
 "use client";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+var API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
-function getToken(): string | null {
+function getToken() {
   if (typeof window === "undefined") return null;
   return localStorage.getItem("access_token");
 }
 
-export function setTokens(access: string, refresh: string) {
+function setTokens(access, refresh) {
   localStorage.setItem("access_token", access);
   localStorage.setItem("refresh_token", refresh);
 }
 
-export function clearTokens() {
+function clearTokens() {
   localStorage.removeItem("access_token");
   localStorage.removeItem("refresh_token");
 }
 
-async function refreshToken(): Promise<string | null> {
-  const refresh = localStorage.getItem("refresh_token");
+async function refreshToken() {
+  var refresh = localStorage.getItem("refresh_token");
   if (!refresh) return null;
   try {
-    const res = await fetch(, {
+    var res = await fetch(API_BASE + "/auth/token/refresh/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refresh }),
+      body: JSON.stringify({ refresh: refresh }),
     });
     if (!res.ok) throw new Error("Refresh failed");
-    const data = await res.json();
+    var data = await res.json();
     localStorage.setItem("access_token", data.access);
     return data.access;
-  } catch {
+  } catch (e) {
     clearTokens();
     return null;
   }
 }
 
-export async function api(
-  path: string,
-  options: RequestInit = {}
-): Promise<any> {
-  let token = getToken();
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(options.headers as Record<string, string>),
-  };
-  if (token) {
-    headers["Authorization"] = ;
-  }
+async function api(path, options) {
+  if (!options) options = {};
+  var token = getToken();
+  var headers = Object.assign({ "Content-Type": "application/json" }, options.headers || {});
+  if (token) headers["Authorization"] = "Bearer " + token;
 
-  let res = await fetch(, { ...options, headers });
+  var res = await fetch(API_BASE + path, Object.assign({}, options, { headers: headers }));
 
-  // Auto-refresh on 401
   if (res.status === 401 && token) {
-    const newToken = await refreshToken();
+    var newToken = await refreshToken();
     if (newToken) {
-      headers["Authorization"] = ;
-      res = await fetch(, { ...options, headers });
+      headers["Authorization"] = "Bearer " + newToken;
+      res = await fetch(API_BASE + path, Object.assign({}, options, { headers: headers }));
     }
   }
 
   if (!res.ok) {
-    const error = await res.json().catch(() => ({ error: res.statusText }));
+    var error = await res.json().catch(function() { return { error: res.statusText }; });
     throw new Error(error.error || error.detail || "Request failed");
   }
 
   return res.json();
 }
 
-// Auth
-export async function login(email: string, password: string) {
-  const data = await api("/auth/login/", {
+async function login(email, password) {
+  var data = await api("/auth/login/", {
     method: "POST",
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email: email, password: password }),
   });
   setTokens(data.access, data.refresh);
   return data;
 }
 
-export async function register(data: { email: string; password: string; first_name?: string; last_name?: string }) {
-  return api("/auth/register/", {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
+async function registerUser(data) {
+  return api("/auth/register/", { method: "POST", body: JSON.stringify(data) });
 }
 
-export async function getMe() {
-  return api("/auth/me/");
+async function getMe() { return api("/auth/me/"); }
+async function getRequests() { return api("/requests/"); }
+async function getRequest(id) { return api("/requests/" + id + "/"); }
+async function createRequest(raw_text, comment) {
+  return api("/requests/", { method: "POST", body: JSON.stringify({ raw_text: raw_text, comment: comment }) });
 }
-
-// Requests
-export async function getRequests() {
-  return api("/requests/");
+async function parseRequest(id) {
+  return api("/requests/" + id + "/parse/", { method: "POST" });
 }
-
-export async function getRequest(id: string | number) {
-  return api();
+async function getSuppliers(params) {
+  var qs = params ? "?" + new URLSearchParams(params).toString() : "";
+  return api("/suppliers/" + qs);
 }
-
-export async function createRequest(raw_text: string, comment?: string) {
-  return api("/requests/", {
-    method: "POST",
-    body: JSON.stringify({ raw_text, comment }),
-  });
+async function searchSuppliersByRadius(lat, lon, radius) {
+  if (!radius) radius = 150;
+  return api("/suppliers/search_radius/?lat=" + lat + "&lon=" + lon + "&radius=" + radius);
 }
-
-export async function parseRequest(id: string | number) {
-  return api(, { method: "POST" });
+async function getQuotes(requestId) {
+  var qs = requestId ? "?request_id=" + requestId : "";
+  return api("/quotes/" + qs);
 }
-
-// Suppliers
-export async function getSuppliers(params?: Record<string, string>) {
-  const qs = params ? "?" + new URLSearchParams(params).toString() : "";
-  return api();
-}
-
-export async function searchSuppliersByRadius(lat: number, lon: number, radius: number = 150, category?: string) {
-  const params: Record<string, string> = {
-    lat: String(lat),
-    lon: String(lon),
-    radius: String(radius),
-  };
-  if (category) params.category = category;
-  return api();
-}
-
-// Quotes
-export async function getQuotes(requestId?: string | number) {
-  const params = requestId ?  : "";
-  return api();
-}
-
-export async function getCompetitiveSheet(requestId: string | number) {
-  return api();
+async function getCompetitiveSheet(requestId) {
+  return api("/quotes/competitive_sheet/?request_id=" + requestId);
 }

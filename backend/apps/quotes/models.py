@@ -41,7 +41,9 @@ class Quote(models.Model):
     valid_until = models.DateField(null=True, blank=True)
     comment = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    class Meta: db_table = "quotes"
+    class Meta:
+        db_table = "quotes"
+        ordering = ["-created_at"]
 
 class QuoteItem(models.Model):
     quote = models.ForeignKey(Quote, on_delete=models.CASCADE, related_name="items")
