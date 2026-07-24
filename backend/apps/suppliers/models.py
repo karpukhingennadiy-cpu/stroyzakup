@@ -1,4 +1,4 @@
-from django.contrib.gis.db import models
+from django.db import models
 
 class Supplier(models.Model):
     name = models.CharField(max_length=500)
@@ -19,7 +19,8 @@ class SupplierAddress(models.Model):
     address = models.TextField()
     city = models.CharField(max_length=200)
     region = models.CharField(max_length=200, blank=True)
-    coordinates = models.PointField(srid=4326, null=True, blank=True)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
     class Meta: db_table = "supplier_addresses"
 
