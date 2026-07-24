@@ -21,15 +21,16 @@ class QuoteViewSet(viewsets.ModelViewSet):
 
         quotes = Quote.objects.filter(request_id=request_id, status__in=['received', 'valid'])
         items = []
+        from decimal import Decimal
         for quote in quotes:
-            total = sum(qi.price * float(qi.request_item.quantity) for qi in quote.items.all())
-            delivery = float(quote.delivery_cost or 0)
+            total = sum(qi.price * qi.request_item.quantity for qi in quote.items.all())
+            delivery = quote.delivery_cost or Decimal('0')
             items.append({
                 'supplier_id': quote.supplier_id,
                 'supplier_name': quote.supplier.name,
                 'materials_total': float(total),
-                'delivery': delivery,
-                'grand_total': float(total) + delivery,
+                'delivery': float(delivery),
+                'grand_total': float(total + delivery),
                 'payment_terms': quote.payment_terms,
                 'delivery_time': quote.delivery_time,
                 'valid_until': quote.valid_until,

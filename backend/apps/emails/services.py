@@ -86,3 +86,58 @@ def create_rfq_invitation(request_obj, supplier):
         quote_token=generate_quote_token(),
     )
     return inv
+
+
+def process_inbound_email_reply(request_code, invitation_hash, sender,
+                                 subject, body_text, body_html="",
+                                 message_id="", headers=None):
+    """Process inbound email: attach to request, create draft quote."""
+    import logging
+    from django.utils import timezone
+    from apps.requests.models import Request
+    from apps.quotes.models import Quote, RfqInvitation, EmailMessage
+
+    logger = logging.getLogger(__name__)
+
+    try:
+        req = Request.objects.get(code=request_code)
+    except Request.DoesNotExist:
+        logger.warning("Request not found: %s", request_code)
+        return
+
+    try:
+        invitation = RfqInvitation.objects.select_related("supplier").get(
+            request=req,
+            reply_email__contains=invitation_hash,
+        )
+    except RfqInvitation.DoesNotExist:
+        logger.warning("Invitation not found for hash: %s", invitation_hash)
+        return
+
+    EmailMessage.objects.create(
+        direction="inbound",
+        from_email=sender,
+        to_email=invitation.reply_email,
+        subject=subject,
+        body_text=body_text,
+        body_html=body_html,
+        message_id=message_id or "",
+        request=req,
+        supplier=invitation.supplier,
+    )
+
+    quote, created = Quote.objects.get_or_create(
+        request=req,
+        supplier=invitation.supplier,
+        invitation=invitation,
+        defaults={"status": "received"},
+    )
+
+    invitation.status = "replied"
+    invitation.replied_at = timezone.now()
+    invitation.save(update_fields=["status", "replied_at"])
+
+    logger.info(
+        "Processed reply: request=%s, supplier=%s, quote=%s",
+        request_code, invitation.supplier.name, quote.id,
+    )

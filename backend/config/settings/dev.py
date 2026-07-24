@@ -12,3 +12,14 @@ DATABASES = {
 }
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+# Inbound email domain for reply addresses
+INBOUND_EMAIL_DOMAIN = "in.stroyzakup.ru"
+INBOUND_EMAIL_WEBHOOK_SECRET = "dev-webhook-secret"
+
+# CORS for frontend dev
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+CORS_ALLOW_CREDENTIALS = True
