@@ -43,12 +43,13 @@ Kod zakupki: {request_code}
 S uvazheniem, Минитендер"""
 
 RFQ_TEMPLATE_HTML = """<html><body>
-<h2>Zapros KP: RFQ-{request_code}</h2>
-<p>Zdravstvujte, {supplier_name}!</p>
-<p>Pozitsii:</p><ul>{items_html}</ul>
-<p>Dostavka: {delivery_address}<br>Srok: {deadline}</p>
-<p><a href="{quote_url}">Zapolnit KP na sayte</a></p>
-<p>Kod: {request_code}</p>
+<h2>Запрос КП: RFQ-{request_code}</h2>
+<p>Здравствуйте, {supplier_name}!</p>
+<p>Позиции:</p><ul>{items_html}</ul>
+<p>Доставка: {delivery_address}<br>Срок: {deadline}</p>
+<p><a href="{quote_url}">Заполнить КП на сайте</a></p>
+<p>Код закупки: {request_code}</p>
+<p>С уважением, Минитендер</p>
 </body></html>"""
 
 def build_rfq_email(invitation):
