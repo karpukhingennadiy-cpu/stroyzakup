@@ -15,14 +15,14 @@ def send_rfq_to_suppliers(request_obj, supplier_ids=None):
         email_data = build_rfq_email(inv)
         msg = EmailMultiAlternatives(
             subject=email_data["subject"], body=email_data["body_text"],
-            from_email="Минитендер RFQ <rfq@minitender.ru>",
+            from_email="Минитендер RFQ <rfq@минитендер.рф>",
             to=[supplier.email], reply_to=[inv.reply_email])
         if email_data.get("body_html"):
             msg.attach_alternative(email_data["body_html"], "text/html")
         try:
             msg.send(fail_silently=False)
             EmailMessage.objects.create(
-                direction="outbound", from_email="rfq@minitender.ru",
+                direction="outbound", from_email="rfq@минитендер.рф",
                 to_email=supplier.email, subject=email_data["subject"],
                 body_text=email_data["body_text"], request=request_obj, supplier=supplier)
             inv.status = "sent"
