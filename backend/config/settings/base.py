@@ -104,18 +104,15 @@ LLM_API_KEY = config("LLM_API_KEY", default="")
 LLM_MODEL = config("LLM_MODEL", default="deepseek-chat")
 LLM_BASE_URL = config("LLM_BASE_URL", default="https://api.deepseek.com/v1")
 
-# Email SMTP (Beget production)
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-
-# Email SMTP (Beget production)
-EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST = "smtp.beget.com"
-EMAIL_PORT = 465
-EMAIL_USE_SSL = True
-EMAIL_HOST_USER = "rfq@минитендер.рф"
+# Email (configured via .env, defaults for dev)
+EMAIL_BACKEND = config("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")
+EMAIL_HOST = config("EMAIL_HOST", default="smtp.beget.com")
+EMAIL_PORT = config("EMAIL_PORT", default=465, cast=int)
+EMAIL_USE_SSL = config("EMAIL_USE_SSL", default=True, cast=bool)
+EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="rfq@минитендер.рф")
 EMAIL_HOST_PASSWORD = ""
-DEFAULT_FROM_EMAIL = "Минитендер RFQ <rfq@минитендер.рф>"
-INBOUND_EMAIL_DOMAIN = "in.минитендер.рф"
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="Минитендер RFQ <rfq@minitender.ru>")
+INBOUND_EMAIL_DOMAIN = config("INBOUND_EMAIL_DOMAIN", default="in.minitender.ru")
 
 # Whitenoise
 STORAGES={"staticfiles":{"BACKEND":"whitenoise.storage.CompressedManifestStaticFilesStorage"}}

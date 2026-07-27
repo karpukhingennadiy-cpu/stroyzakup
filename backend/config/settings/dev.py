@@ -11,14 +11,8 @@ DATABASES = {
     }
 }
 
-EMAIL_BACKEND="django.core.mail.backends.smtp.EmailBackend"
-EMAIL_HOST="smtp.mail.ru"
-EMAIL_PORT=465
-EMAIL_USE_SSL=True
 
 # Inbound email domain for reply addresses
-INBOUND_EMAIL_DOMAIN = "in.minitender.ru"
-INBOUND_EMAIL_WEBHOOK_SECRET = "dev-webhook-secret"
 
 # CORS for frontend dev
 CORS_ALLOWED_ORIGINS = [
@@ -27,5 +21,3 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_CREDENTIALS = True
 
-EMAIL_HOST_USER="309651@mail.ru"
-EMAIL_HOST_PASSWORD="uePMzMa4IhccRLwSUh1R"

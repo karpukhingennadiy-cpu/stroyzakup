@@ -111,6 +111,48 @@ CATEGORIES = [
 ]
 
 
+
+
+# === JSON Schema for LLM response validation ===
+ITEM_SCHEMA = {
+    "type": "object",
+    "required": ["name", "quantity", "unit", "category", "confidence"],
+    "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "quantity": {"type": "number", "minimum": 0},
+        "unit": {"type": "string", "minLength": 1},
+        "category": {"type": "string", "minLength": 1},
+        "brand": {"type": ["string", "null"]},
+        "spec": {"type": ["string", "null"]},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "needs_clarification": {"type": "boolean"},
+        "clarification_question": {"type": "string"},
+        "raw_text": {"type": "string"},
+    },
+}
+
+def validate_items(items):
+    """Validate parsed items against JSON Schema. Returns (valid_items, rejected)."""
+    try:
+        from jsonschema import validate, ValidationError
+    except ImportError:
+        logger.warning("jsonschema not installed, skipping validation")
+        return items, []
+
+    valid = []
+    rejected = []
+    for i, item in enumerate(items):
+        try:
+            validate(instance=item, schema=ITEM_SCHEMA)
+            # Additional checks
+            if not item.get("name") or len(str(item.get("name", "")).strip()) == 0:
+                raise ValidationError("name is empty")
+            valid.append(item)
+        except ValidationError as e:
+            logger.warning("Item %d rejected by schema: %s", i, e.message)
+            rejected.append({"index": i, "error": str(e.message), "item": item})
+    return valid, rejected
+
 def parse_material_list(request_obj):
     """Parse raw text into material items. Universal completeness assessment."""
     try:

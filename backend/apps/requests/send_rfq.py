@@ -1,4 +1,5 @@
 import os
+from django.conf import settings
 """Send RFQ emails to matched suppliers."""
 from django.core.mail import EmailMultiAlternatives
 from apps.emails.services import create_rfq_invitation, build_rfq_email
@@ -27,7 +28,7 @@ def send_rfq_to_suppliers(request_obj, supplier_ids):
         email_data = build_rfq_email(inv)
         msg = EmailMultiAlternatives(
             subject=email_data["subject"], body=email_data["body_text"],
-            from_email=os.environ.get("FROM_EMAIL", "Минитендер RFQ <rfq@minitender.ru>"),
+            from_email=settings.DEFAULT_FROM_EMAIL,
             to=[supplier.email], reply_to=[inv.reply_email])
         if email_data.get("body_html"):
             msg.attach_alternative(email_data["body_html"], "text/html")
