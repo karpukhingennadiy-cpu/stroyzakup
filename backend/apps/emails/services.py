@@ -12,45 +12,82 @@ def generate_request_code(length=6):
         if not Request.objects.filter(code=code).exists():
             return code
 
-def generate_reply_address(request_code, supplier_id):
-    seed = f'{request_code}:{supplier_id}:{secrets.token_hex(4)}'
-    inv_hash = hashlib.sha256(seed.encode()).hexdigest()[:6]
-    return f'rfq-{request_code}-{inv_hash}@{settings.INBOUND_EMAIL_DOMAIN}'
+def generate_reply_address(reply_code):
+    return f'rfq-{reply_code}@{settings.INBOUND_EMAIL_DOMAIN}'
 
 def generate_quote_token():
     return secrets.token_urlsafe(32)
 
 def parse_reply_address(email_addr):
     import re
-    m = re.match(r'rfq-([A-Z0-9]+)-([a-z0-9]+)@', email_addr)
-    return (m.group(1), m.group(2)) if m else None
+    m = re.match(r'rfq-([A-Za-z0-9_-]+)@', email_addr)
+    return m.group(1) if m else None
 
 RFQ_TEMPLATE_TEXT = """Здравствуйте, {supplier_name}!
 
-По закупке RFQ-{request_code} просим предоставить коммерческое предложение.
+Приглашаем вас принять участие в закупке № RFQ-{request_code}.
+Просим предоставить коммерческое предложение на следующие позиции:
 
-Позиции:
 {items_list}
 
-Доставка: {delivery_address}
-Срок ответа: {deadline}
+Условия:
+- Адрес доставки: {delivery_address}
+- Срок подачи КП: до {deadline}
 
-Заполнить КП: {quote_url}
-Или ответьте на это письмо.
+Для заполнения КП перейдите по ссылке:
+{quote_url}
 
-Код закупки: {request_code}
+Или просто ответьте на это письмо — мы получим ваше предложение.
 
-С уважением, Минитендер"""
+По вопросам: ответьте на это письмо или напишите на rfq@minitender.ru
 
-RFQ_TEMPLATE_HTML = """<html><body>
-<h2>Запрос КП: RFQ-{request_code}</h2>
-<p>Здравствуйте, {supplier_name}!</p>
-<p>Позиции:</p><ul>{items_html}</ul>
-<p>Доставка: {delivery_address}<br>Срок: {deadline}</p>
-<p><a href="{quote_url}">Заполнить КП на сайте</a></p>
-<p>Код закупки: {request_code}</p>
-<p>С уважением, Минитендер</p>
-</body></html>"""
+--
+С уважением,
+команда Минитендер.рф
+platforma dlya stroitelnykh zakupok"""
+
+RFQ_TEMPLATE_HTML = """<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family: Arial, sans-serif; max-width: 650px; margin: 0 auto; padding: 20px; color: #333;">
+  <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+    <h2 style="margin: 0 0 10px; color: #1a73e8;">Запрос КП № RFQ-{request_code}</h2>
+    <p style="margin: 0;">Здравствуйте, <strong>{supplier_name}</strong>!</p>
+  </div>
+
+  <p>Приглашаем вас принять участие в закупке. Просим предоставить коммерческое предложение на следующие позиции:</p>
+
+  <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">
+    <tr style="background: #e8eaed;">
+      <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">№</th>
+      <th style="padding: 10px; text-align: left; border: 1px solid #ddd;">Наименование</th>
+    </tr>
+    {items_html}
+  </table>
+
+  <div style="background: #fff3cd; padding: 15px; border-radius: 6px; margin: 15px 0;">
+    <strong>Условия:</strong><br>
+    Адрес доставки: {delivery_address}<br>
+    Срок подачи КП: до <strong>{deadline}</strong>
+  </div>
+
+  <div style="text-align: center; margin: 25px 0;">
+    <a href="{quote_url}" style="display: inline-block; padding: 14px 32px; background: #1a73e8; color: #fff; text-decoration: none; border-radius: 6px; font-size: 16px; font-weight: bold;">
+      Заполнить КП на сайте
+    </a>
+    <p style="color: #666; font-size: 13px; margin-top: 8px;">Или просто ответьте на это письмо</p>
+  </div>
+
+  <hr style="border: none; border-top: 1px solid #ddd; margin: 25px 0;">
+  <p style="color: #888; font-size: 13px;">
+    По вопросам: ответьте на это письмо или напишите на <a href="mailto:rfq@minitender.ru">rfq@minitender.ru</a><br>
+    Код закупки: RFQ-{request_code}
+  </p>
+  <p style="color: #999; font-size: 12px;">
+    platforma dlya stroitelnykh zakupok &mdash; Минитендер.рф
+  </p>
+</body>
+</html>"""
 
 def build_rfq_email(invitation):
     req = invitation.request
@@ -79,41 +116,37 @@ def build_rfq_email(invitation):
 def create_rfq_invitation(request_obj, supplier):
     from apps.quotes.models import RfqInvitation
     code = generate_request_code()
+    reply_code = secrets.token_hex(8)
     inv = RfqInvitation.objects.create(
         request=request_obj,
         supplier=supplier,
         code=code,
-        reply_email=generate_reply_address(code, supplier.id),
+        reply_code=reply_code,
+        reply_email=generate_reply_address(reply_code),
         quote_token=generate_quote_token(),
     )
     return inv
 
 
-def process_inbound_email_reply(request_code, invitation_hash, sender,
+def process_inbound_email_reply(reply_code, sender,
                                  subject, body_text, body_html="",
                                  message_id="", headers=None):
-    """Process inbound email: attach to request, create draft quote."""
+    """Process inbound email: find invitation by reply_code, create draft quote."""
     import logging
     from django.utils import timezone
-    from apps.requests.models import Request
     from apps.quotes.models import Quote, RfqInvitation, EmailMessage
 
     logger = logging.getLogger(__name__)
 
     try:
-        req = Request.objects.get(code=request_code)
-    except Request.DoesNotExist:
-        logger.warning("Request not found: %s", request_code)
-        return
-
-    try:
-        invitation = RfqInvitation.objects.select_related("supplier").get(
-            request=req,
-            reply_email__contains=invitation_hash,
+        invitation = RfqInvitation.objects.select_related("supplier", "request").get(
+            reply_code=reply_code,
         )
     except RfqInvitation.DoesNotExist:
-        logger.warning("Invitation not found for hash: %s", invitation_hash)
-        return
+        logger.warning("Invitation not found for reply_code: %s", reply_code)
+        return None
+
+    req = invitation.request
 
     EmailMessage.objects.create(
         direction="inbound",
@@ -140,5 +173,6 @@ def process_inbound_email_reply(request_code, invitation_hash, sender,
 
     logger.info(
         "Processed reply: request=%s, supplier=%s, quote=%s",
-        request_code, invitation.supplier.name, quote.id,
+        req.code, invitation.supplier.name, quote.id,
     )
+    return quote

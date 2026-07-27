@@ -7,6 +7,7 @@ class RfqInvitation(models.Model):
     request = models.ForeignKey(Request, on_delete=models.CASCADE, related_name="invitations")
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
     code = models.CharField(max_length=12)
+    reply_code = models.CharField(max_length=16, unique=True, null=True, blank=True)
     reply_email = models.EmailField()
     quote_token = models.CharField(max_length=64, unique=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")

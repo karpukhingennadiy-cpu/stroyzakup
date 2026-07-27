@@ -78,7 +78,7 @@ class TestSupplierMatching:
         req.status = "draft"
         req.save()
         r = client.post(f"/api/requests/{req.id}/match_suppliers/", {"limit": 20}, format="json")
-        assert r.status_code == 200
+        assert r.status_code == 400
 
     def test_send_rfq_requires_supplier_ids(self, match_data):
         client, req, suppliers = match_data

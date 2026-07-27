@@ -34,7 +34,7 @@ export default function RequestDetailPage() {
   const [error, setError] = useState("");
 
   const load = () => {
-    getRequest(id).then((data) => {
+    getRequest(Number(id as string)).then((data) => {
       setReq(data);
       setClarifications(data.clarifications || []);
     }).catch((e) => setError(e.message)).finally(() => setLoading(false));
@@ -45,7 +45,7 @@ export default function RequestDetailPage() {
     setActionLoading("parse");
     setError("");
     try {
-      const result = await parseRequest(id);
+      const result = await parseRequest(Number(id as string));
       setReq(result);
       setClarifications(result.clarifications || []);
     } catch (e: any) { setError(e.message); }
@@ -56,7 +56,7 @@ export default function RequestDetailPage() {
     setActionLoading("confirm");
     setError("");
     try {
-      const result = await confirmRequest(id);
+      const result = await confirmRequest(Number(id as string));
       setReq(result.request || result);
     } catch (e: any) { setError(e.message); }
     finally { setActionLoading(""); }

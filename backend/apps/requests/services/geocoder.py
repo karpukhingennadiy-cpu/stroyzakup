@@ -4,6 +4,8 @@ Free tier: 1000 requests/day. Fully Russian service.
 
 import json, time, urllib.request, urllib.parse, ssl
 from typing import Optional
+import logging
+logger = logging.getLogger(__name__)
 
 YANDEX_API_KEY = "cb0b8e22-2e0b-4b02-b8e8-fd2a2f4d5e6f"
 GEOCODE_URL = "https://geocode-maps.yandex.ru/1.x/"
@@ -51,7 +53,7 @@ def _geocode_raw(query: str) -> Optional[tuple[float, float, str, str]]:
             data = json.loads(resp.read())
         _last_request = time.time()
     except Exception as e:
-        print(f"Yandex geocode error: {e}")
+        logger.error(f"Yandex geocode error: {e}")
         return None
 
     try:
@@ -73,5 +75,5 @@ def _geocode_raw(query: str) -> Optional[tuple[float, float, str, str]]:
                 break
         return lat, lon, city, full
     except (KeyError, IndexError, ValueError) as e:
-        print(f"Yandex parse error: {e}")
+        logger.error(f"Yandex parse error: {e}")
         return None

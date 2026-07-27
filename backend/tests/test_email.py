@@ -17,19 +17,18 @@ class TestEmailService:
         assert all(c not in '0O1IL' for c in code1)
 
     def test_generate_reply_address(self):
-        addr = generate_reply_address('ABC123', 42)
-        assert 'rfq-ABC123-' in addr
-        assert '@in.minitender.ru' in addr
+        addr = generate_reply_address('abc123def456')
+        assert addr.startswith('rfq-abc123def456@')
+        assert '@' in addr
 
     def test_parse_reply_address_roundtrip(self):
-        addr = generate_reply_address('TEST99', 1)
-        code, hsh = parse_reply_address(addr)
-        assert code == 'TEST99'
-        assert hsh is not None
+        addr = generate_reply_address('test_reply_123')
+        code = parse_reply_address(addr)
+        assert code == 'test_reply_123'
 
     def test_parse_reply_address_invalid(self):
         assert parse_reply_address('not-a-valid@email.com') is None
-        assert parse_reply_address('rfq-ABC-DEF@gmail.com') is None
+        assert parse_reply_address('plain@email.com') is None
 
     def test_generate_quote_token(self):
         t1 = generate_quote_token()

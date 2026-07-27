@@ -12,7 +12,7 @@ export default function CompetitivePage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    getCompetitiveSheet(id)
+    getCompetitiveSheet(Number(id as string))
       .then(setData)
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));

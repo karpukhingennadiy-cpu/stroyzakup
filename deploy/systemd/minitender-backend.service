@@ -1,0 +1,16 @@
+[Unit]
+Description=Minitender Backend (Gunicorn)
+After=network.target postgresql.service redis.service
+
+[Service]
+User=minitender
+Group=minitender
+WorkingDirectory=/opt/minitender/backend
+Environment="DJANGO_SETTINGS_MODULE=config.settings.prod"
+EnvironmentFile=/opt/minitender/.env
+ExecStart=/opt/minitender/backend/.venv/bin/gunicorn config.wsgi:application --bind 127.0.0.1:8000 --workers 4
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

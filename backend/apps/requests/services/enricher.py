@@ -2,6 +2,8 @@
 
 import json, time, urllib.request, urllib.parse, ssl, re
 from apps.requests.llm_client import llm
+import logging
+logger = logging.getLogger(__name__)
 
 USER_AGENT = "Mozilla/5.0 (compatible; MinitenderRF/1.0)"
 DADATA_TOKEN=""
@@ -20,7 +22,7 @@ def scrape_site_for_products(site_url: str) -> dict:
         with urllib.request.urlopen(req, timeout=15, context=ctx) as resp:
             html = resp.read().decode("utf-8", errors="replace")
     except Exception as e:
-        print(f"  Scrape error: {e}")
+        logger.error(f"  Scrape error: {e}")
         return {}
 
     text = re.sub(r'<script[^>]*>.*?</script>', '', html, flags=re.DOTALL)
@@ -66,7 +68,7 @@ def enrich_with_dadata(company_name: str) -> dict:
         with urllib.request.urlopen(req, timeout=10, context=ctx) as resp:
             data = json.loads(resp.read())
     except Exception as e:
-        print(f"  DaData error: {e}")
+        logger.error(f"  DaData error: {e}")
         return {}
 
     suggestions = data.get("suggestions", [])
@@ -90,7 +92,7 @@ def enrich_supplier(supplier) -> dict:
     result = {}
 
     if supplier.site:
-        print(f"  Scraping: {supplier.site}")
+        logger.info(f"  Scraping: {supplier.site}")
         products = scrape_site_for_products(supplier.site)
         if products:
             result["products"] = products.get("products", [])
@@ -98,7 +100,7 @@ def enrich_supplier(supplier) -> dict:
             result["about"] = products.get("about", "")
 
     if supplier.name:
-        print(f"  DaData: {supplier.name}")
+        logger.info(f"  DaData: {supplier.name}")
         official = enrich_with_dadata(supplier.name)
         if official:
             result["official"] = official

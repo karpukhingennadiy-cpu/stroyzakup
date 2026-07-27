@@ -80,7 +80,7 @@ export default function NewRequestPage() {
     setLoading(true);
     try {
       const rawText = buildRawText();
-      const req = await createRequest(rawText, comment || undefined);
+      const req = await createRequest(rawText, comment || undefined, undefined, undefined);
       setRequestId(req.id);
       setStep(2);
     } catch (e: any) { setError(e.message); }
@@ -228,7 +228,7 @@ export default function NewRequestPage() {
               <div className="p-6">
                 {deliveryLat && deliveryLon && suppliers.length > 0 && (
             <div className="h-[300px] mb-4 rounded-xl overflow-hidden border border-[#e2e8f0]">
-              <SupplierMap suppliers={suppliers} centerLat={deliveryLat} centerLon={deliveryLon} />
+              <SupplierMap suppliers={suppliers as any} centerLat={deliveryLat} centerLon={deliveryLon} />
             </div>
           )}
           {suppliers.length === 0 ? (

@@ -10,6 +10,8 @@ All free. All running on this PC. No Docker, no SearXNG, no paid APIs.
 
 import json, time, urllib.request, urllib.parse, ssl, re
 from apps.requests.llm_client import llm
+import logging
+logger = logging.getLogger(__name__)
 
 USER_AGENT = "Mozilla/5.0 (compatible; MinitenderRF/1.0)"
 
@@ -44,7 +46,7 @@ def _dadata_search(query: str, city: str = "") -> list[dict]:
         with urllib.request.urlopen(req, timeout=10, context=ctx) as resp:
             data = json.loads(resp.read())
     except Exception as e:
-        print(f"  DaData error: {e}")
+        logger.error(f"  DaData error: {e}")
         return []
 
     results = []
@@ -82,7 +84,7 @@ def _yandex_search(query: str, max_results: int = 10) -> list[dict]:
         with urllib.request.urlopen(req, timeout=15, context=ctx) as resp:
             html = resp.read().decode("utf-8", errors="replace")
     except Exception as e:
-        print(f"  Yandex error: {e}")
+        logger.error(f"  Yandex error: {e}")
         return []
 
     results = []
@@ -153,31 +155,31 @@ def search_suppliers_for_material(material_name: str, city: str, category: str =
     all_suppliers = []
 
     # 1. DaData — verified Russian companies
-    print(f"  DaData: {material_name} in {city}")
+    logger.info(f"  DaData: {material_name} in {city}")
     dadata = _dadata_search(material_name, city)
     if dadata:
         all_suppliers.extend(dadata)
-        print(f"    Found {len(dadata)}")
+        logger.info(f"    Found {len(dadata)}")
 
     # 2. Yandex search — find websites
     if len(all_suppliers) < 5:
         query = f"kupit {material_name} {city} stroitelnye_materialy"
-        print(f"  Yandex: {query}")
+        logger.info(f"  Yandex: {query}")
         yandex = _yandex_search(query)
         if yandex:
-            print(f"    Found {len(yandex)} links, extracting...")
+            logger.info(f"    Found {len(yandex)} links, extracting...")
             extracted = _llm_extract_suppliers(yandex, material_name, city)
             if extracted:
                 all_suppliers.extend(extracted)
-                print(f"    Extracted {len(extracted)} suppliers")
+                logger.info(f"    Extracted {len(extracted)} suppliers")
 
     # 3. LLM knowledge as final fallback
     if len(all_suppliers) < 3:
-        print(f"  LLM knowledge: {material_name} in {city}")
+        logger.info(f"  LLM knowledge: {material_name} in {city}")
         llm_results = _llm_knowledge(material_name, city)
         if llm_results:
             all_suppliers.extend(llm_results)
-            print(f"    Found {len(llm_results)}")
+            logger.info(f"    Found {len(llm_results)}")
 
     # Deduplicate by name
     seen = set()
@@ -208,7 +210,7 @@ def discover_suppliers_for_request(request_obj) -> int:
     seen_names = set(Supplier.objects.values_list("name", flat=True))
 
     for item in items:
-        print(f"Discovering: {item.name} in {city or 'Moscow'}")
+        logger.info(f"Discovering: {item.name} in {city or 'Moscow'}")
         found = search_suppliers_for_material(item.name, city or "Moscow")
         time.sleep(0.5)
 
@@ -256,6 +258,6 @@ def discover_suppliers_for_request(request_obj) -> int:
                         supplier=supplier, category=item.category
                     )
                 new_count += 1
-                print(f"  + [{src}] {name} ({sup_city})")
+                logger.info(f"  + [{src}] {name} ({sup_city})")
 
     return new_count

@@ -4,6 +4,11 @@ import { useEffect, useRef } from "react";
 interface Supplier {
   supplier_id: number; name: string; city: string;
   total_score: number; distance_km: number | null;
+  latitude: number | null;
+  longitude: number | null;
+  email?: string; phone?: string; site?: string;
+  category_score?: number; distance_score?: number;
+  manufacturer_bonus?: number; supplier_type?: string; source?: string;
 }
 
 interface Props {
@@ -38,13 +43,13 @@ export default function SupplierMap({ suppliers, centerLat, centerLon }: Props) 
         hintContent: "\u0422\u043e\u0447\u043a\u0430 \u0434\u043e\u0441\u0442\u0430\u0432\u043a\u0438",
       }, { preset: "islands#redCircleIcon" }));
 
-      // Supplier markers around delivery point
-      suppliers.slice(0, 20).forEach((s, i) => {
-        // Spread markers in a circle for visibility
-        const angle = (i / Math.min(suppliers.length, 20)) * Math.PI * 2;
-        const spread = 0.02; // ~2km spread
-        const slat = centerLat + Math.cos(angle) * spread * (i + 1);
-        const slon = centerLon + Math.sin(angle) * spread * (i + 1);
+      // Supplier markers at REAL coordinates
+      const withCoords = suppliers.filter((s: any) => s.latitude && s.longitude);
+      const withoutCoords = suppliers.filter((s: any) => !s.latitude || !s.longitude);
+
+      withCoords.slice(0, 30).forEach((s: any) => {
+        const slat = s.latitude;
+        const slon = s.longitude;
         
         map.geoObjects.add(new ymaps.Placemark([slat, slon], {
           hintContent: s.name,
@@ -53,6 +58,15 @@ export default function SupplierMap({ suppliers, centerLat, centerLon }: Props) 
           preset: "islands#blueDotIcon",
         }));
       });
+
+      // Show suppliers without coordinates below map
+      if (withoutCoords.length > 0 && typeof document !== "undefined") {
+        const noteEl = document.getElementById("supplier-no-coords-note");
+        if (noteEl) {
+          noteEl.textContent = withoutCoords.length + " поставщиков без координат (показаны в таблице)";
+          noteEl.style.display = "block";
+        }
+      }
     }
 
     if (window.ymaps) {

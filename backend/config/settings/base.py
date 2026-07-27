@@ -1,13 +1,13 @@
 import os
 from pathlib import Path
-from decouple import config
+from decouple import config, Csv
 from datetime import timedelta
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 SECRET_KEY="dev-secret-key"
 DEBUG = False
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv())
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -33,6 +33,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -46,11 +47,11 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "NAME": "minitender",
-        "USER": "minitender",
+        "NAME": config("DB_NAME", default="minitender"),
+        "USER": config("DB_USER", default="minitender"),
         "PASSWORD": "minitender",
-        "HOST": "localhost",
-        "PORT": "5432",
+        "HOST": config("DB_HOST", default="localhost"),
+        "PORT": config("DB_PORT", default="5432"),
     }
 }
 
@@ -58,7 +59,7 @@ LANGUAGE_CODE = "ru"
 TIME_ZONE = "Europe/Moscow"
 USE_I18N = True
 USE_TZ = True
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "accounts.User"
@@ -80,7 +81,7 @@ SIMPLE_JWT = {
     "ROTATE_REFRESH_TOKENS": True,
 }
 
-CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_BROKER_URL = config("CELERY_BROKER_URL", default="redis://localhost:6379/0")
 
 TEMPLATES = [
     {
@@ -99,7 +100,7 @@ TEMPLATES = [
 ]
 
 # LLM (DeepSeek API)
-LLM_API_KEY=config("LLM_API_KEY", default="")
+LLM_API_KEY = config("LLM_API_KEY", default="")
 LLM_MODEL = config("LLM_MODEL", default="deepseek-chat")
 LLM_BASE_URL = config("LLM_BASE_URL", default="https://api.deepseek.com/v1")
 
@@ -115,3 +116,8 @@ EMAIL_HOST_USER = "rfq@минитендер.рф"
 EMAIL_HOST_PASSWORD = ""
 DEFAULT_FROM_EMAIL = "Минитендер RFQ <rfq@минитендер.рф>"
 INBOUND_EMAIL_DOMAIN = "in.минитендер.рф"
+
+# Whitenoise
+STORAGES={"staticfiles":{"BACKEND":"whitenoise.storage.CompressedManifestStaticFilesStorage"}}
+# Frontend URL
+FRONTEND_URL=config("FRONTEND_URL",default="http://localhost:3000")

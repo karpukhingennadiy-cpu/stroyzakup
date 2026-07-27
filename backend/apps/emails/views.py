@@ -40,11 +40,10 @@ def mailgun_inbound_webhook(request):
 
     parsed = parse_reply_address(recipient)
     if parsed:
-        request_code, invitation_hash = parsed
+        reply_code = parsed
         from apps.emails.services import process_inbound_email_reply
         process_inbound_email_reply(
-            request_code=request_code,
-            invitation_hash=invitation_hash,
+            reply_code=reply_code,
             sender=sender,
             subject=subject,
             body_text=body_text,
@@ -73,11 +72,10 @@ def generic_inbound_webhook(request):
     recipient = recipients[0] if recipients else ""
     parsed = parse_reply_address(recipient)
     if parsed:
-        request_code, invitation_hash = parsed
+        reply_code = parsed
         from apps.emails.services import process_inbound_email_reply
         process_inbound_email_reply(
-            request_code=request_code,
-            invitation_hash=invitation_hash,
+            reply_code=reply_code,
             sender=sender,
             subject=subject,
             body_text=body_text,

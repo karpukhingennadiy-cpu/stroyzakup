@@ -1,3 +1,4 @@
+from django.db import transaction
 import json, logging, re
 from apps.requests.llm_client import llm
 from apps.requests.models import Request, RequestItem, Category, Unit
@@ -130,7 +131,8 @@ def parse_material_list(request_obj):
             return {"error": "Unexpected response format", "items": [], "clarifications": []}
         if not items:
             return {"error": "No items found", "items": [], "clarifications": []}
-        _save_items(request_obj, items)
+        with transaction.atomic():
+            _save_items(request_obj, items)
         return {
             "items": items,
             "clarifications": [
@@ -146,11 +148,59 @@ def parse_material_list(request_obj):
         return {"error": str(e), "items": [], "clarifications": []}
 
 
+
+
+# === Whitelists for categories and units ===
+ALLOWED_CATEGORIES = {
+    "pilomaterialy", "drevesno-plitnye", "metalloprokat", "truby",
+    "krovelnye", "gidroizolyatsiya", "teploizolyatsiya", "zvukoizolyatsiya",
+    "keramicheskaya-plitka", "keramogranit", "napolnye-pokrytiya",
+    "lakokrasochnye", "suhie-smesi", "beton", "zhbi", "bloki", "kirpich",
+    "kladochnye-smesi", "gipsokarton", "komplektuyushchie-dlya-gkl",
+    "fasadnye", "ventfasad", "okna", "dveri", "metizy", "krepezh",
+    "elektrotovary", "santekhnika", "instrument", "drugoe",
+}
+
+ALLOWED_UNITS = {
+    "m2", "m3", "kg", "ton", "bag", "piece", "pack", "roll",
+    "linear_meter", "liter", "sht", "pog_m", "kompl", "upak",
+}
+
+def normalize_category(cat_name):
+    """Map category to whitelist or fallback to Drugoe."""
+    slug = cat_name.lower().replace(" ", "_").replace("-", "_")[:40]
+    if slug in ALLOWED_CATEGORIES:
+        return slug
+    # Fuzzy fallback: try common aliases
+    aliases = {
+        "doska": "pilomaterialy", "brus": "pilomaterialy",
+        "fanera": "drevesno-plitnye", "osb": "drevesno-plitnye",
+        "armatura": "metalloprokat", "profnastil": "krovelnye",
+        "uteplitel": "teploizolyatsiya", "minvata": "teploizolyatsiya",
+        "penoplast": "teploizolyatsiya", "plenka": "gidroizolyatsiya",
+        "kraska": "lakokrasochnye", "gruntovka": "lakokrasochnye",
+        "tsement": "suhie-smesi", "shpaklevka": "suhie-smesi",
+        "gazobeton": "bloki", "penoblok": "bloki",
+    }
+    for key, val in aliases.items():
+        if key in slug:
+            return val
+    return "drugoe"
+
+def normalize_unit(unit_code):
+    """Map unit to whitelist or fallback."""
+    if unit_code in ALLOWED_UNITS:
+        return unit_code
+    aliases = {"m": "linear_meter", "mm": "piece", "l": "liter",
+               "t": "ton", "gr": "kg", "ml": "liter"}
+    return aliases.get(unit_code, "piece")
+
 def _save_items(request_obj, items):
-    """Save parsed items to DB."""
+    """Save parsed items to DB, idempotent — clears old items first."""
+    request_obj.items.all().delete()
     for item_data in items:
         cat_name = item_data.get("category", "Drugoe")
-        cat_slug = cat_name.lower().replace(" ", "_").replace("-", "_")[:40]
+        cat_slug = normalize_category(cat_name)
         try:
             category = Category.objects.get(name__iexact=cat_name)
         except Category.DoesNotExist:
@@ -160,7 +210,7 @@ def _save_items(request_obj, items):
                 category = Category.objects.create(
                     name=cat_name, slug=cat_slug, default_radius_km=300
                 )
-        unit_code = item_data.get("unit", "piece")
+        unit_code = normalize_unit(item_data.get("unit", "piece"))
         try:
             unit = Unit.objects.get(code=unit_code)
         except Unit.DoesNotExist:

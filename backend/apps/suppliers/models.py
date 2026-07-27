@@ -8,6 +8,16 @@ class Supplier(models.Model):
     phone = models.CharField(max_length=50, blank=True)
     email = models.EmailField()
     is_active = models.BooleanField(default=True)
+    moderation_status = models.CharField(
+        max_length=20,
+        choices=[("unverified", "unverified"), ("verified", "verified"), ("rejected", "rejected")],
+        default="unverified",
+    )
+    source = models.CharField(
+        max_length=20,
+        choices=[("seed", "seed"), ("llm", "llm"), ("web", "web"), ("2gis", "2gis"), ("dadata", "dadata"), ("manual", "manual")],
+        default="manual",
+    )
     supplier_type = models.CharField(max_length=20, default="unknown", choices=[("manufacturer","manufacturer"),("dealer","dealer"),("unknown","unknown")])
     source = models.CharField(max_length=20, default="seed", choices=[("seed","seed"),("llm","llm"),("web","web"),("2gis","2gis"),("dadata","dadata"),("manual","manual")])
     hidden_rating = models.IntegerField(default=0)

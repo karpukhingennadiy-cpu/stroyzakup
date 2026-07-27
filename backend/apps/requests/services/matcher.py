@@ -33,6 +33,8 @@ class SupplierMatch:
     matched_categories: list[str] = field(default_factory=list)
     total_categories: int = 0
     source: str = "seed"
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
     def to_dict(self):
         return {
@@ -42,6 +44,8 @@ class SupplierMatch:
             "phone": self.phone,
             "site": self.site,
             "city": self.city,
+            "latitude": self.latitude,
+            "longitude": self.longitude,
             "distance_km": round(self.distance_km, 1) if self.distance_km else None,
             "total_score": round(self.total_score, 1),
             "category_score": round(self.category_score, 1),
@@ -163,3 +167,8 @@ def match_suppliers(request_obj, limit=20):
 
     matches.sort(key=lambda m: m.total_score, reverse=True)
     return [m.to_dict() for m in matches[:limit]]
+
+
+# TODO: Replace in-memory dict with Redis cache for production
+# from django.core.cache import cache
+# category_weights = cache.get_or_set("category_weights", _load_category_weights, 3600)
