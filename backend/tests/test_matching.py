@@ -73,12 +73,12 @@ class TestSupplierMatching:
         req.refresh_from_db()
         assert req.status == "matched"
 
-    def test_match_fails_on_draft(self, match_data):
+    def test_match_now_allowed_from_draft(self, match_data):
         client, req, suppliers = match_data
         req.status = "draft"
         req.save()
         r = client.post(f"/api/requests/{req.id}/match_suppliers/", {"limit": 20}, format="json")
-        assert r.status_code == 400
+        assert r.status_code == 200
 
     def test_send_rfq_requires_supplier_ids(self, match_data):
         client, req, suppliers = match_data

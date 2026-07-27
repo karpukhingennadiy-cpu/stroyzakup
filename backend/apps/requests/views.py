@@ -87,9 +87,9 @@ class RequestViewSet(viewsets.ModelViewSet):
         """Score and rank suppliers for this request. Returns top 20 with scores."""
         from .services.matcher import match_suppliers
         req = self.get_object()
-        if req.status not in ("confirmed", "matching", "matched"):
+        if req.status not in ("draft", "parsing", "confirmed", "matching", "matched"):
             return Response(
-                {"error": "Cannot match in current status. Need: confirmed/matching/matched"},
+                {"error": "Cannot match in current status. Need: draft/parsing/confirmed/matching/matched"},
                 status=400,
             )
         limit = int(request.data.get("limit", 20))
@@ -107,7 +107,7 @@ class RequestViewSet(viewsets.ModelViewSet):
     def send_rfq(self, request, pk=None):
         from .send_rfq import send_rfq_to_suppliers
         req = self.get_object()
-        if req.status not in ("confirmed", "matching", "matched", "rfq_sent"):
+        if req.status not in ("draft", "parsing", "confirmed", "matching", "matched", "rfq_sent"):
             return Response({"error": "Cannot send RFQ in current status"}, status=400)
         supplier_ids = request.data.get("supplier_ids")
         if not supplier_ids:

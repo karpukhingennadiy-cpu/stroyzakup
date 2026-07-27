@@ -1,76 +1,112 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+import { useEffect, useRef, useState, useCallback } from "react";
 
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
-  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
-  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
-});
+declare global {
+  interface Window {
+    ymaps: any;
+  }
+}
 
 interface Props {
   onLocationSelect: (lat: number, lon: number, address: string) => void;
 }
 
 export default function DeliveryMap({ onLocationSelect }: Props) {
-  const mapRef = useRef<L.Map | null>(null);
-  const markerRef = useRef<L.Marker | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<any>(null);
+  const placemarkRef = useRef<any>(null);
   const [locating, setLocating] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
+  // Load Yandex Maps script
   useEffect(() => {
-    if (!containerRef.current || mapRef.current) return;
-    const map = L.map(containerRef.current).setView([55.75, 37.62], 5);
-    mapRef.current = map;
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "&copy; OpenStreetMap contributors",
-      maxZoom: 19,
-    }).addTo(map);
-
-    map.on("click", async (e: L.LeafletMouseEvent) => {
-      const { lat, lng } = e.latlng;
-      if (markerRef.current) {
-        markerRef.current.setLatLng([lat, lng]);
-      } else {
-        markerRef.current = L.marker([lat, lng]).addTo(map);
-      }
-      try {
-        const url = "https://nominatim.openstreetmap.org/reverse?lat=" + lat + "&lon=" + lng + "&format=json&accept-language=ru";
-        const resp = await fetch(url);
-        const data = await resp.json();
-        const addr = data.display_name || lat.toFixed(5) + ", " + lng.toFixed(5);
-        onLocationSelect(lat, lng, addr);
-      } catch {
-        onLocationSelect(lat, lng, lat.toFixed(5) + ", " + lng.toFixed(5));
-      }
-    });
-
-    return () => { map.remove(); mapRef.current = null; };
+    if (window.ymaps) { setLoaded(true); return; }
+    const script = document.createElement("script");
+    script.src = "https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=cb0b8e22-2e0b-4b02-b8e8-fd2a2f4d5e6f";
+    script.onload = () => {
+      window.ymaps.ready(() => setLoaded(true));
+    };
+    script.onerror = () => console.warn("Yandex Maps failed to load");
+    document.head.appendChild(script);
   }, []);
 
-  const handleLocate = () => {
+  // Initialize map
+  useEffect(() => {
+    if (!loaded || !containerRef.current || mapRef.current) return;
+
+    const ymaps = window.ymaps;
+    const map = new ymaps.Map(containerRef.current, {
+      center: [55.75, 37.62],
+      zoom: 5,
+      controls: ["zoomControl", "typeSelector"],
+    });
+    mapRef.current = map;
+
+    // Click handler
+    map.events.add("click", async (e: any) => {
+      const coords = e.get("coords");
+      const lat = coords[0];
+      const lon = coords[1];
+
+      // Update placemark
+      if (placemarkRef.current) {
+        placemarkRef.current.geometry.setCoordinates([lat, lon]);
+      } else {
+        placemarkRef.current = new ymaps.Placemark([lat, lon], {}, {
+          preset: "islands#redDotIcon",
+        });
+        map.geoObjects.add(placemarkRef.current);
+      }
+
+      // Reverse geocode
+      try {
+        const result = await ymaps.geocode([lat, lon]);
+        const geoObject = result.geoObjects.get(0);
+        const addr = geoObject ? geoObject.getAddressLine() : lat.toFixed(5) + ", " + lon.toFixed(5);
+        onLocationSelect(lat, lon, addr);
+      } catch {
+        onLocationSelect(lat, lon, lat.toFixed(5) + ", " + lon.toFixed(5));
+      }
+    });
+
+    return () => { map.destroy(); mapRef.current = null; };
+  }, [loaded]);
+
+  // Locate user
+  const handleLocate = useCallback(() => {
     if (!mapRef.current) return;
     setLocating(true);
-    mapRef.current.locate({ setView: true, maxZoom: 14 });
-    mapRef.current.once("locationfound", (e) => {
-      const { lat, lng } = e.latlng;
-      if (markerRef.current) {
-        markerRef.current.setLatLng([lat, lng]);
+    const ymaps = window.ymaps;
+    ymaps.geolocation.get({
+      provider: "browser",
+      mapStateAutoApply: true,
+    }).then((result: any) => {
+      const coords = result.geoObjects.get(0).geometry.getCoordinates();
+      const lat = coords[0];
+      const lon = coords[1];
+      mapRef.current.setCenter([lat, lon], 14);
+      if (placemarkRef.current) {
+        placemarkRef.current.geometry.setCoordinates([lat, lon]);
       } else {
-        markerRef.current = L.marker([lat, lng]).addTo(mapRef.current!);
+        placemarkRef.current = new ymaps.Placemark([lat, lon], {}, { preset: "islands#redDotIcon" });
+        mapRef.current.geoObjects.add(placemarkRef.current);
       }
-      const url = "https://nominatim.openstreetmap.org/reverse?lat=" + lat + "&lon=" + lng + "&format=json&accept-language=ru";
-      fetch(url).then(r => r.json()).then(data => {
-        onLocationSelect(lat, lng, data.display_name || lat.toFixed(5) + ", " + lng.toFixed(5));
-      }).catch(() => {
-        onLocationSelect(lat, lng, lat.toFixed(5) + ", " + lng.toFixed(5));
+      ymaps.geocode([lat, lon]).then((geoResult: any) => {
+        const geoObject = geoResult.geoObjects.get(0);
+        const addr = geoObject ? geoObject.getAddressLine() : lat.toFixed(5) + ", " + lon.toFixed(5);
+        onLocationSelect(lat, lon, addr);
       });
       setLocating(false);
-    });
-    mapRef.current.once("locationerror", () => setLocating(false));
-  };
+    }).catch(() => setLocating(false));
+  }, [onLocationSelect]);
+
+  if (!loaded) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-[#f5f7fa] text-[#64748b]">
+        Загрузка карты...
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full h-full">
