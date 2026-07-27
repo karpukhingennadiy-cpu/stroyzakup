@@ -21,3 +21,23 @@ services:
       POSTGRES_DB: minitender
       POSTGRES_USER: minitender
       POSTGRES_PASSWORD: 
+
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "minitender"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
