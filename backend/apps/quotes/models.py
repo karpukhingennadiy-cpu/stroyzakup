@@ -22,6 +22,7 @@ class EmailMessage(models.Model):
     to_email = models.EmailField()
     subject = models.TextField()
     body_text = models.TextField(blank=True)
+    body_html = models.TextField(blank=True, default="")
     message_id = models.CharField(max_length=500, blank=True)
     request = models.ForeignKey(Request, on_delete=models.CASCADE, null=True, blank=True, related_name="emails")
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, null=True, blank=True)

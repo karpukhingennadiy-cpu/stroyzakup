@@ -7,6 +7,7 @@ echo "=== Минитендер.рф — деплой ==="
 # Проверка прав
 if [ "0" -ne 0 ]; then echo "Запустите от root: sudo bash deploy.sh"; exit 1; fi
 
+
 # Зависимости
 apt update && apt install -y python3 python3-venv python3-pip nginx postgresql redis nodejs npm git
 

@@ -25,22 +25,22 @@ def parse_reply_address(email_addr):
     m = re.match(r'rfq-([A-Z0-9]+)-([a-z0-9]+)@', email_addr)
     return (m.group(1), m.group(2)) if m else None
 
-RFQ_TEMPLATE_TEXT = """Zdravstvujte, {supplier_name}!
+RFQ_TEMPLATE_TEXT = """Здравствуйте, {supplier_name}!
 
-Po zakupke RFQ-{request_code} prosím predostavit kommercheskoe predlozhenie.
+По закупке RFQ-{request_code} просим предоставить коммерческое предложение.
 
-Pozitsii:
+Позиции:
 {items_list}
 
-Dostavka: {delivery_address}
-Srok otveta: {deadline}
+Доставка: {delivery_address}
+Срок ответа: {deadline}
 
-Zapolnit KP: {quote_url}
-Ili otvette na eto pismo.
+Заполнить КП: {quote_url}
+Или ответьте на это письмо.
 
-Kod zakupki: {request_code}
+Код закупки: {request_code}
 
-S uvazheniem, Минитендер"""
+С уважением, Минитендер"""
 
 RFQ_TEMPLATE_HTML = """<html><body>
 <h2>Запрос КП: RFQ-{request_code}</h2>
@@ -70,7 +70,7 @@ def build_rfq_email(invitation):
         'quote_url': f'https://app.минитендер.рф/quote/{invitation.quote_token}',
     }
     return {
-        'subject': f'[RFQ-{req.code}] Zapros KP: stroymaterialy',
+        'subject': f'[RFQ-{req.code}] Запрос КП: стройматериалы',
         'body_text': RFQ_TEMPLATE_TEXT.format(**ctx),
         'body_html': RFQ_TEMPLATE_HTML.format(**ctx),
         'reply_to': invitation.reply_email,
