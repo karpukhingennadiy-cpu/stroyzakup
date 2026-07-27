@@ -42,11 +42,17 @@ def parse_material_list(request_obj):
 def _save_items(request_obj, parsed):
     for item_data in parsed.get("items", []):
         cat_name = item_data.get("category", "Drugoe")
+        cat_slug = cat_name.lower().replace(" ", "_").replace("-", "_")[:40]
+        # Try exact name match first, then slug match, then create
         try:
-            category = Category.objects.get(name=cat_name)
+            category = Category.objects.get(name__iexact=cat_name)
         except Category.DoesNotExist:
-            s = cat_name.lower().replace(" ", "_")[:40] + "_" + hashlib.md5(str(time.time()).encode()).hexdigest()[:4]
-            category = Category.objects.create(name=cat_name, slug=s, default_radius_km=300)
+            try:
+                category = Category.objects.get(slug=cat_slug)
+            except Category.DoesNotExist:
+                category = Category.objects.create(
+                    name=cat_name, slug=cat_slug, default_radius_km=300
+                )
         unit_code = item_data.get("unit", "piece")
         unit, _ = Unit.objects.get_or_create(code=unit_code, defaults={"name": unit_code, "short_name": unit_code})
         RequestItem.objects.create(
@@ -57,5 +63,5 @@ def _save_items(request_obj, parsed):
             confidence=item_data.get("confidence", 0.5),
             is_confirmed=item_data.get("confidence", 0) >= 0.7)
     # parsed_json field not in model yet
-    request_obj.status = "confirmed"
-    request_obj.save(update_fields=["status"])
+    # Don't auto-confirm — user confirms via endpoint
+    # request_obj.status stays as-is

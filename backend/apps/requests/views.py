@@ -52,6 +52,18 @@ class RequestViewSet(viewsets.ModelViewSet):
         req = self.get_object()
         req.status = 'confirmed'
         req.save(update_fields=['status'])
+        # Auto-match suppliers if delivery address exists
+        if req.address and req.address.latitude and req.address.longitude:
+            from .services.matcher import match_suppliers
+            matches = match_suppliers(req)
+            req.status = 'matched'
+            req.save(update_fields=['status'])
+            return Response({
+                'status': 'matched',
+                'suppliers': matches,
+                'count': len(matches),
+                'request': RequestSerializer(req).data,
+            })
         return Response(RequestSerializer(req).data)
 
     @decorators.action(detail=True, methods=['post'])

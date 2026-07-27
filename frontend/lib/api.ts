@@ -69,8 +69,10 @@ export async function registerUser(data) {
 export async function getMe() { return api("/auth/me/"); }
 export async function getRequests() { return api("/requests/"); }
 export async function getRequest(id) { return api("/requests/" + id + "/"); }
-export async function createRequest(raw_text, comment) {
-  return api("/requests/", { method: "POST", body: JSON.stringify({ raw_text: raw_text, comment: comment }) });
+export async function createRequest(raw_text, comment, deliveryAddress) {
+  var body = { raw_text: raw_text, comment: comment };
+  if (deliveryAddress) body.delivery_address = deliveryAddress;
+  return api("/requests/", { method: "POST", body: JSON.stringify(body) });
 }
 export async function parseRequest(id) {
   return api("/requests/" + id + "/parse/", { method: "POST" });
@@ -86,6 +88,25 @@ export async function searchSuppliersRadius(lat, lon, radius) {
 export async function getQuotes(requestId) {
   return api("/quotes/" + (requestId ? "?request_id=" + requestId : ""));
 }
+
+export async function geocodeAddress(address) {
+  return api("/auth/geocode/", { method: "POST", body: JSON.stringify({ address: address }) });
+}
+export async function matchSuppliers(requestId, limit) {
+  if (!limit) limit = 20;
+  return api("/requests/" + requestId + "/match_suppliers/", {
+    method: "POST", body: JSON.stringify({ limit: limit }),
+  });
+}
+export async function confirmRequest(id) {
+  return api("/requests/" + id + "/confirm/", { method: "POST" });
+}
+export async function sendRfq(id, supplierIds) {
+  return api("/requests/" + id + "/send_rfq/", {
+    method: "POST", body: JSON.stringify({ supplier_ids: supplierIds }),
+  });
+}
+
 export async function getCompetitiveSheet(requestId) {
   return api("/quotes/competitive_sheet/?request_id=" + requestId);
 }

@@ -78,10 +78,16 @@ class TestE2EMatching:
         # 7. Confirm
         r = client.post("/api/requests/{}/confirm/".format(req_id), format="json")
         assert r.status_code == 200
-        assert r.json()["status"] == "confirmed"
+        status = r.json()["status"]
+        assert status in ("confirmed", "matched"), f"Expected confirmed/matched, got {status}"
 
-        # 8. MATCH SUPPLIERS
-        r = client.post("/api/requests/{}/match_suppliers/".format(req_id), {"limit": 20}, format="json")
+        # 8. GET MATCH RESULTS (may already be done by confirm)
+        if status == "matched":
+            # Confirm auto-matched - get results from confirm response
+            data = r.json()
+        else:
+            r = client.post("/api/requests/{}/match_suppliers/".format(req_id), {"limit": 20}, format="json")
+            data = r.json()
         assert r.status_code == 200
         data = r.json()
         assert data["count"] >= 3

@@ -11,20 +11,52 @@ class RequestItemSerializer(serializers.ModelSerializer):
                   'unit', 'unit_name', 'brand', 'spec', 'confidence', 'is_confirmed']
         read_only_fields = ['id', 'confidence', 'is_confirmed']
 
+class AddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Address
+        fields = ['id', 'address', 'city', 'region', 'latitude', 'longitude']
+
 class RequestSerializer(serializers.ModelSerializer):
     items = RequestItemSerializer(many=True, read_only=True)
     customer_email = serializers.CharField(source='customer.email', read_only=True)
+    address_detail = AddressSerializer(source='address', read_only=True)
+    delivery_address = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = Request
-        fields = ['id', 'code', 'status', 'raw_text', 'address', 'source',
-                  'comment', 'items', 'customer_email', 'created_at', 'updated_at']
+        fields = ['id', 'code', 'status', 'raw_text', 'address', 'address_detail',
+                  'delivery_address', 'source', 'comment', 'items',
+                  'customer_email', 'created_at', 'updated_at']
         read_only_fields = ['id', 'code', 'status', 'created_at', 'updated_at', 'customer_email']
 
 class RequestCreateSerializer(serializers.ModelSerializer):
+    delivery_address = serializers.CharField(write_only=True, required=False)
+
     class Meta:
         model = Request
-        fields = ['raw_text', 'address', 'comment']
+        fields = ['raw_text', 'address', 'delivery_address', 'comment']
+
+    def create(self, validated_data):
+        delivery_address = validated_data.pop('delivery_address', None)
+        request = self.context['request']
+        instance = super().create(validated_data)
+
+        if delivery_address:
+            from .services.geocoder import geocode
+            from .models import Address
+            result = geocode(delivery_address)
+            if result:
+                lat, lon, city, full = result
+                addr = Address.objects.create(
+                    customer=request.user,
+                    address=delivery_address,
+                    city=city,
+                    latitude=lat,
+                    longitude=lon,
+                )
+                instance.address = addr
+                instance.save(update_fields=['address'])
+        return instance
 
 class ItemConfirmSerializer(serializers.ModelSerializer):
     class Meta:
