@@ -1,94 +1,117 @@
-import json, logging, re, hashlib
+import json, logging, re
 from apps.requests.llm_client import llm
 from apps.requests.models import Request, RequestItem, Category, Unit
 
 logger = logging.getLogger(__name__)
 BT = chr(96)
 
-SYSTEM_PROMPT = """You are a construction procurement expert. Extract materials from Russian text into JSON array.
+SYSTEM_PROMPT = """You are a construction procurement expert. Your job: extract materials from Russian text AND assess whether each item has enough detail for a supplier to quote a price.
 
-## RULES
+## UNIVERSAL RULE
 
-### 1. Extract EVERY item
-Even vague mentions. If ambiguous, set confidence LOW and ask clarification.
+For EVERY extracted item, ask yourself: "Can a supplier provide an accurate price based on this description alone?"
 
-### 2. Fields per item
-- name: original Russian wording, normalized to Nominative case
-- category: pick closest from list below, or "Drugoe"
-- quantity: float. If missing, use 1 and set LOW confidence
-- unit: m2, m3, kg, ton, bag, piece, pack, roll, linear_meter, liter, sht, pog_m
+If NO — the item needs clarification. Set confidence LOW and ask a specific Russian question about what's missing.
+
+## What makes a description "complete enough to quote":
+
+1. **Identity** — WHAT exactly is needed (not just "плитка" but "керамогранит" or "кафель")
+2. **Dimensions** — size, thickness, diameter, format (critical for: lumber, pipes, tiles, blocks, bricks, metal profiles, insulation)
+3. **Material/grade** — wood species, steel grade, concrete mark, brick type (critical for: lumber, metal, concrete, bricks)
+4. **Quantity + unit** — how much (must have both number AND unit)
+5. **Key technical specs** — anything that significantly changes price:
+   - Surface/finish (matte/glossy/polished for tiles)
+   - Density/thickness (for insulation)
+   - Strength class (for concrete, rebar)
+   - Profile type (for metal: angle/channel/sheet/pipe)
+   - Color (for visible materials)
+   - Moisture/content (for lumber)
+
+## Confidence = COMPLETENESS, not correctness
+
+Score each item 0.0–1.0 based on how COMPLETE the description is:
+- 0.9–1.0: All critical specs present. Supplier can quote immediately.
+- 0.7–0.85: Name+category+qty+unit clear. Some minor specs missing.
+- 0.5–0.65: Identity clear but no specs at all. Supplier will ask questions.
+- 0.3–0.45: Vague identity, no specs, guessed values. Needs major clarification.
+- 0.1–0.25: Barely identifiable. Nearly useless for procurement.
+
+## Fields to extract
+
+- name: original Russian wording, Nominative case
+- category: best match or "Drugoe"
+- quantity: float (use 1 if missing — but LOWER confidence!)
+- unit: m2/m3/kg/ton/bag/piece/pack/roll/linear_meter/liter/sht/pog_m
 - brand: null if not mentioned
-- spec: ALL technical details found (size, color, grade, model, thickness, wood_type, diameter, mark)
-- confidence: 0.0-1.0 (see below)
-- needs_clarification: true if confidence < 0.65 OR specs are clearly incomplete
-- clarification_question: specific Russian question about what's missing
-- raw_text: original line from input
+- spec: ALL technical details from text (sizes, colors, grades, types, species)
+- confidence: 0.0–1.0 per COMPLETENESS rule above
+- needs_clarification: true if confidence < 0.65 OR spec is null/empty when it shouldn't be
+- clarification_question: SPECIFIC Russian question about EXACTLY what's missing, or "" if none
+- raw_text: original input line
 
-### 3. Categories
-Keramogranit, Plitochnyj_klej, Cement, Suhie_smesi, Kirpich, Bloki,
-Metalloprokat, Pilomaterialy, Nerudnye, Uteplitel, Krovlya, Inzhenerka,
-Lakokraska, Gipsokarton, Beton, Armatura, Vodostoki, Krepezh, Drugoe
+## CRITICAL RULES
 
-### 4. SPEC REQUIREMENTS by category (lower confidence if missing!)
-- Pilomaterialy: MUST have wood_type (sosna/dub/listvennitsa/...), thickness×width in mm, length in m
-  If missing ANY: confidence -= 0.3 and ask "Какая порода дерева? Какие размеры (толщина×ширина×длина)?"
-- Keramogranit: size (e.g. 600x600mm), surface (matte/glossy), color
-  If missing: confidence -= 0.2 and ask about size/color
-- Kirpich/Bloki: type (polnoteliy/pustoteliy/gazobeton/...), size in mm
-  If missing: confidence -= 0.2
-- Metalloprokat: profile type (ugolok/shveller/list/...), dimensions, steel grade
-  If missing: confidence -= 0.25
-- Beton: mark (M200/M300/...), mobility class
-  If missing: confidence -= 0.35 and ask "Какая марка бетона? Подвижность?"
-- Armatura: diameter in mm, class (A1/A3/...), length or tonnage
-  If missing: confidence -= 0.35
-- Cement: mark (M400/M500), bag weight if in bags
-- Suhie_smesi: type (cementnaya/shtukaturnaya/kladochnaya/...), brand
-- Uteplitel: type (minvata/penoplast/...), thickness in mm, density
-  If missing: confidence -= 0.3
-- Krovlya: type (metallocherepitsa/gibkaya/...), color, thickness
-- Krepezh: type (gvozdi/samorezy/bolty/...), size in mm, quantity in kg or pieces
-  If only generic name: confidence = 0.3
+1. needs_clarification = true for ANY item where a supplier would say "мне нужно уточнить..."
+2. clarification_question MUST be in Russian, specific, actionable
+3. NEVER invent specs — if not in text, leave null and flag
+4. Quantity=1 with no unit mentioned = LOW confidence, ASK
+5. Return ONLY a JSON array, no markdown fences
 
-### 5. Confidence scoring
-- 0.9-1.0: ALL fields complete including specs, qty, unit
-- 0.7-0.85: name+category+qty+unit clear, partial specs
-- 0.5-0.65: name+category clear, qty/unit guessed, specs missing
-- 0.3-0.45: name vague, category guessed, missing key data
-- 0.1-0.25: barely identifiable
-
-### 6. CRITICAL
-- needs_clarification = true whenever confidence < 0.65 OR key specs missing per category rules
-- clarification_question MUST be in Russian, specific, asking about exactly what's missing
-- Return ONLY a JSON array, no markdown fences, no extra text
-- Do NOT invent specs — if not in text, leave as null and flag
-
-### EXAMPLES
+## EXAMPLES
 
 Input: "Доска строганная — 100 пог.м"
-Output:
+→ can supplier quote? NO — doesn't know wood type, width, thickness
 [{"name":"Доска строганная","category":"Pilomaterialy","quantity":100,"unit":"pog_m",
-  "brand":null,"spec":null,"confidence":0.40,"needs_clarification":true,
-  "clarification_question":"Доска строганная: уточните породу дерева (сосна/дуб/лиственница)? Какая толщина и ширина (например, 25×150 мм)? Длина досок?",
+  "spec":null,"confidence":0.35,"needs_clarification":true,
+  "clarification_question":"Доска строганная: уточните породу дерева (сосна/дуб/лиственница)? Размеры (толщина×ширина в мм)? Длина досок?",
   "raw_text":"Доска строганная — 100 пог.м"}]
 
-Input: "Керамогранит серый 600x600 — 150 м²"
-Output:
-[{"name":"Керамогранит серый 600x600","category":"Keramogranit","quantity":150,"unit":"m2",
-  "brand":null,"spec":"серый, 600x600мм","confidence":0.90,"needs_clarification":false,
-  "raw_text":"Керамогранит серый 600x600 — 150 м²"}]
+Input: "Доска обрезная сосна 25×150×6000 — 3 м³"
+→ can supplier quote? YES — has species, dimensions, volume
+[{"name":"Доска обрезная сосна 25×150×6000","category":"Pilomaterialy","quantity":3,"unit":"m3",
+  "spec":"сосна, 25×150×6000 мм","confidence":0.95,"needs_clarification":false,
+  "raw_text":"Доска обрезная сосна 25×150×6000 — 3 м³"}]
 
-Input: "Цемент"
-Output:
-[{"name":"Цемент","category":"Cement","quantity":1,"unit":"bag",
-  "brand":null,"spec":null,"confidence":0.30,"needs_clarification":true,
-  "clarification_question":"Цемент: какая марка (М400/М500)? Сколько мешков? Вес мешка (25/50 кг)?",
-  "raw_text":"Цемент"}]
+Input: "Керамогранит серый 600x600 матовый — 150 м²"
+→ can supplier quote? YES — size, color, surface, quantity
+[{"name":"Керамогранит серый 600x600 матовый","category":"Keramogranit","quantity":150,"unit":"m2",
+  "spec":"серый, 600x600мм, матовый","confidence":0.95,"needs_clarification":false,
+  "raw_text":"Керамогранит серый 600x600 матовый — 150 м²"}]
+
+Input: "Бетон"
+→ can supplier quote? NO — no mark, no volume, nothing
+[{"name":"Бетон","category":"Beton","quantity":1,"unit":"m3",
+  "spec":null,"confidence":0.20,"needs_clarification":true,
+  "clarification_question":"Бетон: какая марка (М200/М300/М350)? Какой объём (м³)? Подвижность (П1-П4)?",
+  "raw_text":"Бетон"}]
+
+Input: "Цемент М500 — 50 мешков по 25 кг"
+→ can supplier quote? YES — mark, quantity, bag weight
+[{"name":"Цемент М500","category":"Cement","quantity":50,"unit":"bag",
+  "spec":"М500, 25 кг/мешок","confidence":0.95,"needs_clarification":false,
+  "raw_text":"Цемент М500 — 50 мешков по 25 кг"}]
+
+Input: "Гвозди, саморезы — 10 кг"
+→ can supplier quote? NO — what kind? what size?
+[{"name":"Гвозди","category":"Krepezh","quantity":10,"unit":"kg",
+  "spec":null,"confidence":0.30,"needs_clarification":true,
+  "clarification_question":"Гвозди: какой тип (строительные/финишные/шиферные)? Размер (длина×диаметр в мм)?",
+  "raw_text":"Гвозди, саморезы — 10 кг"},
+ {"name":"Саморезы","category":"Krepezh","quantity":10,"unit":"kg",
+  "spec":null,"confidence":0.30,"needs_clarification":true,
+  "clarification_question":"Саморезы: какой тип (по дереву/по металлу/кровельные)? Размер (длина×диаметр в мм)?",
+  "raw_text":"Гвозди, саморезы — 10 кг"}]
 """
+
+CATEGORIES = [
+    "Keramogranit", "Plitochnyj_klej", "Cement", "Suhie_smesi", "Kirpich", "Bloki",
+    "Metalloprokat", "Pilomaterialy", "Nerudnye", "Uteplitel", "Krovlya", "Inzhenerka",
+    "Lakokraska", "Gipsokarton", "Beton", "Armatura", "Vodostoki", "Krepezh", "Drugoe"
+]
 
 
 def parse_material_list(request_obj):
-    """Parse raw text into material items. Returns dict with items and clarifications."""
+    """Parse raw text into material items. Universal completeness assessment."""
     try:
         result = llm.chat([
             {"role": "system", "content": SYSTEM_PROMPT},
@@ -110,11 +133,13 @@ def parse_material_list(request_obj):
         _save_items(request_obj, items)
         return {
             "items": items,
-            "clarifications": [i.get("clarification_question") for i in items
-                             if i.get("needs_clarification") and i.get("clarification_question")],
+            "clarifications": [
+                i.get("clarification_question") for i in items
+                if i.get("needs_clarification") and i.get("clarification_question")
+            ],
         }
     except json.JSONDecodeError as e:
-        logger.error(f"JSON parse failed: {e}\nContent: {content[:200] if 'content' in dir() else 'N/A'}")
+        logger.error(f"JSON parse failed: {e}")
         return {"error": f"JSON error: {e}", "items": [], "clarifications": []}
     except Exception as e:
         logger.exception("Parse failed")
@@ -123,9 +148,6 @@ def parse_material_list(request_obj):
 
 def _save_items(request_obj, items):
     """Save parsed items to DB."""
-    default_unit, _ = Unit.objects.get_or_create(
-        code="piece", defaults={"name": "Piece", "short_name": "pc"}
-    )
     for item_data in items:
         cat_name = item_data.get("category", "Drugoe")
         cat_slug = cat_name.lower().replace(" ", "_").replace("-", "_")[:40]
@@ -142,9 +164,11 @@ def _save_items(request_obj, items):
         try:
             unit = Unit.objects.get(code=unit_code)
         except Unit.DoesNotExist:
-            unit = Unit.objects.create(code=unit_code, name=unit_code.capitalize(), short_name=unit_code[:10])
+            unit = Unit.objects.create(
+                code=unit_code, name=unit_code.capitalize(), short_name=unit_code[:10]
+            )
         conf = item_data.get("confidence", 0.5)
-        needs_clarification = item_data.get("needs_clarification", conf < 0.6)
+        needs_clarification = item_data.get("needs_clarification", conf < 0.65)
         RequestItem.objects.create(
             request=request_obj,
             raw_text=item_data.get("raw_text", ""),
