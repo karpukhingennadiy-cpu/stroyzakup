@@ -92,5 +92,5 @@ class TestSupplierMatching:
         r = client.post(f"/api/requests/{req.id}/match_suppliers/", {"limit": 20}, format="json")
         data = r.json()
         for s in data["suppliers"]:
-            calc = s["category_score"] + s["distance_score"] + s["rating_score"] + s["completeness_score"]
+            calc = s["category_score"] + s["distance_score"] + s["rating_score"] + s["completeness_score"] + s.get("manufacturer_bonus", 0)
             assert abs(calc - s["total_score"]) < 0.2, f"Score mismatch for {s['name']}: {calc} != {s['total_score']}"

@@ -31,6 +31,8 @@ interface SupplierMatch {
   matched_count: number;
   total_categories: number;
   matched_categories: string[];
+  supplier_type?: string;
+  manufacturer_bonus?: number;
 }
 
 const UNITS = ["m2", "m3", "kg", "ton", "bag", "piece", "pack", "roll", "pog_m", "liter", "sht"];

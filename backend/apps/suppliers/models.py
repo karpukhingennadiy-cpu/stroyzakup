@@ -8,6 +8,7 @@ class Supplier(models.Model):
     phone = models.CharField(max_length=50, blank=True)
     email = models.EmailField()
     is_active = models.BooleanField(default=True)
+    supplier_type = models.CharField(max_length=20, default="unknown", choices=[("manufacturer","manufacturer"),("dealer","dealer"),("unknown","unknown")])
     hidden_rating = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -24,6 +25,7 @@ class SupplierAddress(models.Model):
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
+    supplier_type = models.CharField(max_length=20, default="unknown", choices=[("manufacturer","manufacturer"),("dealer","dealer"),("unknown","unknown")])
     class Meta: db_table = "supplier_addresses"
 
 class SupplierCategory(models.Model):

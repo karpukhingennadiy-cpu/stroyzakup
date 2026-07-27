@@ -25,6 +25,7 @@ For each REAL company you know, provide:
 - url: their website (only if you're confident it's correct)
 - phone: only if you're certain
 - city: city name
+- supplier_type: "manufacturer" if they PRODUCE this material, "dealer" if they only resell, "unknown" if unclear
 - source: "llm_knowledge"
 
 Rules:
@@ -157,6 +158,7 @@ def discover_suppliers_for_request(request_obj) -> int:
                 except:
                     pass
 
+            stype = sup_data.get("supplier_type", "unknown")
             supplier, created = Supplier.objects.get_or_create(
                 name=name[:500],
                 defaults={
@@ -164,6 +166,7 @@ def discover_suppliers_for_request(request_obj) -> int:
                     "phone": (sup_data.get("phone") or "")[:50],
                     "site": site[:200] if site else "",
                     "is_active": True,
+                    "supplier_type": stype if stype in ("manufacturer","dealer","unknown") else "unknown",
                 }
             )
 

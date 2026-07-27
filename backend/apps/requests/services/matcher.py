@@ -26,6 +26,8 @@ class SupplierMatch:
     distance_score: float
     rating_score: float
     completeness_score: float
+    manufacturer_bonus: float
+    supplier_type: str
     total_score: float
 
     matched_categories: list[str] = field(default_factory=list)
@@ -45,6 +47,8 @@ class SupplierMatch:
             "distance_score": round(self.distance_score, 1),
             "rating_score": round(self.rating_score, 1),
             "completeness_score": round(self.completeness_score, 1),
+            "manufacturer_bonus": round(self.manufacturer_bonus, 1),
+            "supplier_type": getattr(self, 'supplier_type', 'unknown'),
             "matched_categories": self.matched_categories,
             "matched_count": len(self.matched_categories),
             "total_categories": self.total_categories,
@@ -120,6 +124,9 @@ def match_suppliers(request_obj, limit=20):
 
         rating_score = min(s.hidden_rating, 10)
 
+        # Manufacturer bonus: +5 points if they produce the material
+        mfr_bonus = 5.0 if s.supplier_type == "manufacturer" else 0
+
         completeness = 0
         if s.email:
             completeness += 2.5
@@ -130,10 +137,11 @@ def match_suppliers(request_obj, limit=20):
         if s.legal_name:
             completeness += 2.5
 
-        total = category_score + distance_score + rating_score + completeness
+        total = category_score + distance_score + rating_score + completeness + mfr_bonus
 
         matches.append(SupplierMatch(
             supplier_id=s.id,
+            supplier_type=s.supplier_type,
             name=s.name,
             email=s.email,
             phone=s.phone or "",
@@ -144,6 +152,7 @@ def match_suppliers(request_obj, limit=20):
             distance_score=distance_score,
             rating_score=rating_score,
             completeness_score=completeness,
+            manufacturer_bonus=mfr_bonus,
             total_score=total,
             matched_categories=matched_names,
             total_categories=len(category_ids),
