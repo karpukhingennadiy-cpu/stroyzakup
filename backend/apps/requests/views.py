@@ -84,9 +84,19 @@ class RequestViewSet(viewsets.ModelViewSet):
         return Response(RequestItemSerializer(items, many=True).data)
     @decorators.action(detail=True, methods=["post"])
     def match_suppliers(self, request, pk=None):
-        """Score and rank suppliers for this request. Returns top 20 with scores."""
+        """Score and rank suppliers for this request. Returns top 20 with scores.
+        Also discovers new suppliers via web search."""
         from .services.matcher import match_suppliers
+        from .services.websearch import discover_suppliers_for_request
         req = self.get_object()
+
+        # Discover new suppliers from web (async-like, don't block on failure)
+        try:
+            new_count = discover_suppliers_for_request(req)
+            if new_count:
+                print(f"Discovered {new_count} new suppliers via web search")
+        except Exception as e:
+            print(f"Web search skipped: {e}")
         if req.status not in ("draft", "parsing", "confirmed", "matching", "matched"):
             return Response(
                 {"error": "Cannot match in current status. Need: draft/parsing/confirmed/matching/matched"},
