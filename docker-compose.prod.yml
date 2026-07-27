@@ -49,7 +49,7 @@ services:
     environment:
       POSTGRES_DB: minitender
       POSTGRES_USER: minitender
-      POSTGRES_PASSWORD: minitender
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
     ports:
       - "5432:5432"
     volumes:

@@ -1,14 +1,13 @@
 [Unit]
-Description=Minitender Celery Worker
-After=network.target redis.service
+Description=Minitender Celery worker
+After=network.target redis-server.service
 
 [Service]
-User=minitender
-Group=minitender
+User=www-data
+Group=www-data
 WorkingDirectory=/opt/minitender/backend
-Environment="DJANGO_SETTINGS_MODULE=config.settings.prod"
 EnvironmentFile=/opt/minitender/.env
-ExecStart=/opt/minitender/backend/.venv/bin/celery -A config worker -l info -c 4
+ExecStart=/opt/minitender/backend/.venv/bin/celery -A config worker --loglevel=info
 Restart=always
 RestartSec=5
 
