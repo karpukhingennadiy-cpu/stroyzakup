@@ -1,128 +1,116 @@
-"""Web search for suppliers: multi-source (DDG + Yandex) + LLM parsing."""
+"""Supplier discovery: LLM knowledge + web search fallback.
+Primary: LLM knows real Russian construction companies from training data.
+Fallback: web scraping when LLM has no info.
+"""
 
-import json, urllib.request, urllib.parse, ssl, re, time
-from typing import Optional
+import json, re, time, urllib.request, urllib.parse, ssl
 from apps.requests.llm_client import llm
 
-USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-
-SEARCHABLE_CATEGORIES = {
-    "pilomaterialy": "doska_obreznaya", "keramogranit": "keramogranit",
-    "kirpich": "kirpich_stroitelnyy", "beton": "beton_tovarnyy",
-    "cement": "tsement", "suhie_smesi": "sukhaya_smes",
-    "metalloprokat": "metalloprokat", "uteplitel": "uteplitel",
-    "krovlya": "krovelnyy_material", "armatura": "armatura_stroitelnaya",
-    "bloki": "stroitelnyye_bloki", "nerudnye": "pesok_shcheben",
-    "lakokraska": "kraska_stroitelnaya", "gipsokarton": "gipsokarton",
-    "krepezh": "krepezh_samorezy",
-}
+USER_AGENT = "Mozilla/5.0 (compatible; MinitenderRF/1.0)"
 
 
-def _yandex_search(query: str, max_results: int = 10) -> list[dict]:
-    """Search Yandex (scrape HTML results page)."""
-    params = urllib.parse.urlencode({"text": query, "lr": 213})  # lr=213 = Moscow region
-    url = f"https://yandex.ru/search/?{params}"
-    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    try:
-        ctx = ssl.create_default_context()
-        with urllib.request.urlopen(req, timeout=15, context=ctx) as resp:
-            html = resp.read().decode("utf-8", errors="replace")
-    except Exception as e:
-        print(f"  Yandex search error: {e}")
-        return []
+def _ask_llm_for_suppliers(material: str, city: str, specs: str = "") -> list[dict]:
+    """Ask LLM for known suppliers of this material in this city.
+    LLMs trained on web data know many real companies.
+    """
+    prompt = f"""Find REAL Russian construction material suppliers in/near {city} that sell: {material}"""
 
-    results = []
-    # Yandex organic results
-    blocks = re.findall(
-        r'<a[^>]*class="[^"]*link[^"]*"[^>]*href="(https?://[^"]+)"[^>]*>(.*?)</a>',
-        html, re.DOTALL
-    )
-    for url, title in blocks[:max_results]:
-        title_clean = re.sub(r'<[^>]+>', '', title).strip()
-        if title_clean and 'yandex' not in url:
-            results.append({"title": title_clean, "url": url, "snippet": ""})
-    return results
+    if specs:
+        prompt += f" (specs: {specs})"
 
+    prompt += f"""
 
-def _ddg_lite_search(query: str, max_results: int = 10) -> list[dict]:
-    """Search DuckDuckGo Lite (simpler HTML, more reliable)."""
-    params = urllib.parse.urlencode({"q": query})
-    url = f"https://lite.duckduckgo.com/lite/?{params}"
-    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    try:
-        ctx = ssl.create_default_context()
-        with urllib.request.urlopen(req, timeout=15, context=ctx) as resp:
-            html = resp.read().decode("utf-8", errors="replace")
-    except Exception as e:
-        print(f"  DDG Lite error: {e}")
-        return []
+For each REAL company you know, provide:
+- name: company name in Russian
+- url: their website (only if you're confident it's correct)
+- phone: only if you're certain
+- city: city name
+- source: "llm_knowledge"
 
-    results = []
-    blocks = re.findall(
-        r'<a[^>]*href="(https?://[^"]+)"[^>]*class="[^"]*result-link[^"]*"[^>]*>(.*?)</a>',
-        html, re.DOTALL
-    )
-    # Fallback pattern
-    if not blocks:
-        blocks = re.findall(
-            r'<a[^>]*href="(https?://[^"]+)"[^>]*>(.*?)</a>',
-            html, re.DOTALL
-        )
-
-    for url, title in blocks[:max_results]:
-        title_clean = re.sub(r'<[^>]+>', '', title).strip()
-        if title_clean and len(title_clean) > 10 and 'duckduckgo' not in url:
-            results.append({"title": title_clean, "url": url, "snippet": ""})
-    return results
-
-
-def search_suppliers_for_material(material_name: str, city: str, category: str = "") -> list[dict]:
-    """Search web for suppliers. Returns list of supplier dicts."""
-    cat_key = SEARCHABLE_CATEGORIES.get(category.lower().replace(" ", "_"), material_name)
-    query = f"kupit {material_name} {city}"
-
-    print(f"  Searching: {query}")
-
-    # Try Yandex first (better for Russian market)
-    results = _yandex_search(query, max_results=8)
-    if len(results) < 3:
-        # Fallback to DDG Lite
-        results2 = _ddg_lite_search(query, max_results=8)
-        results.extend(results2)
-
-    if not results:
-        print("  No search results")
-        return []
-
-    print(f"  Found {len(results)} search results")
-
-    # Use LLM to extract supplier info
-    prompt = f"""Extract construction material suppliers from these web search results for "{material_name}" in {city}.
-
-For each real company found, return: name, url (their website), phone (if visible), city.
-Only REAL companies that sell construction materials.
-
-Search results:
-{json.dumps(results[:6], ensure_ascii=False, indent=2)}
-
-Return ONLY a JSON array like: [{{"name":"...","url":"...","phone":"...","city":"..."}}]"""
+Rules:
+- ONLY return companies you are CONFIDENT exist
+- DO NOT invent fake companies
+- If you don't know any, return empty array []
+- Return ONLY a JSON array, no markdown"""
 
     try:
-        llm_result = llm.chat([
-            {"role": "system", "content": "You extract supplier company data from search results. Return ONLY JSON array."},
+        result = llm.chat([
+            {"role": "system", "content": "You are a construction procurement database. You know thousands of real Russian suppliers. Only output verified information."},
             {"role": "user", "content": prompt},
         ])
-        content = llm_result["choices"][0]["message"]["content"].strip()
+        content = result["choices"][0]["message"]["content"].strip()
         content = re.sub(r"^$", "", content)
         suppliers = json.loads(content)
         return suppliers if isinstance(suppliers, list) else []
     except Exception as e:
-        print(f"  LLM extraction error: {e}")
+        print(f"  LLM supplier query error: {e}")
         return []
 
 
+def _web_search_fallback(query: str, max_results: int = 5) -> list[dict]:
+    """Minimal web search as fallback."""
+    params = urllib.parse.urlencode({"q": query, "format": "json"})
+    url = f"https://api.duckduckgo.com/?{params}"
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    try:
+        ctx = ssl.create_default_context()
+        with urllib.request.urlopen(req, timeout=10, context=ctx) as resp:
+            data = json.loads(resp.read())
+        results = []
+        for t in data.get("RelatedTopics", [])[:max_results]:
+            if isinstance(t, dict) and t.get("FirstURL"):
+                results.append({"title": t.get("Text", ""), "url": t["FirstURL"], "snippet": ""})
+        return results
+    except:
+        return []
+
+
+def search_suppliers_for_material(material_name: str, city: str, category: str = "") -> list[dict]:
+    """Find real suppliers for a material. LLM-first approach."""
+    # Try LLM knowledge first - it knows real companies
+    print(f"  Querying LLM for: {material_name} in {city}")
+    suppliers = _ask_llm_for_suppliers(material_name, city)
+
+    if suppliers:
+        print(f"  LLM found {len(suppliers)} suppliers")
+        return suppliers
+
+    # Fallback: broader search via LLM
+    broad_prompt = f"What Russian companies sell {material_name}? List known ones near {city}."
+    suppliers = _ask_llm_for_suppliers(material_name, city + " oblast region")
+
+    if suppliers:
+        print(f"  LLM (broad) found {len(suppliers)} suppliers")
+        return suppliers
+
+    # Last resort: web search
+    print(f"  Trying web search...")
+    query = f"kupit {material_name} {city} site:ru"
+    results = _web_search_fallback(query)
+    if results:
+        # Parse via LLM
+        prompt = f"""Extract supplier names from these search results for {material_name} in {city}:
+{json.dumps(results[:5], ensure_ascii=False)}
+
+Return JSON array of {{name, url, city}}"""
+        try:
+            llm_result = llm.chat([
+                {"role": "system", "content": "Extract company names from search results. Return JSON array."},
+                {"role": "user", "content": prompt},
+            ])
+            content = llm_result["choices"][0]["message"]["content"].strip()
+            content = re.sub(r"^$", "", content)
+            parsed = json.loads(content)
+            if isinstance(parsed, list):
+                return parsed
+        except:
+            pass
+
+    return []
+
+
 def discover_suppliers_for_request(request_obj) -> int:
-    """Search web for suppliers for all items in a request. Returns count of new suppliers."""
+    """Discover suppliers for all items in a request. LLM-first."""
     from apps.suppliers.models import Supplier, SupplierAddress, SupplierCategory
 
     items = request_obj.items.filter(is_confirmed=True)
@@ -130,35 +118,44 @@ def discover_suppliers_for_request(request_obj) -> int:
         items = request_obj.items.all()
 
     city = ""
-    if request_obj.address and request_obj.address.city:
-        city = request_obj.address.city
-    if not city and request_obj.address:
-        city = request_obj.address.address or ""
+    if request_obj.address:
+        city = request_obj.address.city or request_obj.address.address or ""
 
     new_count = 0
-    seen_urls = set(Supplier.objects.exclude(site="").values_list("site", flat=True))
+    seen_sites = set(Supplier.objects.exclude(site="").values_list("site", flat=True))
+    seen_names = set(Supplier.objects.values_list("name", flat=True))
 
     for item in items:
-        cat_name = item.category.slug if item.category else ""
-        print(f"Searching: {item.name} in {city or 'anywhere'}")
+        cat_slug = item.category.slug if item.category else ""
+        specs = item.spec or ""
 
-        found = search_suppliers_for_material(item.name, city, cat_name)
-        time.sleep(1)  # Rate limit
+        print(f"Discovering suppliers for: {item.name} in {city or 'Moscow'}")
+
+        found = search_suppliers_for_material(item.name, city or "Moscow", cat_slug)
+        time.sleep(0.5)
 
         for sup_data in found:
-            site = (sup_data.get("url") or sup_data.get("site") or "").strip()
             name = (sup_data.get("name") or "").strip()
+            site = (sup_data.get("url") or sup_data.get("site") or "").strip()
+
             if not name or len(name) < 3:
                 continue
-            if site and site in seen_urls:
+            if name in seen_names:
                 continue
+            if site and site in seen_sites:
+                continue
+
+            seen_names.add(name)
             if site:
-                seen_urls.add(site)
+                seen_sites.add(site)
 
             email = sup_data.get("email") or ""
             if not email and site and "://" in site:
-                domain = site.split("://")[1].split("/")[0]
-                email = f"info@{domain}"
+                try:
+                    domain = site.split("://")[1].split("/")[0]
+                    email = f"info@{domain}"
+                except:
+                    pass
 
             supplier, created = Supplier.objects.get_or_create(
                 name=name[:500],
@@ -182,5 +179,6 @@ def discover_suppliers_for_request(request_obj) -> int:
                         supplier=supplier, category=item.category
                     )
                 new_count += 1
+                print(f"  + {name} ({sup_city})")
 
     return new_count
