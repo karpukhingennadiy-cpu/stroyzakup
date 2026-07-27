@@ -12,3 +12,8 @@ services:
   nginx:
     image: nginx:alpine
     ports: ["80:80"]
+
+    environment:
+      POSTGRES_DB: minitender
+      POSTGRES_USER: minitender
+      POSTGRES_PASSWORD: 

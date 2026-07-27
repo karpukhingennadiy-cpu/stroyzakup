@@ -31,7 +31,7 @@ class TestRequests:
         api_client.post('/api/requests/', {'raw_text': 'Item 2'})
         r = api_client.get('/api/requests/')
         assert r.status_code == 200
-        assert len(r.data) >= 2
+        assert len(r.data.get('results', r.data)) >= 2
 
     def test_get_request_detail(self, api_client):
         create_r = api_client.post('/api/requests/', {'raw_text': 'Detail test'})

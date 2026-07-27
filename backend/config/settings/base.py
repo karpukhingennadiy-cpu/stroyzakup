@@ -5,7 +5,7 @@ from datetime import timedelta
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-SECRET_KEY = "dev-secret-key-change-in-production-!!!-abc123"
+SECRET_KEY="dev-secret-key"
 DEBUG = False
 ALLOWED_HOSTS = []
 
