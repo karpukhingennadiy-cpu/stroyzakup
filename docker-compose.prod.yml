@@ -1,0 +1,14 @@
+services:
+  backend:
+    build: ./backend
+    command: gunicorn config.wsgi --bind 0.0.0.0:8000
+  frontend:
+    build: ./frontend
+    ports: ["3000:3000"]
+  postgres:
+    image: postgis/postgis:16-3.4
+  redis:
+    image: redis:7-alpine
+  nginx:
+    image: nginx:alpine
+    ports: ["80:80"]
