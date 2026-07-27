@@ -167,6 +167,7 @@ def discover_suppliers_for_request(request_obj) -> int:
                     "site": site[:200] if site else "",
                     "is_active": True,
                     "supplier_type": stype if stype in ("manufacturer","dealer","unknown") else "unknown",
+                    "source": "llm",
                 }
             )
 

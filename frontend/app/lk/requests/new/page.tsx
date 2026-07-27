@@ -32,6 +32,7 @@ interface SupplierMatch {
   total_categories: number;
   matched_categories: string[];
   supplier_type?: string;
+  source?: string;
   manufacturer_bonus?: number;
 }
 
@@ -60,6 +61,7 @@ export default function NewRequestPage() {
   const [suppliers, setSuppliers] = useState<SupplierMatch[]>([]);
   const [selectedSuppliers, setSelectedSuppliers] = useState<Set<number>>(new Set());
   const [sentCount, setSentCount] = useState(0);
+  const [sourceFilter, setSourceFilter] = useState<string>("all");
   const [supplierLimit, setSupplierLimit] = useState(10);
 
   const buildRawText = () => {
@@ -211,7 +213,14 @@ export default function NewRequestPage() {
               <div className="p-6 border-b border-[#e2e8f0] bg-[#f5f7fa]">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-[#27ae60]/10 flex items-center justify-center"><IconTruck className="w-5 h-5 text-[#27ae60]" /></div>
-                  <div><p className="font-semibold text-[#1a1a2e]">Шаг 3: Выбор поставщиков</p><p className="text-xs text-[#64748b]">Найдено {suppliers.length} поставщиков. Отметьте кому отправить запрос КП. <select value={supplierLimit} onChange={e => setSupplierLimit(Number(e.target.value))} className="ml-2 px-2 py-0.5 border rounded text-xs">{[5,10,15,20].map(n => <option key={n} value={n}>{n}</option>)}</select> показывать</p></div>
+                  <div><p className="font-semibold text-[#1a1a2e]">Шаг 3: Выбор поставщиков</p><p className="text-xs text-[#64748b]">Найдено {suppliers.length} поставщиков.
+              <select value={sourceFilter} onChange={e => setSourceFilter(e.target.value)}
+                className="ml-2 px-2 py-0.5 border rounded text-xs">
+                <option value="all">Все источники</option>
+                <option value="seed">Из базы</option>
+                <option value="llm">AI-поиск</option>
+                <option value="web">Веб-поиск</option>
+              </select> Отметьте кому отправить запрос КП. <select value={supplierLimit} onChange={e => setSupplierLimit(Number(e.target.value))} className="ml-2 px-2 py-0.5 border rounded text-xs">{[5,10,15,20].map(n => <option key={n} value={n}>{n}</option>)}</select> показывать</p></div>
                 </div>
               </div>
               <div className="p-6">
@@ -233,7 +242,7 @@ export default function NewRequestPage() {
                       <th className="py-2 font-semibold text-[#64748b]">Город</th>
                     </tr></thead>
                     <tbody>
-                      {suppliers.map(s => (
+                      {suppliers.filter(s => sourceFilter === "all" || s.source === sourceFilter).map(s => (
                         <tr key={s.supplier_id} className={"border-b border-[#f5f7fa] cursor-pointer hover:bg-[#f8fafc] " + (selectedSuppliers.has(s.supplier_id) ? "bg-amber-50" : "")} onClick={() => toggleSupplier(s.supplier_id)}>
                           <td className="py-2"><input type="checkbox" checked={selectedSuppliers.has(s.supplier_id)} onChange={() => toggleSupplier(s.supplier_id)} className="w-4 h-4 accent-[#f0a500]" /></td>
                           <td className="py-2"><p className="font-medium text-[#1a1a2e]">{s.name}</p><p className="text-xs text-[#94a3b8]">{s.email}</p></td>

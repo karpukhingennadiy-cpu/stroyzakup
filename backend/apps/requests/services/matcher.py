@@ -32,6 +32,7 @@ class SupplierMatch:
 
     matched_categories: list[str] = field(default_factory=list)
     total_categories: int = 0
+    source: str = "seed"
 
     def to_dict(self):
         return {
@@ -49,6 +50,7 @@ class SupplierMatch:
             "completeness_score": round(self.completeness_score, 1),
             "manufacturer_bonus": round(self.manufacturer_bonus, 1),
             "supplier_type": getattr(self, 'supplier_type', 'unknown'),
+            "source": getattr(self, 'source', 'seed'),
             "matched_categories": self.matched_categories,
             "matched_count": len(self.matched_categories),
             "total_categories": self.total_categories,
@@ -142,6 +144,7 @@ def match_suppliers(request_obj, limit=20):
         matches.append(SupplierMatch(
             supplier_id=s.id,
             supplier_type=s.supplier_type,
+            source=getattr(s, "source", "seed"),
             name=s.name,
             email=s.email,
             phone=s.phone or "",
