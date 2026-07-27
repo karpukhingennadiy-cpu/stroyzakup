@@ -31,28 +31,58 @@ class RequestSerializer(serializers.ModelSerializer):
 
 class RequestCreateSerializer(serializers.ModelSerializer):
     delivery_address = serializers.CharField(write_only=True, required=False)
+    latitude = serializers.FloatField(write_only=True, required=False)
+    longitude = serializers.FloatField(write_only=True, required=False)
+    city = serializers.CharField(write_only=True, required=False)
 
     class Meta:
         model = Request
-        fields = ['raw_text', 'address', 'delivery_address', 'comment']
+        fields = ['raw_text', 'address', 'delivery_address',
+                  'latitude', 'longitude', 'city', 'comment']
 
     def create(self, validated_data):
         delivery_address = validated_data.pop('delivery_address', None)
+        lat = validated_data.pop('latitude', None)
+        lon = validated_data.pop('longitude', None)
+        city = validated_data.pop('city', None)
         request = self.context['request']
         instance = super().create(validated_data)
 
-        if delivery_address:
+        # If frontend already geocoded, use those coordinates
+        if lat and lon:
+            from .models import Address
+            addr = Address.objects.create(
+                customer=request.user,
+                address=delivery_address or f"{city}",
+                city=city or "",
+                latitude=lat,
+                longitude=lon,
+            )
+            instance.address = addr
+            instance.save(update_fields=['address'])
+        elif delivery_address:
+            # Fallback: geocode on backend
             from .services.geocoder import geocode
             from .models import Address
             result = geocode(delivery_address)
             if result:
-                lat, lon, city, full = result
+                glat, glon, gcity, full = result
                 addr = Address.objects.create(
                     customer=request.user,
                     address=delivery_address,
-                    city=city,
-                    latitude=lat,
-                    longitude=lon,
+                    city=gcity,
+                    latitude=glat,
+                    longitude=glon,
+                )
+                instance.address = addr
+                instance.save(update_fields=['address'])
+            else:
+                # Geocoding failed but address text is still saved
+                from .models import Address
+                addr = Address.objects.create(
+                    customer=request.user,
+                    address=delivery_address,
+                    city=city or "",
                 )
                 instance.address = addr
                 instance.save(update_fields=['address'])

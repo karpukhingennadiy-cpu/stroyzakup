@@ -22,8 +22,9 @@ export default function NewRequestPage() {
       const result = await geocodeAddress(deliveryAddress);
       setGeoResult(result);
     } catch (err: any) {
-      setError("Не удалось найти адрес: " + (err.message || "проверьте написание"));
+      // Geocoding failed - user can still proceed without coordinates
       setGeoResult(null);
+      setError("Адрес не найден на карте. Можно продолжить без координат — поиск поставщиков будет по городу.");
     } finally {
       setGeoLoading(false);
     }
@@ -35,7 +36,12 @@ export default function NewRequestPage() {
     setError("");
     setLoading(true);
     try {
-      const req = await createRequest(rawText, comment || undefined, deliveryAddress || undefined);
+      const req = await createRequest(
+        rawText,
+        comment || undefined,
+        deliveryAddress || undefined,
+        geoResult || undefined
+      );
       router.push("/lk/requests/" + req.id);
     } catch (err: any) {
       setError(err.message || "Ошибка создания заявки");

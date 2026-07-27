@@ -69,9 +69,14 @@ export async function registerUser(data) {
 export async function getMe() { return api("/auth/me/"); }
 export async function getRequests() { return api("/requests/"); }
 export async function getRequest(id) { return api("/requests/" + id + "/"); }
-export async function createRequest(raw_text, comment, deliveryAddress) {
+export async function createRequest(raw_text, comment, deliveryAddress, geoResult) {
   var body = { raw_text: raw_text, comment: comment };
   if (deliveryAddress) body.delivery_address = deliveryAddress;
+  if (geoResult) {
+    body.latitude = geoResult.latitude;
+    body.longitude = geoResult.longitude;
+    body.city = geoResult.city;
+  }
   return api("/requests/", { method: "POST", body: JSON.stringify(body) });
 }
 export async function parseRequest(id) {
