@@ -1,7 +1,7 @@
 from .base import *
 
 DEBUG = True
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["testserver", "localhost", "127.0.0.1", "localhost", "127.0.0.1"]
 
 # SQLite for local dev (no Docker needed)
 DATABASES = {
@@ -11,8 +11,10 @@ DATABASES = {
     }
 }
 
-EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
-EMAIL_FILE_PATH = BASE_DIR / "sent_emails"
+EMAIL_BACKEND="django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST="smtp.mail.ru"
+EMAIL_PORT=465
+EMAIL_USE_SSL=True
 
 # Inbound email domain for reply addresses
 INBOUND_EMAIL_DOMAIN = "in.minitender.ru"
@@ -24,3 +26,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
 ]
 CORS_ALLOW_CREDENTIALS = True
+
+EMAIL_HOST_USER="309651@mail.ru"
+EMAIL_HOST_PASSWORD="uePMzMa4IhccRLwSUh1R"
