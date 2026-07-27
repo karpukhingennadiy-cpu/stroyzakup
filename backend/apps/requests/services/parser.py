@@ -5,45 +5,86 @@ from apps.requests.models import Request, RequestItem, Category, Unit
 logger = logging.getLogger(__name__)
 BT = chr(96)
 
-SYSTEM_PROMPT = """You are a construction procurement expert. Extract materials from Russian text into JSON.
+SYSTEM_PROMPT = """You are a construction procurement expert. Extract materials from Russian text into JSON array.
 
-RULES:
-1. Extract EVERY item mentioned, even vague ones. If ambiguous, set confidence low.
-2. Name: keep original Russian wording, normalize to Nominative case.
-3. Category (pick closest, or "Drugoe" if none fits):
-   Keramogranit, Plitochnyj_klej, Cement, Suhie_smesi, Kirpich, Bloki,
-   Metalloprokat, Pilomaterialy, Nerudnye, Uteplitel, Krovlya, Inzhenerka,
-   Lakokraska, Gipsokarton, Beton, Armatura, Vodostoki, Drugoe
-4. Quantity: number (float). If text says "100-150", use the first number.
-   If no quantity, set quantity=1 and confidence below 0.4.
-5. Units: m2, m3, kg, ton, bag, piece, pack, roll, linear_meter, liter, sht
-6. Brand: extract separately from name. null if not mentioned.
-7. Spec: size, color, grade, model. null if not mentioned.
-8. Confidence (0.0-1.0):
-   - 0.9-1.0: all fields clear (name, qty, unit, category)
-   - 0.6-0.8: name+category clear, qty/unit guessed
-   - 0.3-0.5: name vague, category guessed, qty missing
-   - 0.0-0.2: completely ambiguous
-9. needs_clarification: true if confidence < 0.6. Include clarification_question
-   in Russian asking user to specify the exact material.
-10. Return ONLY valid JSON array. No markdown fences, no extra text.
+## RULES
 
-EXAMPLE INPUT: "Плитка — 50 м²"
-EXAMPLE OUTPUT:
-[{"name":"Плитка","category":"Keramogranit","quantity":50,"unit":"m2",
-  "brand":null,"spec":null,"confidence":0.85,"needs_clarification":false,
-  "raw_text":"Плитка — 50 м²"}]
+### 1. Extract EVERY item
+Even vague mentions. If ambiguous, set confidence LOW and ask clarification.
 
-EXAMPLE INPUT: "Нужен бетон и арматура для фундамента"
-EXAMPLE OUTPUT:
-[{"name":"Бетон","category":"Beton","quantity":1,"unit":"m3","brand":null,
-  "spec":"для фундамента","confidence":0.4,"needs_clarification":true,
-  "clarification_question":"Уточните марку бетона и объём? Сколько кубов нужно?",
-  "raw_text":"Нужен бетон и арматура для фундамента"},
- {"name":"Арматура","category":"Armatura","quantity":1,"unit":"ton",
-  "brand":null,"spec":"для фундамента","confidence":0.35,"needs_clarification":true,
-  "clarification_question":"Какой диаметр арматуры? Сколько тонн/метров?",
-  "raw_text":"Нужен бетон и арматура для фундамента"}]"""
+### 2. Fields per item
+- name: original Russian wording, normalized to Nominative case
+- category: pick closest from list below, or "Drugoe"
+- quantity: float. If missing, use 1 and set LOW confidence
+- unit: m2, m3, kg, ton, bag, piece, pack, roll, linear_meter, liter, sht, pog_m
+- brand: null if not mentioned
+- spec: ALL technical details found (size, color, grade, model, thickness, wood_type, diameter, mark)
+- confidence: 0.0-1.0 (see below)
+- needs_clarification: true if confidence < 0.65 OR specs are clearly incomplete
+- clarification_question: specific Russian question about what's missing
+- raw_text: original line from input
+
+### 3. Categories
+Keramogranit, Plitochnyj_klej, Cement, Suhie_smesi, Kirpich, Bloki,
+Metalloprokat, Pilomaterialy, Nerudnye, Uteplitel, Krovlya, Inzhenerka,
+Lakokraska, Gipsokarton, Beton, Armatura, Vodostoki, Krepezh, Drugoe
+
+### 4. SPEC REQUIREMENTS by category (lower confidence if missing!)
+- Pilomaterialy: MUST have wood_type (sosna/dub/listvennitsa/...), thickness×width in mm, length in m
+  If missing ANY: confidence -= 0.3 and ask "Какая порода дерева? Какие размеры (толщина×ширина×длина)?"
+- Keramogranit: size (e.g. 600x600mm), surface (matte/glossy), color
+  If missing: confidence -= 0.2 and ask about size/color
+- Kirpich/Bloki: type (polnoteliy/pustoteliy/gazobeton/...), size in mm
+  If missing: confidence -= 0.2
+- Metalloprokat: profile type (ugolok/shveller/list/...), dimensions, steel grade
+  If missing: confidence -= 0.25
+- Beton: mark (M200/M300/...), mobility class
+  If missing: confidence -= 0.35 and ask "Какая марка бетона? Подвижность?"
+- Armatura: diameter in mm, class (A1/A3/...), length or tonnage
+  If missing: confidence -= 0.35
+- Cement: mark (M400/M500), bag weight if in bags
+- Suhie_smesi: type (cementnaya/shtukaturnaya/kladochnaya/...), brand
+- Uteplitel: type (minvata/penoplast/...), thickness in mm, density
+  If missing: confidence -= 0.3
+- Krovlya: type (metallocherepitsa/gibkaya/...), color, thickness
+- Krepezh: type (gvozdi/samorezy/bolty/...), size in mm, quantity in kg or pieces
+  If only generic name: confidence = 0.3
+
+### 5. Confidence scoring
+- 0.9-1.0: ALL fields complete including specs, qty, unit
+- 0.7-0.85: name+category+qty+unit clear, partial specs
+- 0.5-0.65: name+category clear, qty/unit guessed, specs missing
+- 0.3-0.45: name vague, category guessed, missing key data
+- 0.1-0.25: barely identifiable
+
+### 6. CRITICAL
+- needs_clarification = true whenever confidence < 0.65 OR key specs missing per category rules
+- clarification_question MUST be in Russian, specific, asking about exactly what's missing
+- Return ONLY a JSON array, no markdown fences, no extra text
+- Do NOT invent specs — if not in text, leave as null and flag
+
+### EXAMPLES
+
+Input: "Доска строганная — 100 пог.м"
+Output:
+[{"name":"Доска строганная","category":"Pilomaterialy","quantity":100,"unit":"pog_m",
+  "brand":null,"spec":null,"confidence":0.40,"needs_clarification":true,
+  "clarification_question":"Доска строганная: уточните породу дерева (сосна/дуб/лиственница)? Какая толщина и ширина (например, 25×150 мм)? Длина досок?",
+  "raw_text":"Доска строганная — 100 пог.м"}]
+
+Input: "Керамогранит серый 600x600 — 150 м²"
+Output:
+[{"name":"Керамогранит серый 600x600","category":"Keramogranit","quantity":150,"unit":"m2",
+  "brand":null,"spec":"серый, 600x600мм","confidence":0.90,"needs_clarification":false,
+  "raw_text":"Керамогранит серый 600x600 — 150 м²"}]
+
+Input: "Цемент"
+Output:
+[{"name":"Цемент","category":"Cement","quantity":1,"unit":"bag",
+  "brand":null,"spec":null,"confidence":0.30,"needs_clarification":true,
+  "clarification_question":"Цемент: какая марка (М400/М500)? Сколько мешков? Вес мешка (25/50 кг)?",
+  "raw_text":"Цемент"}]
+"""
 
 
 def parse_material_list(request_obj):
@@ -55,10 +96,8 @@ def parse_material_list(request_obj):
         ])
         content = result["choices"][0]["message"]["content"]
         content = content.strip()
-        # Strip markdown fences
         content = re.sub(r"^" + BT*3 + r"(?:json)?\s*", "", content)
         content = re.sub(r"\s*" + BT*3 + r"$", "", content)
-        # Handle both array and object formats
         parsed = json.loads(content)
         if isinstance(parsed, dict):
             items = parsed.get("items", [parsed])
@@ -66,10 +105,8 @@ def parse_material_list(request_obj):
             items = parsed
         else:
             return {"error": "Unexpected response format", "items": [], "clarifications": []}
-
         if not items:
             return {"error": "No items found", "items": [], "clarifications": []}
-
         _save_items(request_obj, items)
         return {
             "items": items,
@@ -77,7 +114,7 @@ def parse_material_list(request_obj):
                              if i.get("needs_clarification") and i.get("clarification_question")],
         }
     except json.JSONDecodeError as e:
-        logger.error(f"JSON parse failed: {e}\nContent: {content[:200]}")
+        logger.error(f"JSON parse failed: {e}\nContent: {content[:200] if 'content' in dir() else 'N/A'}")
         return {"error": f"JSON error: {e}", "items": [], "clarifications": []}
     except Exception as e:
         logger.exception("Parse failed")
@@ -85,15 +122,11 @@ def parse_material_list(request_obj):
 
 
 def _save_items(request_obj, items):
-    """Save parsed items to DB. Handles missing fields gracefully."""
-    # Default unit
+    """Save parsed items to DB."""
     default_unit, _ = Unit.objects.get_or_create(
-        code="piece",
-        defaults={"name": "Piece", "short_name": "pc"}
+        code="piece", defaults={"name": "Piece", "short_name": "pc"}
     )
-
     for item_data in items:
-        # Category matching
         cat_name = item_data.get("category", "Drugoe")
         cat_slug = cat_name.lower().replace(" ", "_").replace("-", "_")[:40]
         try:
@@ -105,22 +138,13 @@ def _save_items(request_obj, items):
                 category = Category.objects.create(
                     name=cat_name, slug=cat_slug, default_radius_km=300
                 )
-
-        # Unit matching
         unit_code = item_data.get("unit", "piece")
         try:
             unit = Unit.objects.get(code=unit_code)
         except Unit.DoesNotExist:
-            unit = Unit.objects.create(
-                code=unit_code,
-                name=unit_code.capitalize(),
-                short_name=unit_code[:10],
-            )
-
+            unit = Unit.objects.create(code=unit_code, name=unit_code.capitalize(), short_name=unit_code[:10])
         conf = item_data.get("confidence", 0.5)
         needs_clarification = item_data.get("needs_clarification", conf < 0.6)
-        clarification_q = item_data.get("clarification_question", "")
-
         RequestItem.objects.create(
             request=request_obj,
             raw_text=item_data.get("raw_text", ""),
