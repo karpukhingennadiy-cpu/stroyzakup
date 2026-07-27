@@ -4,12 +4,17 @@ from .models import Request, RequestItem, Category, Unit, Address
 class RequestItemSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)
     unit_name = serializers.CharField(source='unit.short_name', read_only=True)
+    needs_clarification = serializers.SerializerMethodField()
 
     class Meta:
         model = RequestItem
         fields = ['id', 'raw_text', 'name', 'category', 'category_name', 'quantity',
-                  'unit', 'unit_name', 'brand', 'spec', 'confidence', 'is_confirmed']
-        read_only_fields = ['id', 'confidence', 'is_confirmed']
+                  'unit', 'unit_name', 'brand', 'spec', 'confidence', 'is_confirmed',
+                  'needs_clarification']
+        read_only_fields = ['id', 'confidence', 'is_confirmed', 'needs_clarification']
+
+    def get_needs_clarification(self, obj):
+        return obj.confidence < 0.6 if obj.confidence else False
 
 class AddressSerializer(serializers.ModelSerializer):
     class Meta:

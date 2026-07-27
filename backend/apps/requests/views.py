@@ -45,7 +45,9 @@ class RequestViewSet(viewsets.ModelViewSet):
         req.save(update_fields=['status'])
         result = parse_material_list(req)
         req.refresh_from_db()
-        return Response(RequestSerializer(req).data)
+        response_data = RequestSerializer(req).data
+        response_data['clarifications'] = result.get('clarifications', [])
+        return Response(response_data)
 
     @decorators.action(detail=True, methods=['post'])
     def confirm(self, request, pk=None):
