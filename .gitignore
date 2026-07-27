@@ -1,3 +1,4 @@
+# Python
 __pycache__/
 *.py[cod]
 *.egg-info/
@@ -7,30 +8,42 @@ build/
 .venv/
 venv/
 env/
+
+# Environment
 .env
 .env.local
+.env.prod
+.env.production
+*.env
+
+# IDE
 .vscode/
 .idea/
 *.swp
 .DS_Store
+
+# Docker data
 docker/postgres_data/
 docker/redis_data/
 docker/minio_data/
+
+# Django
 backend/staticfiles/
 backend/media/
+backend/db.sqlite3
+
+# Frontend
 frontend/.next/
 frontend/out/
 frontend/node_modules/
+
+# Tests
 .coverage
 htmlcov/
 .pytest_cache/
-*.log
-.hermes/
 
-# Secrets
-dkim_private.pem
-*.pem
-.github/workflows/
+# Logs
+*.log
 
 # Secrets
 dkim_private.pem
@@ -39,3 +52,10 @@ dkim_private.pem
 *.p12
 *.pfx
 secrets/
+
+# CI (uncomment when token has workflow scope)
+# .github/workflows/
+
+# Hermes
+.hermes/
+.github/workflows/
