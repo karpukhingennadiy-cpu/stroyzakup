@@ -221,6 +221,7 @@ export default function NewRequestPage() {
                 <option value="llm">AI-поиск</option>
                 <option value="web">Веб-поиск</option>
                 <option value="2gis">2GIS</option>
+                <option value="dadata">DaData</option>
               </select> Отметьте кому отправить запрос КП. <select value={supplierLimit} onChange={e => setSupplierLimit(Number(e.target.value))} className="ml-2 px-2 py-0.5 border rounded text-xs">{[5,10,15,20].map(n => <option key={n} value={n}>{n}</option>)}</select> показывать</p></div>
                 </div>
               </div>

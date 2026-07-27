@@ -1,9 +1,11 @@
-"""Multi-source supplier discovery: 2GIS + DuckDuckGo + LLM.
+"""Multi-source supplier discovery — free, no Docker, no external services.
 
-Sources (tried in order):
-1. 2GIS API - Russian business directory, best for local suppliers
-2. DuckDuckGo - web search for broader results
-3. LLM knowledge - training data about real companies
+Pipeline:
+1. DaData API — find companies by name/industry/city (10K req/day free)
+2. Yandex Search — find supplier websites (scraping)
+3. LLM (DeepSeek) — extract + verify company data from results
+
+All free. All running on this PC. No Docker, no SearXNG, no paid APIs.
 """
 
 import json, time, urllib.request, urllib.parse, ssl, re
@@ -11,130 +13,173 @@ from apps.requests.llm_client import llm
 
 USER_AGENT = "Mozilla/5.0 (compatible; MinitenderRF/1.0)"
 
-# 2GIS API (free tier: 1000 req/day)
-GIS_API_KEY="cb0b8e22-2e0b-4b02-b8e8-fd2a2f4d5e6f"
-GIS_URL = "https://catalog.api.2gis.com/3.0/items"
-GIS_URL = "https://catalog.api.2gis.com/3.0/items"
+# ===== DADATA API (free: 10 000 req/day) =====
+DADATA_TOKEN=""  # Get free token at https://dadata.ru/api/suggest/party/
+DADATA_URL = "https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/party"
 
-
-def _search_2gis(query: str, city: str = "", max_results: int = 10) -> list[dict]:
-    """Search 2GIS business catalog."""
-    city_ids = {
-        "moskva": "1", "moscow": "1",
-        "spb": "2", "sankt-peterburg": "2",
-        "ekaterinburg": "7", "novosibirsk": "8",
-        "kazan": "16", "podolsk": "17", "krasnodar": "14",
+def _dadata_search(query: str, city: str = "") -> list[dict]:
+    """Search Russian companies via DaData API. Returns verified company info."""
+    if not DADATA_TOKEN:
+        return []  # No token configured, skip
+    headers = {
+        "Authorization": f"Token {DADATA_TOKEN}",
+        "Content-Type": "application/json",
+        "Accept": "application/json",
     }
-    city_id = city_ids.get(city.lower().strip(), "1")
+    body = json.dumps({"query": query, "count": 10}).encode()
 
-    params = urllib.parse.urlencode({
-        "q": query, "city_id": city_id, "type": "branch",
-        "fields": "items.point,items.address_name,items.org,items.contact_groups",
-        "key": GIS_API_KEY,
-    })
+    # Add city filter if provided
+    if city:
+        # DaData uses special format for location filter
+        body = json.dumps({
+            "query": query,
+            "count": 10,
+            "locations": [{"city": city}],
+        }).encode()
+
+    req = urllib.request.Request(DADATA_URL, data=body, headers=headers, method="POST")
 
     try:
         ctx = ssl.create_default_context()
-        url = f"{GIS_URL}?{params}"
-        req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
         with urllib.request.urlopen(req, timeout=10, context=ctx) as resp:
             data = json.loads(resp.read())
     except Exception as e:
-        print(f"  2GIS error: {e}")
+        print(f"  DaData error: {e}")
         return []
 
     results = []
-    for item in data.get("result", {}).get("items", [])[:max_results]:
-        org = item.get("org", {})
-        name = org.get("name", "")
-        addr = item.get("address_name", "")
-        contacts = item.get("contact_groups", [])
-        phone = site = ""
-        for cg in contacts:
-            for c in cg.get("contacts", []):
-                if c.get("type") == "phone" and not phone:
-                    phone = c.get("value", "")
-                if c.get("type") == "website" and not site:
-                    site = c.get("value", "")
+    for s in data.get("suggestions", [])[:10]:
+        d = s.get("data", {})
+        name = d.get("value") or d.get("name", {}).get("full_with_opf", "")
+        address = d.get("address", {}).get("value", "")
+        phone = d.get("phones", [{}])[0].get("value", "") if d.get("phones") else ""
+        site = d.get("site", "") or d.get("www", "")
+        inn = d.get("inn", "")
+
         if name:
-            results.append({"name": name, "address": addr, "phone": phone, "url": site, "city": city, "source": "2gis"})
+            results.append({
+                "name": name,
+                "inn": inn,
+                "address": address,
+                "phone": phone,
+                "url": site,
+                "city": city,
+                "source": "dadata",
+            })
+
     return results
 
 
-def _search_ddg(query: str, max_results: int = 10) -> list[dict]:
-    """Search DuckDuckGo Instant Answer API."""
-    params = urllib.parse.urlencode({"q": query, "format": "json", "no_html": "1"})
+# ===== YANDEX SEARCH (scraping) =====
+def _yandex_search(query: str, max_results: int = 10) -> list[dict]:
+    """Search Yandex for supplier websites."""
+    params = urllib.parse.urlencode({"text": query, "lr": 213})
+    url = f"https://yandex.ru/search/?{params}"
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+
     try:
         ctx = ssl.create_default_context()
-        url = f"https://api.duckduckgo.com/?{params}"
-        req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-        with urllib.request.urlopen(req, timeout=10, context=ctx) as resp:
-            data = json.loads(resp.read())
+        with urllib.request.urlopen(req, timeout=15, context=ctx) as resp:
+            html = resp.read().decode("utf-8", errors="replace")
     except Exception as e:
-        print(f"  DDG error: {e}")
+        print(f"  Yandex error: {e}")
         return []
 
     results = []
-    if data.get("AbstractText") and data.get("AbstractURL"):
-        results.append({"title": data["AbstractText"][:200], "url": data["AbstractURL"], "snippet": ""})
-    for t in data.get("RelatedTopics", [])[:max_results]:
-        if isinstance(t, dict) and t.get("FirstURL"):
-            results.append({"title": t.get("Text", ""), "url": t["FirstURL"], "snippet": ""})
-    return results[:max_results]
+    blocks = re.findall(
+        r'<a[^>]*href="(https?://[^"]+)"[^>]*>(.*?)</a>',
+        html, re.DOTALL
+    )
+    for url, title in blocks[:max_results]:
+        title_clean = re.sub(r'<[^>]+>', '', title).strip()
+        if title_clean and 'yandex' not in url and len(title_clean) > 5:
+            results.append({"title": title_clean, "url": url, "snippet": ""})
+
+    return results
 
 
-def _ask_llm(material: str, city: str) -> list[dict]:
-    """Ask LLM for known suppliers."""
-    prompt = f"Find REAL Russian suppliers of {material} in {city}. Return JSON array with: name, url, phone, city, supplier_type (manufacturer/dealer), source: llm. Only real companies."
+# ===== LLM EXTRACTION =====
+def _llm_extract_suppliers(search_results: list[dict], material: str, city: str) -> list[dict]:
+    """Extract supplier names and contacts from search results using LLM."""
+    if not search_results:
+        return []
+
+    prompt = f"""From these search results about {material} in {city}, extract real construction material suppliers.
+Return JSON array with: name, url, city, phone (if visible), supplier_type (manufacturer/dealer), source: "search".
+Only real companies. Skip news, forums, articles.
+
+Search results:
+{json.dumps(search_results[:8], ensure_ascii=False, indent=2)}
+
+Return ONLY JSON array."""
+
     try:
-        result = llm.chat([{"role": "system", "content": "Return only verified company info as JSON array."}, {"role": "user", "content": prompt}])
+        result = llm.chat([
+            {"role": "system", "content": "Extract company data from search results. Return JSON array only."},
+            {"role": "user", "content": prompt},
+        ])
         content = result["choices"][0]["message"]["content"].strip()
         content = re.sub(r"^```(?:json)?\s*", "", content)
         content = re.sub(r"\s*```$", "", content)
-        return json.loads(content) if isinstance(json.loads(content), list) else []
+        suppliers = json.loads(content)
+        return suppliers if isinstance(suppliers, list) else []
+    except:
+        return []
+
+
+# ===== LLM KNOWLEDGE =====
+def _llm_knowledge(material: str, city: str) -> list[dict]:
+    """Ask LLM for known suppliers from training data."""
+    prompt = f"""Find REAL Russian suppliers of {material} in/near {city}.
+Return JSON array with: name, url, phone, city, supplier_type (manufacturer/dealer), source: "llm".
+Only real companies you're confident exist. No inventions."""
+
+    try:
+        result = llm.chat([
+            {"role": "system", "content": "You know real Russian companies. Return only verified data as JSON."},
+            {"role": "user", "content": prompt},
+        ])
+        content = result["choices"][0]["message"]["content"].strip()
+        content = re.sub(r"^```(?:json)?\s*", "", content)
+        content = re.sub(r"\s*```$", "", content)
+        suppliers = json.loads(content)
+        return suppliers if isinstance(suppliers, list) else []
     except:
         return []
 
 
 def search_suppliers_for_material(material_name: str, city: str, category: str = "") -> list[dict]:
-    """Multi-source search: 2GIS -> DDG -> LLM."""
+    """Multi-source search: DaData -> Yandex -> LLM."""
     all_suppliers = []
 
-    # 1. 2GIS
-    print(f"  Searching 2GIS: {material_name} in {city}")
-    gis_results = _search_2gis(material_name, city, max_results=8)
-    if gis_results:
-        all_suppliers.extend(gis_results)
-        print(f"  2GIS found {len(gis_results)}")
+    # 1. DaData — verified Russian companies
+    print(f"  DaData: {material_name} in {city}")
+    dadata = _dadata_search(material_name, city)
+    if dadata:
+        all_suppliers.extend(dadata)
+        print(f"    Found {len(dadata)}")
 
-    # 2. DuckDuckGo
+    # 2. Yandex search — find websites
     if len(all_suppliers) < 5:
-        query = f"kupit {material_name} {city}"
-        print(f"  Searching DDG: {query}")
-        ddg_results = _search_ddg(query)
-        if ddg_results:
-            prompt = f"Extract suppliers from: {json.dumps(ddg_results[:5], ensure_ascii=False)}. Return JSON array of {{name, url, city, source: web}}"
-            try:
-                llm_result = llm.chat([{"role": "system", "content": "Return JSON array."}, {"role": "user", "content": prompt}])
-                content = llm_result["choices"][0]["message"]["content"].strip()
-                content = re.sub(r"^```(?:json)?\s*", "", content)
-                content = re.sub(r"\s*```$", "", content)
-                parsed = json.loads(content)
-                if isinstance(parsed, list):
-                    all_suppliers.extend(parsed)
-                    print(f"  DDG+LLM found {len(parsed)}")
-            except:
-                pass
+        query = f"kupit {material_name} {city} stroitelnye_materialy"
+        print(f"  Yandex: {query}")
+        yandex = _yandex_search(query)
+        if yandex:
+            print(f"    Found {len(yandex)} links, extracting...")
+            extracted = _llm_extract_suppliers(yandex, material_name, city)
+            if extracted:
+                all_suppliers.extend(extracted)
+                print(f"    Extracted {len(extracted)} suppliers")
 
-    # 3. LLM knowledge
+    # 3. LLM knowledge as final fallback
     if len(all_suppliers) < 3:
-        print(f"  Asking LLM for: {material_name} in {city}")
-        llm_results = _ask_llm(material_name, city)
+        print(f"  LLM knowledge: {material_name} in {city}")
+        llm_results = _llm_knowledge(material_name, city)
         if llm_results:
             all_suppliers.extend(llm_results)
-            print(f"  LLM found {len(llm_results)}")
+            print(f"    Found {len(llm_results)}")
 
-    # Deduplicate
+    # Deduplicate by name
     seen = set()
     unique = []
     for s in all_suppliers:
@@ -142,6 +187,7 @@ def search_suppliers_for_material(material_name: str, city: str, category: str =
         if n and n not in seen and len(n) > 2:
             seen.add(n)
             unique.append(s)
+
     return unique
 
 
@@ -194,16 +240,21 @@ def discover_suppliers_for_request(request_obj) -> int:
                     "site": site[:200] if site else "",
                     "is_active": True,
                     "supplier_type": stype if stype in ("manufacturer","dealer","unknown") else "unknown",
-                    "source": src if src in ("seed","llm","web","2gis") else "llm",
+                    "source": src if src in ("seed","llm","web","2gis","dadata") else "llm",
                 }
             )
 
             if created:
                 sup_city = sup_data.get("city") or city
                 if sup_city:
-                    SupplierAddress.objects.get_or_create(supplier=supplier, defaults={"address": sup_city, "city": sup_city})
+                    SupplierAddress.objects.get_or_create(
+                        supplier=supplier,
+                        defaults={"address": sup_city, "city": sup_city}
+                    )
                 if item.category:
-                    SupplierCategory.objects.get_or_create(supplier=supplier, category=item.category)
+                    SupplierCategory.objects.get_or_create(
+                        supplier=supplier, category=item.category
+                    )
                 new_count += 1
                 print(f"  + [{src}] {name} ({sup_city})")
 
