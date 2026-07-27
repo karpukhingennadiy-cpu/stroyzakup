@@ -30,3 +30,4 @@ htmlcov/
 # Secrets
 dkim_private.pem
 *.pem
+.github/workflows/
