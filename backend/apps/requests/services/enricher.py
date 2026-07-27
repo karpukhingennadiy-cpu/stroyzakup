@@ -4,7 +4,7 @@ import json, time, urllib.request, urllib.parse, ssl, re
 from apps.requests.llm_client import llm
 
 USER_AGENT = "Mozilla/5.0 (compatible; MinitenderRF/1.0)"
-DADATA_TOKEN = ""  # Get free token at https://dadata.ru
+DADATA_TOKEN="d476a55a81ca0802bfef3046c7e856c054129119"
 
 
 def scrape_site_for_products(site_url: str) -> dict:

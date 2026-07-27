@@ -14,7 +14,7 @@ from apps.requests.llm_client import llm
 USER_AGENT = "Mozilla/5.0 (compatible; MinitenderRF/1.0)"
 
 # ===== DADATA API (free: 10 000 req/day) =====
-DADATA_TOKEN=""  # Get free token at https://dadata.ru/api/suggest/party/
+DADATA_TOKEN="d476a55a81ca0802bfef3046c7e856c054129119"
 DADATA_URL = "https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/party"
 
 def _dadata_search(query: str, city: str = "") -> list[dict]:
