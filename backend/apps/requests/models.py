@@ -30,7 +30,7 @@ class Address(models.Model):
 class Request(models.Model):
     STATUS_CHOICES = [
         ("draft","draft"),("parsing","parsing"),("confirmed","confirmed"),
-        ("matching","matching"),("rfq_sent","rfq_sent"),("collecting_quotes","collecting_quotes"),
+        ("matching","matching"),("matched","matched"),("rfq_sent","rfq_sent"),("collecting_quotes","collecting_quotes"),
         ("ready","ready"),("completed","completed"),("cancelled","cancelled"),
     ]
     customer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="requests")

@@ -69,12 +69,38 @@ class RequestViewSet(viewsets.ModelViewSet):
         from .serializers import RequestItemSerializer
         return Response(RequestItemSerializer(items, many=True).data)
     @decorators.action(detail=True, methods=["post"])
+    def match_suppliers(self, request, pk=None):
+        """Score and rank suppliers for this request. Returns top 20 with scores."""
+        from .services.matcher import match_suppliers
+        req = self.get_object()
+        if req.status not in ("confirmed", "matching", "matched"):
+            return Response(
+                {"error": "Cannot match in current status. Need: confirmed/matching/matched"},
+                status=400,
+            )
+        limit = int(request.data.get("limit", 20))
+        results = match_suppliers(req, limit=limit)
+        req.status = "matched"
+        req.save(update_fields=["status"])
+        return Response({
+            "request_id": req.id,
+            "request_code": req.code,
+            "suppliers": results,
+            "count": len(results),
+        })
+
+    @decorators.action(detail=True, methods=["post"])
     def send_rfq(self, request, pk=None):
         from .send_rfq import send_rfq_to_suppliers
         req = self.get_object()
-        if req.status not in ("confirmed", "matching", "rfq_sent"):
+        if req.status not in ("confirmed", "matching", "matched", "rfq_sent"):
             return Response({"error": "Cannot send RFQ in current status"}, status=400)
-        supplier_ids = request.data.get("supplier_ids", None)
+        supplier_ids = request.data.get("supplier_ids")
+        if not supplier_ids:
+            return Response(
+                {"error": "supplier_ids required. Use match_suppliers first to select suppliers."},
+                status=400,
+            )
         results = send_rfq_to_suppliers(req, supplier_ids)
         return Response({"sent": len([r for r in results if r["status"] == "sent"]), "results": results})
 
