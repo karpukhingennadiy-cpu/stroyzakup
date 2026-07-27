@@ -3,6 +3,7 @@ import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { createRequest, matchSuppliers, sendRfq, api } from "@/lib/api";
+const SupplierMap = dynamic(() => import("./SupplierMap"), { ssr: false });
 import { IconPlus, IconMapPin, IconHardHat, IconTruck } from "@/components/icons";
 
 const DeliveryMap = dynamic(() => import("./DeliveryMap"), { ssr: false });
@@ -57,6 +58,7 @@ export default function NewRequestPage() {
   const [suppliers, setSuppliers] = useState<SupplierMatch[]>([]);
   const [selectedSuppliers, setSelectedSuppliers] = useState<Set<number>>(new Set());
   const [sentCount, setSentCount] = useState(0);
+  const [supplierLimit, setSupplierLimit] = useState(10);
 
   const buildRawText = () => {
     return rows.filter(r => r.name.trim()).map(r => {
@@ -91,7 +93,7 @@ export default function NewRequestPage() {
         method: "PATCH",
         body: JSON.stringify({ delivery_address: deliveryAddr, latitude: deliveryLat, longitude: deliveryLon }),
       });
-      const result = await matchSuppliers(requestId, 30);
+      const result = await matchSuppliers(requestId, supplierLimit);
       setSuppliers(result.suppliers || []);
       setStep(3);
     } catch (e: any) { setError(e.message); }
@@ -207,11 +209,16 @@ export default function NewRequestPage() {
               <div className="p-6 border-b border-[#e2e8f0] bg-[#f5f7fa]">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-[#27ae60]/10 flex items-center justify-center"><IconTruck className="w-5 h-5 text-[#27ae60]" /></div>
-                  <div><p className="font-semibold text-[#1a1a2e]">Шаг 3: Выбор поставщиков</p><p className="text-xs text-[#64748b]">Найдено {suppliers.length} поставщиков. Отметьте кому отправить запрос КП.</p></div>
+                  <div><p className="font-semibold text-[#1a1a2e]">Шаг 3: Выбор поставщиков</p><p className="text-xs text-[#64748b]">Найдено {suppliers.length} поставщиков. Отметьте кому отправить запрос КП. <select value={supplierLimit} onChange={e => setSupplierLimit(Number(e.target.value))} className="ml-2 px-2 py-0.5 border rounded text-xs">{[5,10,15,20].map(n => <option key={n} value={n}>{n}</option>)}</select> показывать</p></div>
                 </div>
               </div>
               <div className="p-6">
-                {suppliers.length === 0 ? (
+                {deliveryLat && deliveryLon && suppliers.length > 0 && (
+            <div className="h-[300px] mb-4 rounded-xl overflow-hidden border border-[#e2e8f0]">
+              <SupplierMap suppliers={suppliers} centerLat={deliveryLat} centerLon={deliveryLon} />
+            </div>
+          )}
+          {suppliers.length === 0 ? (
                   <div className="text-center py-8 text-[#64748b]">Поставщики не найдены. Попробуйте изменить точку доставки.</div>
                 ) : (
                   <table className="w-full text-sm">
