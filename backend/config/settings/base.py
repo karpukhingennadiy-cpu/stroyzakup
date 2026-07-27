@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from decouple import config
 from datetime import timedelta
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -96,3 +97,8 @@ TEMPLATES = [
         },
     },
 ]
+
+# LLM (DeepSeek API)
+LLM_API_KEY=config("LLM_API_KEY", default="")
+LLM_MODEL = config("LLM_MODEL", default="deepseek-chat")
+LLM_BASE_URL = config("LLM_BASE_URL", default="https://api.deepseek.com/v1")
