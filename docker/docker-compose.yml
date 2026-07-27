@@ -1,18 +1,18 @@
 services:
   postgres:
     image: postgis/postgis:16-3.4
-    container_name: stroyzakup-postgres
+    container_name: minitender-postgres
     environment:
-      POSTGRES_DB: stroyzakup
-      POSTGRES_USER: stroyzakup
-      POSTGRES_PASSWORD: stroyzakup
+      POSTGRES_DB: minitender
+      POSTGRES_USER: minitender
+      POSTGRES_PASSWORD: minitender
     ports: ["5432:5432"]
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/01-init.sql
   redis:
     image: redis:7-alpine
-    container_name: stroyzakup-redis
+    container_name: minitender-redis
     ports: ["6379:6379"]
     volumes: [redis_data:/data]
 volumes:

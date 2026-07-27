@@ -25,7 +25,7 @@ export default function Home() {
             <span>MVP запущен — первые 50 заявок бесплатно</span>
           </div>
           <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
-            СтройЗакуп
+            Минитендер
           </h1>
           <p className="text-xl text-white/70 max-w-2xl mx-auto mb-10 leading-relaxed">
             Отправьте список материалов — за 24 часа получите конкурентный лист с лучшими ценами от поставщиков в вашем регионе.
@@ -71,7 +71,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="bg-[#1a1a2e] text-white/40 py-8 text-center text-sm">
-        © 2026 СтройЗакуп. Сервис организации закупок стройматериалов.
+        © 2026 Минитендер. Сервис организации закупок стройматериалов.
       </footer>
     </main>
   );

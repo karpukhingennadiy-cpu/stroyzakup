@@ -42,7 +42,7 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
             <div className="w-9 h-9 rounded-lg bg-[#f0a500] flex items-center justify-center">
               <IconHardHat className="w-5 h-5 text-[#1a1a2e]" />
             </div>
-            <span className="font-bold text-lg tracking-tight">СтройЗакуп</span>
+            <span className="font-bold text-lg tracking-tight">Минитендер</span>
           </Link>
         </div>
 

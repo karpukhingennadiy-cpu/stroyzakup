@@ -46,9 +46,9 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "NAME": "stroyzakup",
-        "USER": "stroyzakup",
-        "PASSWORD": "stroyzakup",
+        "NAME": "minitender",
+        "USER": "minitender",
+        "PASSWORD": "minitender",
         "HOST": "localhost",
         "PORT": "5432",
     }

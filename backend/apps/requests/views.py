@@ -68,3 +68,13 @@ class RequestViewSet(viewsets.ModelViewSet):
         items = req.items.all()
         from .serializers import RequestItemSerializer
         return Response(RequestItemSerializer(items, many=True).data)
+    @decorators.action(detail=True, methods=["post"])
+    def send_rfq(self, request, pk=None):
+        from .send_rfq import send_rfq_to_suppliers
+        req = self.get_object()
+        if req.status not in ("confirmed", "matching", "rfq_sent"):
+            return Response({"error": "Cannot send RFQ in current status"}, status=400)
+        supplier_ids = request.data.get("supplier_ids", None)
+        results = send_rfq_to_suppliers(req, supplier_ids)
+        return Response({"sent": len([r for r in results if r["status"] == "sent"]), "results": results})
+

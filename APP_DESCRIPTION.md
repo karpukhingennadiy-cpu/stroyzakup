@@ -1,7 +1,7 @@
-# СтройЗакуп — сервис организации закупок стройматериалов
+# Минитендер — сервис организации закупок стройматериалов
 
 > **Версия:** MVP 1.0 | **Дата:** 27.07.2026
-> **Репозиторий:** github.com/karpukhingennadiy-cpu/stroyzakup
+> **Репозиторий:** github.com/karpukhingennadiy-cpu/minitender
 
 ---
 
@@ -57,8 +57,8 @@
 
 ШАГ 4: Рассылка RFQ
   Email 5 поставщикам с уникальным reply-to адресом
-  От: rfq@stroyzakup.ru
-  Reply-To: rfq-BQ6EE5-a1b2c3@in.stroyzakup.ru
+  От: rfq@minitender.ru
+  Reply-To: rfq-BQ6EE5-a1b2c3@in.minitender.ru
 
 ШАГ 5: Сбор КП
   Поставщики отвечают на уникальные адреса
@@ -74,8 +74,8 @@
 
 ```
 Заявка ABC123:
-  Поставщик 1: reply-to = rfq-ABC123-x1y2z3@in.stroyzakup.ru
-  Поставщик 2: reply-to = rfq-ABC123-a4b5c6@in.stroyzakup.ru
+  Поставщик 1: reply-to = rfq-ABC123-x1y2z3@in.minitender.ru
+  Поставщик 2: reply-to = rfq-ABC123-a4b5c6@in.minitender.ru
 
 Когда поставщик отвечает -> парсим адрес:
   ABC123 = заявка, хеш = поставщик -> авто-привязка
@@ -190,7 +190,7 @@ cd frontend && npm install && npx next dev -p 3000 -H 0.0.0.0
 - Тестовый логин: `dev@test.com` / `testpass123`## 10. Структура проекта
 
 ```
-stroyzakup/
+minitender/
 ├── backend/
 │   ├── apps/{accounts,requests,suppliers,quotes,emails,admin_ext}
 │   ├── config/          Django settings, celery, urls

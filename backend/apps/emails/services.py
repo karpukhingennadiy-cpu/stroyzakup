@@ -40,7 +40,7 @@ Ili otvette na eto pismo.
 
 Kod zakupki: {request_code}
 
-S uvazheniem, StroyZakup"""
+S uvazheniem, Минитендер"""
 
 RFQ_TEMPLATE_HTML = """<html><body>
 <h2>Zapros KP: RFQ-{request_code}</h2>
@@ -66,7 +66,7 @@ def build_rfq_email(invitation):
         'items_html': items_html,
         'delivery_address': req.address.address if req.address else 'Ne ukazan',
         'deadline': (invitation.created_at + timedelta(days=3)).strftime('%d.%m.%Y'),
-        'quote_url': f'https://app.stroyzakup.ru/quote/{invitation.quote_token}',
+        'quote_url': f'https://app.minitender.ru/quote/{invitation.quote_token}',
     }
     return {
         'subject': f'[RFQ-{req.code}] Zapros KP: stroymaterialy',

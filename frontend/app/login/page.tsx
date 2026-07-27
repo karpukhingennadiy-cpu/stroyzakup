@@ -33,7 +33,7 @@ export default function LoginPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#1e3a5f] mb-4 shadow-lg">
             <IconHardHat className="w-8 h-8 text-[#f0a500]" />
           </div>
-          <h1 className="text-2xl font-bold text-[#1a1a2e]">Вход в СтройЗакуп</h1>
+          <h1 className="text-2xl font-bold text-[#1a1a2e]">Вход в Минитендер</h1>
           <p className="text-[#64748b] mt-1">Войдите, чтобы управлять заявками</p>
         </div>
 

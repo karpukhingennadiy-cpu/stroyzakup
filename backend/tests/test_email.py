@@ -19,7 +19,7 @@ class TestEmailService:
     def test_generate_reply_address(self):
         addr = generate_reply_address('ABC123', 42)
         assert 'rfq-ABC123-' in addr
-        assert '@in.stroyzakup.ru' in addr
+        assert '@in.minitender.ru' in addr
 
     def test_parse_reply_address_roundtrip(self):
         addr = generate_reply_address('TEST99', 1)

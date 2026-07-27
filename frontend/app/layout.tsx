@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin", "cyrillic"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "СтройЗакуп — поиск лучших цен на стройматериалы",
+  title: "Минитендер — поиск лучших цен на стройматериалы",
   description: "Сервис организации закупок стройматериалов. Автоматический разбор сметы, поиск поставщиков, сравнение КП.",
 };
 

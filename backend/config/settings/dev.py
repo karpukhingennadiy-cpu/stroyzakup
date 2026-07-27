@@ -11,10 +11,11 @@ DATABASES = {
     }
 }
 
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+EMAIL_FILE_PATH = BASE_DIR / "sent_emails"
 
 # Inbound email domain for reply addresses
-INBOUND_EMAIL_DOMAIN = "in.stroyzakup.ru"
+INBOUND_EMAIL_DOMAIN = "in.minitender.ru"
 INBOUND_EMAIL_WEBHOOK_SECRET = "dev-webhook-secret"
 
 # CORS for frontend dev
