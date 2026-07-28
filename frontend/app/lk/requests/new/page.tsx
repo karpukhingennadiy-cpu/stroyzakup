@@ -184,7 +184,7 @@ export default function NewRequestPage() {
             </div>
           </div>
           <div className="h-[450px] relative">
-            <DeliveryMap onLocationSelect={(lat: number, lon: number, addr: string) => { setDeliveryLat(lat); setDeliveryLon(lon); setDeliveryAddr(addr); }} />
+            <DeliveryMap onSelect={(lat: number, lon: number, addr: string) => { setDeliveryLat(lat); setDeliveryLon(lon); setDeliveryAddr(addr); }} />
           </div>
           {deliveryLat && deliveryLon && (
             <div className="p-4 bg-green-50 border-t border-green-200 flex items-center gap-3">
