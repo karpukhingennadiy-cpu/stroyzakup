@@ -172,3 +172,29 @@ def match_suppliers(request_obj, limit=20):
 # TODO: Replace in-memory dict with Redis cache for production
 # from django.core.cache import cache
 # category_weights = cache.get_or_set("category_weights", _load_category_weights, 3600)
+
+
+# --- PostGIS optimization (reference for future refactoring) ---
+# from django.contrib.gis.db.models.functions import Distance
+# from django.contrib.gis.geos import Point
+# from django.contrib.gis.measure import D
+#
+# def match_suppliers_postgis(request_obj, limit=20):
+#     """Production matcher using PostGIS spatial queries."""
+#     addr = request_obj.address
+#     if not addr or addr.latitude is None or addr.longitude is None:
+#         return []
+#     req_point = Point(addr.longitude, addr.latitude, srid=4326)
+#     category_ids = list(request_obj.items.values_list("category_id", flat=True).distinct())
+#     max_radius = max(
+#         c.default_radius_km for c in Category.objects.filter(id__in=category_ids)
+#     )
+#     addresses = (
+#         SupplierAddress.objects
+#         .filter(is_active=True, supplier__is_active=True)
+#         .annotate(distance=Distance("geom", req_point))
+#         .filter(distance__lte=D(km=max_radius))
+#         .select_related("supplier")
+#         .order_by("distance")[:limit]
+#     )
+#     return [a.supplier for a in addresses]
