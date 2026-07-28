@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -62,6 +63,7 @@ const IconChevronRight = ({ className }: { className?: string }) => (
 );
 
 function Header() {
+  const router = useRouter();
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
@@ -77,8 +79,8 @@ function Header() {
           <a href="#pricing" className="text-sm font-medium text-slate-600 hover:text-orange-600 transition-colors">Тарифы</a>
         </nav>
         <div className="flex items-center gap-3">
-          <button className="hidden text-sm font-medium text-slate-600 hover:text-slate-900 sm:block">Войти</button>
-          <button className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-700 active:scale-95 transition-all">
+          <button onClick={() => router.push("/lk")} className="hidden text-sm font-medium text-slate-600 hover:text-slate-900 sm:block">Войти</button>
+          <button onClick={() => router.push("/lk/requests/new")} className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-700 active:scale-95 transition-all">
             Начать бесплатно
           </button>
         </div>
@@ -88,6 +90,7 @@ function Header() {
 }
 
 function Hero() {
+  const router = useRouter();
   const [text, setText] = useState("");
   return (
     <section className="relative overflow-hidden bg-slate-900 text-white">
@@ -124,11 +127,11 @@ function Hero() {
             </div>
           </div>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <button className="inline-flex items-center justify-center gap-2 rounded-xl bg-orange-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-orange-900/20 hover:bg-orange-500 active:scale-95 transition-all">
+            <button onClick={() => router.push("/lk/requests/new")} className="inline-flex items-center justify-center gap-2 rounded-xl bg-orange-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-orange-900/20 hover:bg-orange-500 active:scale-95 transition-all">
               <IconZap className="h-5 w-5" />
               Разослать заявку
             </button>
-            <button className="inline-flex items-center justify-center gap-2 rounded-xl bg-white/5 px-8 py-3.5 text-base font-semibold text-white ring-1 ring-white/10 hover:bg-white/10 active:scale-95 transition-all">
+            <button onClick={() => document.getElementById("how")?.scrollIntoView({behavior: "smooth"})} className="inline-flex items-center justify-center gap-2 rounded-xl bg-white/5 px-8 py-3.5 text-base font-semibold text-white ring-1 ring-white/10 hover:bg-white/10 active:scale-95 transition-all">
               Посмотреть демо
             </button>
           </div>
@@ -225,19 +228,20 @@ function Stats() {
 }
 
 function CTA() {
+  const router = useRouter();
   return (
     <section className="bg-slate-900 py-24">
       <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
         <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Готовы сэкономить на закупках?</h2>
         <p className="mt-4 text-lg text-slate-400">Первые 50 заявок обрабатываются бесплатно. Никаких подписок — только результат.</p>
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <button className="inline-flex items-center gap-2 rounded-xl bg-orange-600 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-orange-900/30 hover:bg-orange-500 active:scale-95 transition-all">
+          <button onClick={() => router.push("/lk/requests/new")} className="inline-flex items-center gap-2 rounded-xl bg-orange-600 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-orange-900/30 hover:bg-orange-500 active:scale-95 transition-all">
             Начать бесплатно
             <IconChevronRight className="h-5 w-5" />
           </button>
-          <button className="inline-flex items-center gap-2 rounded-xl bg-white/5 px-8 py-4 text-base font-semibold text-white ring-1 ring-white/10 hover:bg-white/10 transition-all">
+          <a href="mailto:info@minitender.ru" className="inline-flex items-center gap-2 rounded-xl bg-white/5 px-8 py-4 text-base font-semibold text-white ring-1 ring-white/10 hover:bg-white/10 transition-all">
             Связаться с нами
-          </button>
+          </a>
         </div>
         <p className="mt-6 text-xs text-slate-500">По вопросам корпоративного доступа: info@minitender.ru</p>
       </div>
