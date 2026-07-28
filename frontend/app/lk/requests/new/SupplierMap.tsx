@@ -73,7 +73,12 @@ export default function SupplierMap({ suppliers, centerLat, centerLon }: Props) 
       window.ymaps.ready(initMap);
     } else {
       const script = document.createElement("script");
-      script.src = "https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=cb0b8e22-2e0b-4b02-b8e8-fd2a2f4d5e6f";
+      const apiKey = process.env.NEXT_PUBLIC_YANDEX_MAPS_KEY;
+      if (!apiKey) {
+        console.warn("Yandex Maps API key not configured. Map disabled.");
+        return;
+      }
+      script.src = "https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=" + apiKey;
       script.onload = () => window.ymaps.ready(initMap);
       document.head.appendChild(script);
     }
