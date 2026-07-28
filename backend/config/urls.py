@@ -1,9 +1,11 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.http import JsonResponse
 from apps.quotes.views import public_quote
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 urlpatterns = [
+    path("api/health/", lambda r: JsonResponse({"status": "ok"})),
     path("admin/", admin.site.urls),
     path("api/auth/", include("apps.accounts.urls")),
     path("api/", include("apps.requests.urls")),

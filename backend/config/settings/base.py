@@ -118,3 +118,10 @@ INBOUND_EMAIL_DOMAIN = config("INBOUND_EMAIL_DOMAIN", default="in.minitender.ru"
 STORAGES={"staticfiles":{"BACKEND":"whitenoise.storage.CompressedManifestStaticFilesStorage"}}
 # Frontend URL
 FRONTEND_URL=config("FRONTEND_URL",default="http://localhost:3000")
+
+# CORS
+CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS", default="http://localhost:3000", cast=Csv())
+CORS_ALLOW_CREDENTIALS = True
+
+# CSRF
+CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="http://localhost:3000", cast=Csv())
