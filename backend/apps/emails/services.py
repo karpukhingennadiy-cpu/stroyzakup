@@ -104,7 +104,7 @@ def build_rfq_email(invitation):
         'items_html': items_html,
         'delivery_address': req.address.address if req.address else 'Ne ukazan',
         'deadline': (invitation.created_at + timedelta(days=3)).strftime('%d.%m.%Y'),
-        'quote_url': f'{getattr(settings, "FRONTEND_URL", "https://app.минитендер.рф")}/quote/{invitation.quote_token}',
+        'quote_url': f'https://app.минитендер.рф/quote/{invitation.quote_token}',
     }
     return {
         'subject': f'[RFQ-{req.code}] Запрос КП: стройматериалы',

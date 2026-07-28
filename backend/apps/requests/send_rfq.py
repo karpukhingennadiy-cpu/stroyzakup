@@ -35,7 +35,7 @@ def send_rfq_to_suppliers(request_obj, supplier_ids):
         try:
             msg.send(fail_silently=False)
             EmailMessage.objects.create(
-                direction="outbound", from_email=settings.DEFAULT_FROM_EMAIL,
+                direction="outbound", from_email="rfq@minitender.ru",
                 to_email=supplier.email, subject=email_data["subject"],
                 body_text=email_data["body_text"], request=request_obj, supplier=supplier)
             inv.status = "sent"
