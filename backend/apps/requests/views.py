@@ -140,7 +140,7 @@ class RequestViewSet(viewsets.ModelViewSet):
     def match_suppliers(self, request, pk=None):
         req = self.get_object()
         limit = request.data.get("limit", 20)
-        if req.status not in ("parsed", "confirmed", "matched", "matching", "parsing"):
+        if req.status not in ("parsed", "confirmed", "matched", "matching", "parsing", "draft"):
             return Response(
                 {"error": "Cannot match in current status"},
                 status=status.HTTP_400_BAD_REQUEST,
