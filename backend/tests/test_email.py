@@ -12,7 +12,7 @@ class TestEmailService:
     def test_generate_invitation_code_unique(self):
         code1 = generate_invitation_code()
         code2 = generate_invitation_code()
-        assert len(code1) == 6
+        assert len(code1) == 8
         assert code1 != code2
         assert all(c not in '0O1IL' for c in code1)
 
