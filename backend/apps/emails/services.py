@@ -1,4 +1,5 @@
 # backend/apps/emails/services.py
+'''Email service: RFQ codes, reply addresses, templates.'''
 import secrets
 import string
 from datetime import timedelta
@@ -30,7 +31,7 @@ def parse_reply_address(email_addr):
     return m.group(1) if m else None
 
 
-RFQ_TEMPLATE_TEXT = """Здравствуйте, {supplier_name}!
+RFQ_TEMPLATE_TEXT = '''Здравствуйте, {supplier_name}!
 
 Приглашаем вас принять участие в закупке № RFQ-{request_code}.
 Просим предоставить коммерческое предложение на следующие позиции:
@@ -51,10 +52,10 @@ RFQ_TEMPLATE_TEXT = """Здравствуйте, {supplier_name}!
 --
 С уважением,
 команда Минитендер.рф
-"""
+'''
 
 # FIX-H4: полноценный HTML-шаблон с правильной таблицей
-RFQ_TEMPLATE_HTML = """<!DOCTYPE html>
+RFQ_TEMPLATE_HTML = '''<!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -93,7 +94,7 @@ th{background:#fafafa;font-weight:600;font-size:12px;text-transform:uppercase;co
 </div>
 </div>
 </body>
-</html>"""
+</html>'''
 
 
 def build_rfq_email(invitation):

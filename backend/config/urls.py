@@ -11,7 +11,7 @@ urlpatterns = [
     path("api/", include("apps.suppliers.urls")),
     path("api/", include("apps.quotes.urls")),
     path("api/emails/", include("apps.emails.urls")),
-    # FIX-K3: двойной слеш + добавлен параметр token
+    # FIX-K3: убран двойной слеш, добавлен параметр token
     path("api/public/quote/<str:token>/", public_quote, name="public-quote"),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger"),
