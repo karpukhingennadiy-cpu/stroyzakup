@@ -43,8 +43,7 @@ export default function SupplierMap({ suppliers, centerLat, centerLon }: Props) 
       // Delivery point marker (red)
       new window.mapgl.Marker(map, {
         coordinates: [centerLon, centerLat],
-        icon: "https://docs.2gis.com/img/dotMarker.svg",
-        label: { text: "Доставка", fontSize: 12, color: "#c00" },
+        label: { text: "📍 Доставка", fontSize: 14, color: "#e03131" },
       });
 
       // Supplier markers at REAL coordinates
@@ -52,8 +51,7 @@ export default function SupplierMap({ suppliers, centerLat, centerLon }: Props) 
       withCoords.slice(0, 30).forEach((s) => {
         new window.mapgl.Marker(map, {
           coordinates: [s.longitude!, s.latitude!],
-          icon: "https://docs.2gis.com/img/markerIcon.svg",
-          label: { text: s.name, fontSize: 11 },
+          label: { text: s.name, fontSize: 11, color: "#1971c2" },
         });
       });
     }

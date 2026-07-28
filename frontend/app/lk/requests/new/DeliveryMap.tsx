@@ -22,8 +22,7 @@ export default function DeliveryMap({ onSelect, initialLat, initialLon }: Props)
     if (!mapRef.current) return;
     markerRef.current = new window.mapgl.Marker(mapRef.current, {
       coordinates: [lon, lat],
-      icon: "https://docs.2gis.com/img/dotMarker.svg",
-      label: { text: "Доставка", fontSize: 12, color: "#c00" },
+      label: { text: "📍 Доставка", fontSize: 14, color: "#e03131" },
     });
     setAddress(lat.toFixed(6) + ", " + lon.toFixed(6));
     onSelect(lat, lon, lat.toFixed(6) + ", " + lon.toFixed(6));
