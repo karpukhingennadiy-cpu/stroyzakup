@@ -62,23 +62,16 @@ class RequestViewSet(viewsets.ModelViewSet):
         req.status = "parsing"
         req.save(update_fields=["status"])
 
-        try:
-            from .tasks import parse_request_task
-            parse_request_task.delay(req.id)
-        except Exception:
-            result = parse_material_list(req)
-            if "error" in result:
-                # FIX-K1: 'parse_failed' → 'draft' (такого статуса нет в модели)
-                req.status = "draft"
-                req.save(update_fields=["status"])
-                return Response({"error": result["error"]}, status=422)
-            req.status = "confirmed"
+        # Sync-only in dev: no Celery async, immediate result
+        result = parse_material_list(req)
+        if "error" in result:
+            # FIX-K1: 'parse_failed' → 'draft' (такого статуса нет в модели)
+            req.status = "draft"
             req.save(update_fields=["status"])
-
-        return Response(
-            {"status": "accepted", "message": "Parsing started", "request_id": req.id},
-            status=202,
-        )
+            return Response({"error": result["error"]}, status=422)
+        req.status = "confirmed"
+        req.save(update_fields=["status"])
+        return Response(RequestSerializer(req).data)
 
     @decorators.action(detail=True, methods=["post"])
     def confirm(self, request, pk=None):
@@ -87,29 +80,19 @@ class RequestViewSet(viewsets.ModelViewSet):
         req.save(update_fields=["status"])
 
         if req.address and req.address.latitude and req.address.longitude:
-            try:
-                from .tasks import match_suppliers_task
-                match_suppliers_task.delay(req.id)
-                return Response(
-                    {
-                        "status": "matching",
-                        "message": "Supplier matching started",
-                        "request": RequestSerializer(req).data,
-                    }
-                )
-            except Exception:
-                from .services.matcher import match_suppliers
-                matches = match_suppliers(req)
-                req.status = "matched"
-                req.save(update_fields=["status"])
-                return Response(
-                    {
-                        "status": "matched",
-                        "suppliers": matches,
-                        "count": len(matches),
-                        "request": RequestSerializer(req).data,
-                    }
-                )
+            # Sync-only in dev
+            from .services.matcher import match_suppliers
+            matches = match_suppliers(req)
+            req.status = "matched"
+            req.save(update_fields=["status"])
+            return Response(
+                {
+                    "status": "matched",
+                    "suppliers": matches,
+                    "count": len(matches),
+                    "request": RequestSerializer(req).data,
+                }
+            )
 
         # FIX-M1: понятное сообщение, если адреса нет
         return Response(
@@ -140,7 +123,7 @@ class RequestViewSet(viewsets.ModelViewSet):
     def match_suppliers(self, request, pk=None):
         req = self.get_object()
         limit = request.data.get("limit", 20)
-        if req.status not in ("parsed", "confirmed", "matched", "matching", "parsing", "draft"):
+        if req.status not in ("parsed", "confirmed", "matched", "matching", "parsing", "draft", "rfq_sent", "rfq_failed"):
             return Response(
                 {"error": "Cannot match in current status"},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -148,26 +131,18 @@ class RequestViewSet(viewsets.ModelViewSet):
         req.status = "matching"
         req.save(update_fields=["status"])
 
-        try:
-            from .tasks import match_suppliers_task
-            match_suppliers_task.delay(req.id, limit)
-        except Exception:
-            from .services.matcher import match_suppliers
-            matches = match_suppliers(req, limit)
-            req.status = "matched"
-            req.save(update_fields=["status"])
-            return Response(
-                {
-                    "status": "matched",
-                    "suppliers": matches,
-                    "count": len(matches),
-                    "request": RequestSerializer(req).data,
-                }
-            )
-
+        # Sync-only in dev: no Celery async, immediate result
+        from .services.matcher import match_suppliers
+        matches = match_suppliers(req, limit)
+        req.status = "matched"
+        req.save(update_fields=["status"])
         return Response(
-            {"status": "accepted", "message": "Matching started", "request_id": req.id},
-            status=202,
+            {
+                "status": "matched",
+                "suppliers": matches,
+                "count": len(matches),
+                "request": RequestSerializer(req).data,
+            }
         )
 
     @decorators.action(detail=True, methods=["post"])
@@ -185,22 +160,10 @@ class RequestViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        try:
-            from .tasks import send_rfq_task
-            send_rfq_task.delay(req.id, supplier_ids)
-        except Exception:
-            from .services.send_rfq import send_rfq_to_suppliers
-            results = send_rfq_to_suppliers(req, supplier_ids)
-            # FIX-K2: статус не обновлялся при синхронном фолбэке
-            req.status = "rfq_sent"
-            req.save(update_fields=["status"])
-            return Response({"status": req.status, "results": results})
-
-        return Response(
-            {
-                "status": "accepted",
-                "message": f"RFQ sending started for {len(supplier_ids)} suppliers",
-                "request_id": req.id,
-            },
-            status=202,
-        )
+        # Sync-only in dev: no Celery async, immediate result
+        from .services.send_rfq import send_rfq_to_suppliers
+        results = send_rfq_to_suppliers(req, supplier_ids)
+        # FIX-K2: статус не обновлялся при синхронном фолбэке
+        req.status = "rfq_sent"
+        req.save(update_fields=["status"])
+        return Response({"status": req.status, "results": results})

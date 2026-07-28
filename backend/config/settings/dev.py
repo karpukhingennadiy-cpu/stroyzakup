@@ -25,3 +25,6 @@ CORS_ALLOW_CREDENTIALS = True
 # Sync Celery tasks in dev (no worker needed)
 CELERY_TASK_ALWAYS_EAGER = True
 CELERY_TASK_EAGER_PROPAGATES = True
+# Force sync fallback: no broker = .delay() raises = sync fallback in views
+CELERY_BROKER_URL = None
+CELERY_RESULT_BACKEND = None

@@ -82,6 +82,12 @@ export default function NewRequestPage() {
       const rawText = buildRawText();
       const req = await createRequest(rawText, comment || undefined, undefined, undefined);
       setRequestId(req.id);
+      // Parse materials from raw_text to create items
+      try {
+        await api("/requests/" + req.id + "/parse/", { method: "POST" });
+      } catch (e) {
+        console.warn("Parse failed, continuing anyway:", e);
+      }
       setStep(2);
     } catch (e: any) { setError(e.message); }
     finally { setLoading(false); }

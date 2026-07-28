@@ -165,8 +165,83 @@ def validate_items(items):
 
 
 
+
+
+def _fallback_parse_line(line, request_obj):
+    """Simple regex fallback when LLM is unavailable."""
+    import re
+    line = line.strip()
+    if not line:
+        return None
+    # Pattern: "Name specs - qty unit" or "Name specs - qty"
+    m = re.match(r'^(.+?)\s*[-—–]\s*(\d+(?:[.,]\d+)?)\s*(\S*)?$', line)
+    if m:
+        name = m.group(1).strip()
+        qty = float(m.group(2).replace(',', '.'))
+        unit_str = (m.group(3) or 'sht').lower().strip()
+    else:
+        # Pattern: "Name - qty unit" (no specs)
+        m = re.match(r'^(.+?)\s+(\d+(?:[.,]\d+)?)\s*(\S*)$', line)
+        if m:
+            name = m.group(1).strip()
+            qty = float(m.group(2).replace(',', '.'))
+            unit_str = (m.group(3) or 'sht').lower().strip()
+        else:
+            name = line
+            qty = 1.0
+            unit_str = 'sht'
+    # Normalize unit
+    unit_map = {'м2': 'm2', 'м³': 'm3', 'м3': 'm3', 'кг': 'kg', 'т': 'ton', 'меш': 'bag',
+                'шт': 'sht', 'упак': 'pack', 'рул': 'roll', 'пог.м': 'pog_m', 'л': 'liter'}
+    unit = unit_map.get(unit_str, unit_str if unit_str in ALLOWED_UNITS else 'sht')
+    # Guess category from name
+    cat = 'drugoe'
+    name_lower = name.lower()
+    if 'керамогранит' in name_lower or 'плитка' in name_lower:
+        cat = 'keramogranit'
+    elif 'кирпич' in name_lower:
+        cat = 'kirpich'
+    elif 'бетон' in name_lower:
+        cat = 'beton'
+    elif 'доска' in name_lower or 'брус' in name_lower:
+        cat = 'pilomaterialy'
+    elif 'цемент' in name_lower:
+        cat = 'suhie-smesi'
+    elif 'арматура' in name_lower:
+        cat = 'metalloprokat'
+    return {
+        'name': name, 'quantity': qty, 'unit': unit,
+        'category': cat, 'brand': None, 'spec': None,
+        'confidence': 0.5, 'needs_clarification': True,
+        'clarification_question': f'{name}: уточните характеристики',
+        'raw_text': line,
+    }
+
+
+def _fallback_parse(request_obj):
+    """Parse without LLM — simple line-by-line regex."""
+    lines = request_obj.raw_text.strip().split('\n')
+    items = []
+    for line in lines:
+        item = _fallback_parse_line(line, request_obj)
+        if item:
+            items.append(item)
+    if not items:
+        return {'error': 'No items parsed', 'items': [], 'clarifications': []}
+    with transaction.atomic():
+        _save_items(request_obj, items)
+    return {
+        'items': items,
+        'clarifications': [i['clarification_question'] for i in items if i.get('needs_clarification')],
+    }
+
+
 def parse_material_list(request_obj):
     """Parse raw text into material items. Universal completeness assessment."""
+    # Fallback if LLM API key not configured
+    if not llm.api_key:
+        logger.warning("LLM_API_KEY not set, using fallback parser")
+        return _fallback_parse(request_obj)
     try:
         result = llm.chat([
             {"role": "system", "content": SYSTEM_PROMPT},
