@@ -1,5 +1,5 @@
 import pytest
-from apps.emails.services import generate_reply_address, parse_reply_address, generate_quote_token, generate_request_code
+from apps.emails.services import generate_reply_address, parse_reply_address, generate_quote_token, generate_invitation_code
 from apps.requests.models import Request
 from apps.suppliers.models import Supplier
 from apps.quotes.models import RfqInvitation
@@ -9,9 +9,9 @@ User = get_user_model()
 
 @pytest.mark.django_db
 class TestEmailService:
-    def test_generate_request_code_unique(self):
-        code1 = generate_request_code()
-        code2 = generate_request_code()
+    def test_generate_invitation_code_unique(self):
+        code1 = generate_invitation_code()
+        code2 = generate_invitation_code()
         assert len(code1) == 6
         assert code1 != code2
         assert all(c not in '0O1IL' for c in code1)

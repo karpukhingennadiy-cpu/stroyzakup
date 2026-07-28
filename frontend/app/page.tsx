@@ -5,12 +5,10 @@ import { useState } from "react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
-// --- Utils ---
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// --- Icons (inline SVG, zero deps) ---
 const IconHammer = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
     <path d="m15 12-9.373 9.373a1 1 0 0 1-3.001-3L12 9" />
@@ -63,7 +61,6 @@ const IconChevronRight = ({ className }: { className?: string }) => (
   </svg>
 );
 
-// --- Components ---
 function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md">
@@ -72,25 +69,15 @@ function Header() {
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-orange-600 text-white">
             <IconHammer className="h-5 w-5" />
           </div>
-          <span className="text-xl font-bold tracking-tight text-slate-900">
-            Минитендер
-          </span>
+          <span className="text-xl font-bold tracking-tight text-slate-900">Минитендер</span>
         </a>
         <nav className="hidden items-center gap-8 md:flex">
-          <a href="#how" className="text-sm font-medium text-slate-600 hover:text-orange-600 transition-colors">
-            Как работает
-          </a>
-          <a href="#features" className="text-sm font-medium text-slate-600 hover:text-orange-600 transition-colors">
-            Возможности
-          </a>
-          <a href="#pricing" className="text-sm font-medium text-slate-600 hover:text-orange-600 transition-colors">
-            Тарифы
-          </a>
+          <a href="#how" className="text-sm font-medium text-slate-600 hover:text-orange-600 transition-colors">Как работает</a>
+          <a href="#features" className="text-sm font-medium text-slate-600 hover:text-orange-600 transition-colors">Возможности</a>
+          <a href="#pricing" className="text-sm font-medium text-slate-600 hover:text-orange-600 transition-colors">Тарифы</a>
         </nav>
         <div className="flex items-center gap-3">
-          <button className="hidden text-sm font-medium text-slate-600 hover:text-slate-900 sm:block">
-            Войти
-          </button>
+          <button className="hidden text-sm font-medium text-slate-600 hover:text-slate-900 sm:block">Войти</button>
           <button className="rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-orange-700 active:scale-95 transition-all">
             Начать бесплатно
           </button>
@@ -102,10 +89,8 @@ function Header() {
 
 function Hero() {
   const [text, setText] = useState("");
-
   return (
     <section className="relative overflow-hidden bg-slate-900 text-white">
-      {/* Abstract grid background */}
       <div className="absolute inset-0 opacity-[0.08]" style={{
         backgroundImage: `linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)`,
         backgroundSize: '48px 48px'
@@ -117,14 +102,11 @@ function Hero() {
             MVP запущен — первые 50 заявок бесплатно
           </div>
           <h1 className="text-balance text-4xl font-extrabold tracking-tight sm:text-6xl">
-            Строительные закупки{" "}
-            <span className="text-orange-500">без посредников</span>
+            Строительные закупки <span className="text-orange-500">без посредников</span>
           </h1>
           <p className="mt-6 text-lg leading-8 text-slate-300">
-            Отправьте список материалов — за 24 часа получите конкурентный лист
-            с лучшими ценами от поставщиков в вашем регионе.
+            Отправьте список материалов — за 24 часа получите конкурентный лист с лучшими ценами от поставщиков в вашем регионе.
           </p>
-
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <div className="relative w-full max-w-md">
               <textarea
@@ -141,7 +123,6 @@ function Hero() {
               </div>
             </div>
           </div>
-
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
             <button className="inline-flex items-center justify-center gap-2 rounded-xl bg-orange-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-orange-900/20 hover:bg-orange-500 active:scale-95 transition-all">
               <IconZap className="h-5 w-5" />
@@ -151,10 +132,7 @@ function Hero() {
               Посмотреть демо
             </button>
           </div>
-
-          <p className="mt-4 text-xs text-slate-500">
-            Не нужна регистрация для просмотра демо. Данные обрабатываются AI.
-          </p>
+          <p className="mt-4 text-xs text-slate-500">Не нужна регистрация для просмотра демо. Данные обрабатываются AI.</p>
         </div>
       </div>
     </section>
@@ -162,26 +140,10 @@ function Hero() {
 }
 
 const steps = [
-  {
-    icon: IconFileCheck,
-    title: "Загрузите смету",
-    desc: "Вставьте список материалов текстом или Excel. AI распознаёт позиции, категории и объёмы.",
-  },
-  {
-    icon: IconSearch,
-    title: "AI найдёт поставщиков",
-    desc: "Алгоритм сканирует базу производителей и дилеров в радиусе до 300 км от объекта.",
-  },
-  {
-    icon: IconTruck,
-    title: "Авторассылка RFQ",
-    desc: "Поставщики получают персонализированные запросы КП с вашим списком позиций.",
-  },
-  {
-    icon: IconShield,
-    title: "Сравните предложения",
-    desc: "Все цены собираются в единую таблицу. Выбирайте по цене, срокам и рейтингу.",
-  },
+  { icon: IconFileCheck, title: "Загрузите смету", desc: "Вставьте список материалов текстом или Excel. AI распознаёт позиции, категории и объёмы." },
+  { icon: IconSearch, title: "AI найдёт поставщиков", desc: "Алгоритм сканирует базу производителей и дилеров в радиусе до 300 км от объекта." },
+  { icon: IconTruck, title: "Авторассылка RFQ", desc: "Поставщики получают персонализированные запросы КП с вашим списком позиций." },
+  { icon: IconShield, title: "Сравните предложения", desc: "Все цены собираются в единую таблицу. Выбирайте по цене, срокам и рейтингу." },
 ];
 
 function HowItWorks() {
@@ -189,27 +151,18 @@ function HowItWorks() {
     <section id="how" className="py-24 bg-white">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-            Как это работает
-          </h2>
-          <p className="mt-4 text-lg text-slate-600">
-            Пять шагов от заявки до выбора поставщика — без телефона, без посредников.
-          </p>
+          <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Как это работает</h2>
+          <p className="mt-4 text-lg text-slate-600">Пять шагов от заявки до выбора поставщика — без телефона, без посредников.</p>
         </div>
         <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((step, idx) => (
-            <div
-              key={idx}
-              className="group relative rounded-2xl border border-slate-200 bg-slate-50 p-6 hover:border-orange-200 hover:shadow-lg hover:shadow-orange-900/5 transition-all"
-            >
+            <div key={idx} className="group relative rounded-2xl border border-slate-200 bg-slate-50 p-6 hover:border-orange-200 hover:shadow-lg hover:shadow-orange-900/5 transition-all">
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-orange-600 text-white shadow-sm group-hover:scale-110 transition-transform">
                 <step.icon className="h-6 w-6" />
               </div>
               <h3 className="text-lg font-semibold text-slate-900">{step.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-slate-600">{step.desc}</p>
-              <span className="absolute right-4 top-4 text-4xl font-bold text-slate-200 group-hover:text-orange-100 transition-colors">
-                0{idx + 1}
-              </span>
+              <span className="absolute right-4 top-4 text-4xl font-bold text-slate-200 group-hover:text-orange-100 transition-colors">0{idx + 1}</span>
             </div>
           ))}
         </div>
@@ -219,30 +172,12 @@ function HowItWorks() {
 }
 
 const features = [
-  {
-    title: "Универсальный парсинг",
-    desc: "Понимает любые формулировки: от «сотка арматуры» до ГОСТ-описаний. Оценивает полноту данных.",
-  },
-  {
-    title: "Гибридный поиск",
-    desc: "LLM генерирует первичный список, DaData верифицирует юрлица. Защита от фейковых контактов.",
-  },
-  {
-    title: "Гео-скоринг",
-    desc: "Реальные координаты поставщиков через Яндекс.Геокодер. Сортировка по расстоянию до объекта.",
-  },
-  {
-    title: "Inbox-интеграция",
-    desc: "Поставщик отвечает на письмо — КП создаётся автоматически. Не нужен личный кабинет у поставщика.",
-  },
-  {
-    title: "Публичная страница КП",
-    desc: "Отправьте ссылку /quote/TOKEN заказчику. Он увидит сравнение цен без регистрации.",
-  },
-  {
-    title: "Производители в приоритете",
-    desc: "AI-классификация «производитель / дилер». Производители получают бонус +10 к релевантности.",
-  },
+  { title: "Универсальный парсинг", desc: "Понимает любые формулировки: от «сотка арматуры» до ГОСТ-описаний. Оценивает полноту данных." },
+  { title: "Гибридный поиск", desc: "LLM генерирует первичный список, DaData верифицирует юрлица. Защита от фейковых контактов." },
+  { title: "Гео-скоринг", desc: "Реальные координаты поставщиков через Яндекс.Геокодер. Сортировка по расстоянию до объекта." },
+  { title: "Inbox-интеграция", desc: "Поставщик отвечает на письмо — КП создаётся автоматически. Не нужен личный кабинет у поставщика." },
+  { title: "Публичная страница КП", desc: "Отправьте ссылку /quote/TOKEN заказчику. Он увидит сравнение цен без регистрации." },
+  { title: "Производители в приоритете", desc: "AI-классификация «производитель / дилер». Производители получают бонус +10 к релевантности." },
 ];
 
 function Features() {
@@ -250,19 +185,12 @@ function Features() {
     <section id="features" className="py-24 bg-slate-50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-            Возможности платформы
-          </h2>
-          <p className="mt-4 text-lg text-slate-600">
-            Всё, что нужно для профессиональных закупок в строительстве.
-          </p>
+          <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Возможности платформы</h2>
+          <p className="mt-4 text-lg text-slate-600">Всё, что нужно для профессиональных закупок в строительстве.</p>
         </div>
         <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((f, idx) => (
-            <div
-              key={idx}
-              className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 hover:shadow-md hover:ring-orange-200 transition-all"
-            >
+            <div key={idx} className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-200 hover:shadow-md hover:ring-orange-200 transition-all">
               <h3 className="text-base font-semibold text-slate-900">{f.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-slate-600">{f.desc}</p>
             </div>
@@ -280,7 +208,6 @@ function Stats() {
     { value: "24", label: "часа на сбор КП" },
     { value: "0", label: "руб. за первые 50 заявок" },
   ];
-
   return (
     <section className="border-y border-slate-200 bg-white py-12">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -301,12 +228,8 @@ function CTA() {
   return (
     <section className="bg-slate-900 py-24">
       <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-        <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-          Готовы сэкономить на закупках?
-        </h2>
-        <p className="mt-4 text-lg text-slate-400">
-          Первые 50 заявок обрабатываются бесплатно. Никаких подписок — только результат.
-        </p>
+        <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Готовы сэкономить на закупках?</h2>
+        <p className="mt-4 text-lg text-slate-400">Первые 50 заявок обрабатываются бесплатно. Никаких подписок — только результат.</p>
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <button className="inline-flex items-center gap-2 rounded-xl bg-orange-600 px-8 py-4 text-base font-semibold text-white shadow-lg shadow-orange-900/30 hover:bg-orange-500 active:scale-95 transition-all">
             Начать бесплатно
@@ -316,9 +239,7 @@ function CTA() {
             Связаться с нами
           </button>
         </div>
-        <p className="mt-6 text-xs text-slate-500">
-          По вопросам корпоративного доступа: info@minitender.ru
-        </p>
+        <p className="mt-6 text-xs text-slate-500">По вопросам корпоративного доступа: info@minitender.ru</p>
       </div>
     </section>
   );
@@ -335,9 +256,7 @@ function Footer() {
             </div>
             <span className="text-lg font-bold text-slate-900">Минитендер</span>
           </div>
-          <p className="text-sm text-slate-500">
-            © {new Date().getFullYear()} Минитендер.рф — платформа строительных закупок
-          </p>
+          <p className="text-sm text-slate-500">© {new Date().getFullYear()} Минитендер.рф — платформа строительных закупок</p>
           <div className="flex gap-6">
             <a href="#" className="text-sm text-slate-500 hover:text-orange-600 transition-colors">Политика</a>
             <a href="#" className="text-sm text-slate-500 hover:text-orange-600 transition-colors">API</a>
@@ -348,7 +267,6 @@ function Footer() {
   );
 }
 
-// --- Page ---
 export default function HomePage() {
   return (
     <main className="flex min-h-screen flex-col">

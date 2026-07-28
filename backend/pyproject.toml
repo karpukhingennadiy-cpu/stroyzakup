@@ -1,3 +1,4 @@
+# backend/pyproject.toml
 [project]
 name = "stroyzakup-backend"
 version = "0.1.0"
@@ -15,6 +16,8 @@ dependencies = [
     "python-decouple>=3.8",
     "httpx>=0.28",
     "gunicorn>=23.0",
+    "jsonschema>=4.0",        # FIX-M3: явное указание
+    "django-environ>=0.11",   # FIX-M3: для 12-factor config
 ]
 
 [project.optional-dependencies]
@@ -25,6 +28,7 @@ dev = [
     "black>=24.8",
     "isort>=5.13",
     "ruff>=0.6",
+    "factory-boy>=3.3",       # FIX-M3: для тестовых данных
 ]
 
 [tool.pytest.ini_options]
