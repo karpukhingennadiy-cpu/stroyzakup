@@ -1,7 +1,7 @@
 from .base import *
 
 DEBUG = True
-ALLOWED_HOSTS = ["testserver", "localhost", "127.0.0.1", "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["testserver", "localhost", "127.0.0.1"]
 
 # SQLite for local dev (no Docker needed)
 DATABASES = {

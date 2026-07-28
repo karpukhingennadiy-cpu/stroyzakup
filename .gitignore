@@ -59,3 +59,4 @@ secrets/
 # Hermes
 .hermes/
 .github/workflows/
+db.sqlite3\n*.sqlite3\n*.sqlite3-journal
