@@ -21,3 +21,7 @@ CORS_ALLOWED_ORIGINS = [
 ]
 CORS_ALLOW_CREDENTIALS = True
 
+
+# Sync Celery tasks in dev (no worker needed)
+CELERY_TASK_ALWAYS_EAGER = True
+CELERY_TASK_EAGER_PROPAGATES = True

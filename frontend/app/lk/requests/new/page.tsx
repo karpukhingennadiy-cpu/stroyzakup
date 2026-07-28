@@ -204,7 +204,7 @@ export default function NewRequestPage() {
           {sentCount > 0 ? (
             <div className="bg-white rounded-2xl border border-[#e2e8f0] shadow-sm p-12 text-center">
               <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4"><IconTruck className="w-8 h-8 text-green-600" /></div>
-              <h2 className="text-2xl font-bold text-[#1a1a2e] mb-2">Запросы отправлены!</h2>
+              <h2 className="text-2xl font-bold text-[#1a1a2e] mb-2">Тендер запущен!</h2>
               <p className="text-[#64748b] mb-6">РФК отправлены {sentCount} поставщикам. Ожидайте коммерческие предложения.</p>
               <button onClick={() => router.push("/lk/requests/" + requestId)} className="px-6 py-3 bg-[#f0a500] text-[#1a1a2e] rounded-xl font-bold hover:bg-[#fcc419] transition">Перейти к заявке</button>
             </div>
@@ -259,7 +259,7 @@ export default function NewRequestPage() {
                 )}
                 <div className="mt-6 flex gap-3">
                   <button onClick={() => setStep(2)} className="px-5 py-3 border border-[#e2e8f0] rounded-xl text-sm font-medium hover:bg-[#f5f7fa] transition">← Назад к карте</button>
-                  <button onClick={handleSendRfq} disabled={loading || selectedSuppliers.size === 0} className="flex-1 py-3.5 bg-[#27ae60] text-white rounded-xl font-bold text-base hover:bg-[#219a52] transition disabled:opacity-50">{loading ? "Отправляем..." : "Отправить запрос КП (" + selectedSuppliers.size + ")"}</button>
+                  <button onClick={handleSendRfq} disabled={loading || selectedSuppliers.size === 0} className="flex-1 py-3.5 bg-[#27ae60] text-white rounded-xl font-bold text-base hover:bg-[#219a52] transition disabled:opacity-50">{loading ? "Отправляем..." : "Начать тендер (" + selectedSuppliers.size + ")"}</button>
                 </div>
               </div>
             </div>
