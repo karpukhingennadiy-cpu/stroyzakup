@@ -19,7 +19,6 @@ class Supplier(models.Model):
         default="manual",
     )
     supplier_type = models.CharField(max_length=20, default="unknown", choices=[("manufacturer","manufacturer"),("dealer","dealer"),("unknown","unknown")])
-    source = models.CharField(max_length=20, default="seed", choices=[("seed","seed"),("llm","llm"),("web","web"),("2gis","2gis"),("dadata","dadata"),("manual","manual")])
     hidden_rating = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -36,8 +35,6 @@ class SupplierAddress(models.Model):
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
-    supplier_type = models.CharField(max_length=20, default="unknown", choices=[("manufacturer","manufacturer"),("dealer","dealer"),("unknown","unknown")])
-    source = models.CharField(max_length=20, default="seed", choices=[("seed","seed"),("llm","llm"),("web","web"),("2gis","2gis"),("dadata","dadata"),("manual","manual")])
     class Meta: db_table = "supplier_addresses"
 
 class SupplierCategory(models.Model):
