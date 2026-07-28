@@ -153,6 +153,18 @@ def validate_items(items):
             rejected.append({"index": i, "error": str(e.message), "item": item})
     return valid, rejected
 
+    # Remove items no longer in the parsed result
+    to_delete = [
+        item for key, item in existing_items.items()
+        if key not in processed_keys
+    ]
+    if to_delete:
+        RequestItem.objects.filter(
+            id__in=[i.id for i in to_delete]
+        ).delete()
+
+
+
 def parse_material_list(request_obj):
     """Parse raw text into material items. Universal completeness assessment."""
     try:
@@ -238,8 +250,14 @@ def normalize_unit(unit_code):
     return aliases.get(unit_code, "piece")
 
 def _save_items(request_obj, items):
-    """Save parsed items to DB, idempotent — clears old items first."""
-    request_obj.items.all().delete()
+    """Save parsed items to DB with diff-update (non-destructive).
+    Updates existing items by raw_text match, creates new ones, removes stale."""
+    existing_items = {
+        item.raw_text.strip().lower(): item
+        for item in request_obj.items.all()
+    }
+    processed_keys = set()
+
     for item_data in items:
         cat_name = item_data.get("category", "Drugoe")
         cat_slug = normalize_category(cat_name)
@@ -261,15 +279,28 @@ def _save_items(request_obj, items):
             )
         conf = item_data.get("confidence", 0.5)
         needs_clarification = item_data.get("needs_clarification", conf < 0.65)
-        RequestItem.objects.create(
-            request=request_obj,
-            raw_text=item_data.get("raw_text", ""),
-            name=item_data.get("name", ""),
-            category=category,
-            quantity=item_data.get("quantity", 1),
-            unit=unit,
-            brand=item_data.get("brand") or "",
-            spec=item_data.get("spec") or "",
-            confidence=conf,
-            is_confirmed=conf >= 0.7 and not needs_clarification,
-        )
+        raw = item_data.get("raw_text", "").strip().lower()
+        processed_keys.add(raw)
+
+        defaults = {
+            "name": item_data.get("name", ""),
+            "category": category,
+            "quantity": item_data.get("quantity", 1),
+            "unit": unit,
+            "brand": item_data.get("brand") or "",
+            "spec": item_data.get("spec") or "",
+            "confidence": conf,
+            "is_confirmed": conf >= 0.7 and not needs_clarification,
+        }
+
+        if raw in existing_items:
+            obj = existing_items[raw]
+            for key, value in defaults.items():
+                setattr(obj, key, value)
+            obj.save(update_fields=list(defaults.keys()))
+        else:
+            RequestItem.objects.create(
+                request=request_obj,
+                raw_text=item_data.get("raw_text", ""),
+                **defaults,
+            )
