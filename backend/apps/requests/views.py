@@ -140,7 +140,7 @@ class RequestViewSet(viewsets.ModelViewSet):
     def match_suppliers(self, request, pk=None):
         req = self.get_object()
         limit = request.data.get("limit", 20)
-        if req.status not in ("parsed", "confirmed", "matched", "matching"):
+        if req.status not in ("parsed", "confirmed", "matched", "matching", "parsing"):
             return Response(
                 {"error": "Cannot match in current status"},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -179,7 +179,7 @@ class RequestViewSet(viewsets.ModelViewSet):
                 {"error": "supplier_ids required"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        if req.status not in ("matched", "rfq_sent"):
+        if req.status not in ("matched", "rfq_sent", "matching"):
             return Response(
                 {"error": "Cannot send RFQ in current status"},
                 status=status.HTTP_400_BAD_REQUEST,
