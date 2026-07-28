@@ -60,14 +60,14 @@ RFQ_TEMPLATE_HTML = '''<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <style>
-body{font-family:Arial,sans-serif;background:#f4f4f5;color:#18181b;line-height:1.5;}
-.container{max-width:640px;margin:0 auto;padding:24px;background:#fff;border-radius:8px;}
-h2{color:#ea580c;margin-top:0;}
-table{width:100%;border-collapse:collapse;margin:16px 0;}
-th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #e4e4e7;}
-th{background:#fafafa;font-weight:600;font-size:12px;text-transform:uppercase;color:#71717a;}
-.btn{display:inline-block;padding:12px 24px;background:#ea580c;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;}
-.footer{margin-top:24px;padding-top:16px;border-top:1px solid #e4e4e7;font-size:12px;color:#71717a;}
+body{{font-family:Arial,sans-serif;background:#f4f4f5;color:#18181b;line-height:1.5;}}
+.container{{max-width:640px;margin:0 auto;padding:24px;background:#fff;border-radius:8px;}}
+h2{{color:#ea580c;margin-top:0;}}
+table{{width:100%;border-collapse:collapse;margin:16px 0;}}
+th,td{{padding:10px 12px;text-align:left;border-bottom:1px solid #e4e4e7;}}
+th{{background:#fafafa;font-weight:600;font-size:12px;text-transform:uppercase;color:#71717a;}}
+.btn{{display:inline-block;padding:12px 24px;background:#ea580c;color:#fff;text-decoration:none;border-radius:6px;font-weight:600;}}
+.footer{{margin-top:24px;padding-top:16px;border-top:1px solid #e4e4e7;font-size:12px;color:#71717a;}}
 </style>
 </head>
 <body>

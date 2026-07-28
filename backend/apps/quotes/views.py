@@ -53,16 +53,16 @@ class QuoteViewSet(viewsets.ModelViewSet):
 
 from rest_framework import status as http_status
 from rest_framework.throttling import AnonRateThrottle
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.permissions import AllowAny
 from apps.requests.models import RequestItem
 from .models import RfqInvitation
 
-@api_view(["GET", "POST"])
 class PublicQuoteThrottle(AnonRateThrottle):
     rate = "30/minute"
 
 
+@api_view(["GET", "POST"])
 @throttle_classes([PublicQuoteThrottle])
 @permission_classes([AllowAny])
 def public_quote(request, token):
