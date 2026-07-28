@@ -7,8 +7,6 @@ interface Supplier {
   latitude: number | null;
   longitude: number | null;
   email?: string; phone?: string; site?: string;
-  category_score?: number; distance_score?: number;
-  manufacturer_bonus?: number; supplier_type?: string; source?: string;
 }
 
 interface Props {
@@ -17,7 +15,7 @@ interface Props {
   centerLon: number;
 }
 
-declare global { interface Window { ymaps: any; } }
+declare global { interface Window { mapgl: any; } }
 
 export default function SupplierMap({ suppliers, centerLat, centerLon }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -25,68 +23,58 @@ export default function SupplierMap({ suppliers, centerLat, centerLon }: Props) 
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
-    
+
+    const apiKey = process.env.NEXT_PUBLIC_2GIS_KEY;
+    if (!apiKey) {
+      console.warn("2GIS API key not configured. Map disabled.");
+      return;
+    }
+
     function initMap() {
-      if (!containerRef.current) return;
-      const ymaps = window.ymaps;
-      if (!ymaps) return;
-      
-      const map = new ymaps.Map(containerRef.current, {
-        center: [centerLat, centerLon],
+      if (!containerRef.current || !window.mapgl) return;
+
+      const map = new window.mapgl.Map(containerRef.current, {
+        center: [centerLon, centerLat],
         zoom: 10,
-        controls: ["zoomControl"],
+        key: apiKey,
       });
       mapRef.current = map;
 
-      // Delivery point marker
-      map.geoObjects.add(new ymaps.Placemark([centerLat, centerLon], {
-        hintContent: "\u0422\u043e\u0447\u043a\u0430 \u0434\u043e\u0441\u0442\u0430\u0432\u043a\u0438",
-      }, { preset: "islands#redCircleIcon" }));
-
-      // Supplier markers at REAL coordinates
-      const withCoords = suppliers.filter((s: any) => s.latitude && s.longitude);
-      const withoutCoords = suppliers.filter((s: any) => !s.latitude || !s.longitude);
-
-      withCoords.slice(0, 30).forEach((s: any) => {
-        const slat = s.latitude;
-        const slon = s.longitude;
-        
-        map.geoObjects.add(new ymaps.Placemark([slat, slon], {
-          hintContent: s.name,
-          balloonContent: "<strong>" + s.name + "</strong><br/>" + (s.city || "") + "<br/>\u0411\u0430\u043b\u043b\u044b: " + s.total_score.toFixed(0),
-        }, {
-          preset: "islands#blueDotIcon",
-        }));
+      // Delivery point marker (red)
+      new window.mapgl.Marker(map, {
+        coordinates: [centerLon, centerLat],
+        icon: "https://docs.2gis.com/img/dotMarker.svg",
+        label: { text: "Доставка", fontSize: 12, color: "#c00" },
       });
 
-      // Show suppliers without coordinates below map
-      if (withoutCoords.length > 0 && typeof document !== "undefined") {
-        const noteEl = document.getElementById("supplier-no-coords-note");
-        if (noteEl) {
-          noteEl.textContent = withoutCoords.length + " поставщиков без координат (показаны в таблице)";
-          noteEl.style.display = "block";
-        }
-      }
+      // Supplier markers at REAL coordinates
+      const withCoords = suppliers.filter((s) => s.latitude && s.longitude);
+      withCoords.slice(0, 30).forEach((s) => {
+        new window.mapgl.Marker(map, {
+          coordinates: [s.longitude!, s.latitude!],
+          icon: "https://docs.2gis.com/img/markerIcon.svg",
+          label: { text: s.name, fontSize: 11 },
+        });
+      });
     }
 
-    if (window.ymaps) {
-      window.ymaps.ready(initMap);
+    if (window.mapgl) {
+      initMap();
     } else {
       const script = document.createElement("script");
-      const apiKey = process.env.NEXT_PUBLIC_YANDEX_MAPS_KEY;
-      if (!apiKey) {
-        console.warn("Yandex Maps API key not configured. Map disabled.");
-        return;
-      }
-      script.src = "https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=" + apiKey;
-      script.onload = () => window.ymaps.ready(initMap);
+      script.src = "https://mapgl.2gis.com/api/js/v1";
+      script.onload = initMap;
+      script.onerror = () => console.warn("2GIS map failed to load");
       document.head.appendChild(script);
     }
+  }, [suppliers, centerLat, centerLon]);
 
-    return () => {
-      if (mapRef.current) { mapRef.current.destroy(); mapRef.current = null; }
-    };
-  }, [centerLat, centerLon, suppliers]);
-
-  return <div ref={containerRef} className="w-full h-full" />;
+  return (
+    <div>
+      <div ref={containerRef} style={{ width: "100%", height: 400, borderRadius: 8, border: "1px solid #e2e8f0" }} />
+      <p style={{ fontSize: 12, color: "#94a3b8", marginTop: 4 }}>
+        Поставщики с координатами: {suppliers.filter((s) => s.latitude && s.longitude).length} из {suppliers.length}
+      </p>
+    </div>
+  );
 }
