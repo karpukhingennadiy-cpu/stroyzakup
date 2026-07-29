@@ -60,7 +60,7 @@ export default function SupplierMap({ suppliers, centerLat, centerLon }: Props) 
       initMap();
     } else {
       const script = document.createElement("script");
-      script.src = "https://mapgl.2gis.com/api/js/v1";
+      script.src = `https://mapgl.2gis.com/api/js/v1?key=${apiKey}`;
       script.onload = initMap;
       script.onerror = () => console.warn("2GIS map failed to load");
       document.head.appendChild(script);
