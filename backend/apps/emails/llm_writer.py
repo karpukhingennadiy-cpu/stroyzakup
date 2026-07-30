@@ -57,7 +57,7 @@ def _cache_key(scenario, request_obj, supplier, context) -> str:
     return "llm_writer:" + hashlib.sha256(raw.encode()).hexdigest()
 
 
-def _scan_safety(subject: str, body: str, request_obj) -> tuple[bool, str]:
+def _scan_safety(subject: str, body: str, request_obj, scenario: str = "") -> tuple[bool, str]:
     """Post-generation safety scan. Returns (needs_review, reason)."""
     text = f"{subject}\n{body}".lower()
     for pattern in FORBIDDEN_PATTERNS:
@@ -67,6 +67,24 @@ def _scan_safety(subject: str, body: str, request_obj) -> tuple[bool, str]:
         code = request_obj.code.lower()
         if code not in text:
             return True, "в письме не указан код заявки"
+        # Fact completeness for invitations: every request item must be
+        # mentioned — the LLM must not silently drop positions (E2E finding)
+        if scenario == "rfq_invitation":
+            body_norm = re.sub(r"\s+", " ", body.lower())
+            items = request_obj.items.filter(is_confirmed=True)
+            if not items.exists():
+                items = request_obj.items.all()
+            for item in items:
+                name = re.sub(r"\s+", " ", (item.name or "").lower()).strip()
+                if not name or len(name) < 4:
+                    continue
+                if name in body_norm:
+                    continue
+                # Tolerant check: first two tokens of the item name must appear
+                tokens = [t for t in name.split(" ") if len(t) >= 2][:2]
+                if tokens and all(t in body_norm for t in tokens):
+                    continue
+                return True, f"в письме потеряна позиция заявки: «{item.name}»"
     if len(subject) > 150 or len(body.strip()) < 20:
         return True, "подозрительная длина письма"
     return False, ""
@@ -131,7 +149,7 @@ def generate_email(scenario, request_obj, supplier=None, context=None, timeout=6
         logger.exception("llm_writer failed for scenario %s", scenario)
         return None
 
-    flagged, reason = _scan_safety(subject, body_text, request_obj)
+    flagged, reason = _scan_safety(subject, body_text, request_obj, scenario)
     if flagged:
         needs_review = True
         review_reason = review_reason or reason

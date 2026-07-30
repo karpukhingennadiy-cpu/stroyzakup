@@ -241,3 +241,18 @@ class TestLlmWriterEval:
         req, sup = req_supplier
         with pytest.raises(ValueError):
             generate_email("no_such_scenario", request_obj=req, supplier=sup, context={})
+
+    # 21. regression (E2E finding): LLM dropped a request position -> needs_review
+    def test_dropped_position_flagged(self, llm_ok, req_supplier):
+        llm_ok(_good_email(body="Здравствуйте! Приглашаем к участию в закупке RFQ-LLMWR1. Позиции: ждём ваше предложение. С уважением, команда Минитендер.рф"))
+        req, sup = req_supplier
+        out = generate_email("rfq_invitation", request_obj=req, supplier=sup, context={})
+        assert out["needs_review"] is True
+        assert "потеряна позиция" in out["review_reason"]
+
+    # 22. all positions present -> passes
+    def test_all_positions_present_ok(self, llm_ok, req_supplier):
+        llm_ok(_good_email(body="Здравствуйте! Закупка RFQ-LLMWR1. Позиции: 1. Цемент М500 — 50 меш. Адрес: Подольск. С уважением, команда Минитендер.рф"))
+        req, sup = req_supplier
+        out = generate_email("rfq_invitation", request_obj=req, supplier=sup, context={})
+        assert out["needs_review"] is False
