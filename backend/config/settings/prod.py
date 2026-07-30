@@ -29,8 +29,8 @@ EMAIL_PORT = config("EMAIL_PORT", default=465, cast=int)
 EMAIL_USE_SSL = config("EMAIL_USE_SSL", default=True, cast=bool)
 EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
-DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="Минитендер RFQ <rfq@minitender.ru>")
-INBOUND_EMAIL_DOMAIN = config("INBOUND_EMAIL_DOMAIN", default="in.minitender.ru")
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="Минитендер RFQ <rfq@xn--d1abbjawic3ap.xn--p1ai>")
+INBOUND_EMAIL_DOMAIN = config("INBOUND_EMAIL_DOMAIN", default="in.xn--d1abbjawic3ap.xn--p1ai")
 
 # Database — use PostgreSQL in production
 DATABASES = {

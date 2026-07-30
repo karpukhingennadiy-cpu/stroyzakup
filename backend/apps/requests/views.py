@@ -71,6 +71,9 @@ class RequestViewSet(viewsets.ModelViewSet):
             return Response({"error": result["error"]}, status=422)
         req.status = "confirmed"
         req.save(update_fields=["status"])
+        # FIX: clear prefetch cache so serializer sees newly created items
+        if hasattr(req, '_prefetched_objects_cache'):
+            req._prefetched_objects_cache.pop('items', None)
         return Response(RequestSerializer(req).data)
 
     @decorators.action(detail=True, methods=["post"])
@@ -163,7 +166,8 @@ class RequestViewSet(viewsets.ModelViewSet):
         # Sync-only in dev: no Celery async, immediate result
         from .services.send_rfq import send_rfq_to_suppliers
         results = send_rfq_to_suppliers(req, supplier_ids)
-        # FIX-K2: статус не обновлялся при синхронном фолбэке
-        req.status = "rfq_sent"
-        req.save(update_fields=["status"])
+        # Status: rfq_sent only if at least one email went out
+        if any(r.get("status") == "sent" for r in results):
+            req.status = "rfq_sent"
+        req.refresh_from_db(fields=["status"])
         return Response({"status": req.status, "results": results})

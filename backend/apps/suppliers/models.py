@@ -45,6 +45,12 @@ class Supplier(models.Model):
         db_index=True,
     )
     hidden_rating = models.IntegerField(default=0)
+    # Material sub-types this supplier handles (e.g. "резиновая плитка", "брусчатка")
+    material_types = models.JSONField(default=list, blank=True)
+    # Product catalog: description scraped from supplier website
+    product_description = models.TextField(blank=True)
+    # Product keywords: extracted product names/keywords from description
+    product_keywords = models.JSONField(default=list, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

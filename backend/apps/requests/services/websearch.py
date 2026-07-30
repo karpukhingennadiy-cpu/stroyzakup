@@ -8,7 +8,7 @@ Pipeline:
 All free. All running on this PC. No Docker, no SearXNG, no paid APIs.
 """
 
-import json, time, urllib.request, urllib.parse, ssl, re
+import os, json, time, urllib.request, urllib.parse, ssl, re
 from apps.requests.llm_client import llm
 import logging
 logger = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 USER_AGENT = "Mozilla/5.0 (compatible; MinitenderRF/1.0)"
 
 # ===== DADATA API (free: 10 000 req/day) =====
-DADATA_TOKEN=""
+DADATA_TOKEN = os.environ.get("DADATA_TOKEN", "")
 DADATA_URL = "https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/party"
 
 def _dadata_search(query: str, city: str = "") -> list[dict]:

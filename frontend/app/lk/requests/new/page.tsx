@@ -1,8 +1,8 @@
 "use client";
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import { createRequest, matchSuppliers, sendRfq, api } from "@/lib/api";
+import { createRequest, matchSuppliers, sendRfq, api, geocodeAddress } from "@/lib/api";
 const SupplierMap = dynamic(() => import("./SupplierMap"), { ssr: false });
 import { IconPlus, IconMapPin, IconHardHat, IconTruck } from "@/components/icons";
 
@@ -14,6 +14,17 @@ interface MaterialRow {
   specs: string;
   quantity: string;
   unit: string;
+}
+
+interface ScoreBreakdown {
+  category: string;
+  distance: string;
+  rating: string;
+  completeness: string;
+  manufacturer_bonus: string;
+  material_type: string;
+  product_match: string;
+  total: number;
 }
 
 interface SupplierMatch {
@@ -28,12 +39,15 @@ interface SupplierMatch {
   distance_score: number;
   rating_score: number;
   completeness_score: number;
+  material_type_score: number;
+  product_match_score: number;
   matched_count: number;
   total_categories: number;
   matched_categories: string[];
   supplier_type?: string;
   source?: string;
   manufacturer_bonus?: number;
+  score_breakdown?: ScoreBreakdown;
 }
 
 const UNITS = ["m2", "m3", "kg", "ton", "bag", "piece", "pack", "roll", "pog_m", "liter", "sht"];
@@ -57,12 +71,16 @@ export default function NewRequestPage() {
   const [deliveryLat, setDeliveryLat] = useState<number | null>(null);
   const [deliveryLon, setDeliveryLon] = useState<number | null>(null);
   const [deliveryAddr, setDeliveryAddr] = useState("");
+  const [cityInput, setCityInput] = useState("");
+  const [cityLoading, setCityLoading] = useState(false);
   const [requestId, setRequestId] = useState<number | null>(null);
   const [suppliers, setSuppliers] = useState<SupplierMatch[]>([]);
   const [selectedSuppliers, setSelectedSuppliers] = useState<Set<number>>(new Set());
   const [sentCount, setSentCount] = useState(0);
   const [sourceFilter, setSourceFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
   const [supplierLimit, setSupplierLimit] = useState(10);
+  const [expandedSupplier, setExpandedSupplier] = useState<number | null>(null);
 
   const buildRawText = () => {
     return rows.filter(r => r.name.trim()).map(r => {
@@ -82,7 +100,6 @@ export default function NewRequestPage() {
       const rawText = buildRawText();
       const req = await createRequest(rawText, comment || undefined, undefined, undefined);
       setRequestId(req.id);
-      // Parse materials from raw_text to create items
       try {
         await api("/requests/" + req.id + "/parse/", { method: "POST" });
       } catch (e) {
@@ -93,8 +110,29 @@ export default function NewRequestPage() {
     finally { setLoading(false); }
   };
 
+  // Fallback: geocode city name via backend API
+  const handleCitySearch = async () => {
+    if (!cityInput.trim()) return;
+    setCityLoading(true);
+    setError("");
+    try {
+      const result = await geocodeAddress(cityInput.trim());
+      if (result && result.latitude && result.longitude) {
+        setDeliveryLat(result.latitude);
+        setDeliveryLon(result.longitude);
+        setDeliveryAddr(result.address || cityInput.trim());
+      } else {
+        setError("Город не найден. Попробуйте указать область (например: Пенза, Пензенская обл.)");
+      }
+    } catch (e: any) {
+      setError("Ошибка геокодирования: " + e.message);
+    } finally {
+      setCityLoading(false);
+    }
+  };
+
   const handleStep2Next = async () => {
-    if (!deliveryLat || !deliveryLon) { setError("Укажите точку доставки на карте"); return; }
+    if (!deliveryLat || !deliveryLon) { setError("Укажите точку доставки на карте или введите город"); return; }
     if (!requestId) return;
     setError("");
     setLoading(true);
@@ -127,6 +165,12 @@ export default function NewRequestPage() {
     } catch (e: any) { setError(e.message); }
     finally { setLoading(false); }
   };
+
+  const filteredSuppliers = suppliers.filter(s => {
+    const sourceOk = sourceFilter === "all" || s.source === sourceFilter;
+    const typeOk = typeFilter === "all" || s.supplier_type === typeFilter;
+    return sourceOk && typeOk;
+  });
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -186,11 +230,31 @@ export default function NewRequestPage() {
           <div className="p-6 border-b border-[#e2e8f0] bg-[#f5f7fa]">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-[#f0a500]/10 flex items-center justify-center"><IconMapPin className="w-5 h-5 text-[#f0a500]" /></div>
-              <div><p className="font-semibold text-[#1a1a2e]">Шаг 2: Точка доставки</p><p className="text-xs text-[#64748b]">Кликните на карту чтобы указать адрес доставки</p></div>
+              <div><p className="font-semibold text-[#1a1a2e]">Шаг 2: Точка доставки</p><p className="text-xs text-[#64748b]">Кликните на карту или введите город</p></div>
             </div>
           </div>
           <div className="h-[450px] relative">
             <DeliveryMap onSelect={(lat: number, lon: number, addr: string) => { setDeliveryLat(lat); setDeliveryLon(lon); setDeliveryAddr(addr); }} />
+          </div>
+          {/* Fallback: text city input */}
+          <div className="p-4 border-t border-[#e2e8f0] bg-[#f8fafc]">
+            <p className="text-xs text-[#64748b] mb-2">Или введите город вручную:</p>
+            <div className="flex gap-2">
+              <input
+                value={cityInput}
+                onChange={e => setCityInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleCitySearch()}
+                placeholder="Например: Подольск, Московская обл."
+                className="flex-1 px-3 py-2 bg-white border border-[#e2e8f0] rounded-lg text-sm focus:border-[#1e3a5f] outline-none"
+              />
+              <button
+                onClick={handleCitySearch}
+                disabled={cityLoading || !cityInput.trim()}
+                className="px-4 py-2 bg-[#1e3a5f] text-white rounded-lg text-sm font-medium hover:bg-[#2a4a7f] transition disabled:opacity-50"
+              >
+                {cityLoading ? "..." : "Найти"}
+              </button>
+            </div>
           </div>
           {deliveryLat && deliveryLon && (
             <div className="p-4 bg-green-50 border-t border-green-200 flex items-center gap-3">
@@ -219,7 +283,7 @@ export default function NewRequestPage() {
               <div className="p-6 border-b border-[#e2e8f0] bg-[#f5f7fa]">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-[#27ae60]/10 flex items-center justify-center"><IconTruck className="w-5 h-5 text-[#27ae60]" /></div>
-                  <div><p className="font-semibold text-[#1a1a2e]">Шаг 3: Выбор поставщиков</p><p className="text-xs text-[#64748b]">Найдено {suppliers.length} поставщиков.
+                  <div><p className="font-semibold text-[#1a1a2e]">Шаг 3: Выбор поставщиков</p><p className="text-xs text-[#64748b]">Найдено {filteredSuppliers.length} поставщиков.
               <select value={sourceFilter} onChange={e => setSourceFilter(e.target.value)}
                 className="ml-2 px-2 py-0.5 border rounded text-xs">
                 <option value="all">Все источники</option>
@@ -228,21 +292,29 @@ export default function NewRequestPage() {
                 <option value="web">Веб-поиск</option>
                 <option value="2gis">2GIS</option>
                 <option value="dadata">DaData</option>
-              </select> Отметьте кому отправить запрос КП. <select value={supplierLimit} onChange={e => setSupplierLimit(Number(e.target.value))} className="ml-2 px-2 py-0.5 border rounded text-xs">{[5,10,15,20].map(n => <option key={n} value={n}>{n}</option>)}</select> показывать</p></div>
+              </select>
+              <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)}
+                className="ml-2 px-2 py-0.5 border rounded text-xs">
+                <option value="all">Все типы</option>
+                <option value="manufacturer">Только производители</option>
+                <option value="dealer">Только дилеры</option>
+                <option value="unknown">Неизвестно</option>
+              </select>
+              Отметьте кому отправить запрос КП. <select value={supplierLimit} onChange={e => setSupplierLimit(Number(e.target.value))} className="ml-2 px-2 py-0.5 border rounded text-xs">{[5,10,15,20].map(n => <option key={n} value={n}>{n}</option>)}</select> показывать</p></div>
                 </div>
               </div>
               <div className="p-6">
-                {deliveryLat && deliveryLon && suppliers.length > 0 && (
+                {deliveryLat && deliveryLon && filteredSuppliers.length > 0 && (
             <div className="h-[300px] mb-4 rounded-xl overflow-hidden border border-[#e2e8f0]">
-              <SupplierMap suppliers={suppliers as any} centerLat={deliveryLat} centerLon={deliveryLon} />
+              <SupplierMap suppliers={filteredSuppliers as any} centerLat={deliveryLat} centerLon={deliveryLon} />
             </div>
           )}
-          {suppliers.length === 0 ? (
-                  <div className="text-center py-8 text-[#64748b]">Поставщики не найдены. Попробуйте изменить точку доставки.</div>
+          {filteredSuppliers.length === 0 ? (
+                  <div className="text-center py-8 text-[#64748b]">Поставщики не найдены. Попробуйте изменить точку доставки или снять фильтры.</div>
                 ) : (
                   <table className="w-full text-sm">
                     <thead><tr className="border-b border-[#e2e8f0] text-left">
-                      <th className="py-2 w-10"><input type="checkbox" onChange={e => { if (e.target.checked) setSelectedSuppliers(new Set(suppliers.map(s => s.supplier_id))); else setSelectedSuppliers(new Set()); }} checked={selectedSuppliers.size === suppliers.length && suppliers.length > 0} className="w-4 h-4 accent-[#f0a500]" /></th>
+                      <th className="py-2 w-10"><input type="checkbox" onChange={e => { if (e.target.checked) setSelectedSuppliers(new Set(filteredSuppliers.map(s => s.supplier_id))); else setSelectedSuppliers(new Set()); }} checked={selectedSuppliers.size === filteredSuppliers.length && filteredSuppliers.length > 0} className="w-4 h-4 accent-[#f0a500]" /></th>
                       <th className="py-2 font-semibold text-[#64748b]">Поставщик</th>
                       <th className="py-2 font-semibold text-[#64748b] text-center">Баллы</th>
                       <th className="py-2 font-semibold text-[#64748b] text-center">Категории</th>
@@ -250,15 +322,38 @@ export default function NewRequestPage() {
                       <th className="py-2 font-semibold text-[#64748b]">Город</th>
                     </tr></thead>
                     <tbody>
-                      {suppliers.filter(s => sourceFilter === "all" || s.source === sourceFilter).map(s => (
+                      {filteredSuppliers.map(s => (
+                        <>
                         <tr key={s.supplier_id} className={"border-b border-[#f5f7fa] cursor-pointer hover:bg-[#f8fafc] " + (selectedSuppliers.has(s.supplier_id) ? "bg-amber-50" : "")} onClick={() => toggleSupplier(s.supplier_id)}>
                           <td className="py-2"><input type="checkbox" checked={selectedSuppliers.has(s.supplier_id)} onChange={() => toggleSupplier(s.supplier_id)} className="w-4 h-4 accent-[#f0a500]" /></td>
-                          <td className="py-2"><p className="font-medium text-[#1a1a2e]">{s.name}</p><p className="text-xs text-[#94a3b8]">{s.email}</p></td>
-                          <td className="py-2 text-center"><span className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full text-xs font-bold">{s.total_score.toFixed(0)}</span></td>
+                          <td className="py-2"><p className="font-medium text-[#1a1a2e] flex items-center gap-2">{s.name}{s.supplier_type === "manufacturer" && <span className="inline-flex items-center px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-[10px] font-bold">Производитель</span>}{s.supplier_type === "dealer" && <span className="inline-flex items-center px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-bold">Дилер</span>}</p><p className="text-xs text-[#94a3b8]">{s.email}</p></td>
+                          <td className="py-2 text-center">
+                            <button onClick={(e) => { e.stopPropagation(); setExpandedSupplier(expandedSupplier === s.supplier_id ? null : s.supplier_id); }} className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full text-xs font-bold hover:bg-amber-200 transition">
+                              {s.total_score.toFixed(0)}
+                              <span className="text-[8px]">{expandedSupplier === s.supplier_id ? "▲" : "▼"}</span>
+                            </button>
+                          </td>
                           <td className="py-2 text-center text-xs text-[#64748b]">{s.matched_count}/{s.total_categories}</td>
                           <td className="py-2 text-center text-xs text-[#64748b]">{s.distance_km ? s.distance_km + " км" : "—"}</td>
                           <td className="py-2 text-xs text-[#64748b]">{s.city || "—"}</td>
                         </tr>
+                        {expandedSupplier === s.supplier_id && s.score_breakdown && (
+                          <tr className="bg-[#f8fafc]">
+                            <td colSpan={6} className="px-4 py-3 text-xs">
+                              <div className="grid grid-cols-2 gap-2 text-[#64748b]">
+                                <div><span className="font-semibold">Категории:</span> {s.score_breakdown.category}</div>
+                                <div><span className="font-semibold">Расстояние:</span> {s.score_breakdown.distance}</div>
+                                <div><span className="font-semibold">Рейтинг:</span> {s.score_breakdown.rating}</div>
+                                <div><span className="font-semibold">Полнота:</span> {s.score_breakdown.completeness}</div>
+                                <div><span className="font-semibold">Производитель:</span> {s.score_breakdown.manufacturer_bonus}</div>
+                                <div><span className="font-semibold">Тип материала:</span> {s.score_breakdown.material_type}</div>
+                                <div><span className="font-semibold">Ассортимент:</span> {s.score_breakdown.product_match}</div>
+                                <div className="col-span-2 font-bold text-[#1a1a2e]">Итого: {s.score_breakdown.total} баллов</div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                        </>
                       ))}
                     </tbody>
                   </table>

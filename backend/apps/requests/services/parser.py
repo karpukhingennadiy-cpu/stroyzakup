@@ -44,6 +44,17 @@ Score each item 0.0–1.0 based on how COMPLETE the description is:
 - quantity: float (use 1 if missing — but LOWER confidence!)
 - unit: m2/m3/kg/ton/bag/piece/pack/roll/linear_meter/liter/sht/pog_m
 - brand: null if not mentioned
+- material_type: SPECIFIC material subtype — this is CRITICAL for supplier matching. Be as precise as possible:
+  - For tiles: "керамогранит", "керамическая плитка", "резиновая плитка", "брусчатка", "тротуарная плитка", "клинкерная плитка"
+  - For lumber: "доска обрезная", "доска строганная", "брус", "брусок", "рейка", "фанера", "ОСБ", "ДСП", "ДВП"
+  - For concrete: "бетон товарный", "раствор цементный", "пескобетон", "керамзитобетон"
+  - For metal: "арматура", "уголок", "швеллер", "двутавр", "лист", "труба", "профнастил", "сетка"
+  - For bricks: "кирпич керамический", "кирпич силикатный", "газоблок", "пеноблок", "керамический блок"
+  - For insulation: "минвата", "экструдер", "пеноплекс", "пенофол", "изолон", " базальтовая вата"
+  - For roofing: "металлочерепица", "гибкая черепица", "шифер", "ондулин", "профлист"
+  - For finishes: "штукатурка", "шпаклевка", "грунтовка", "краска", "гипсокартон", "профиль"
+  - Always extract the MOST SPECIFIC type from the text. "Плитка резиновая" → "резиновая плитка", not just "плитка"
+  - "Брусчатка" and "тротуарная плитка" are DIFFERENT types with DIFFERENT manufacturers
 - spec: ALL technical details from text (sizes, colors, grades, types, species)
 - confidence: 0.0–1.0 per COMPLETENESS rule above
 - needs_clarification: true if confidence < 0.65 OR spec is null/empty when it shouldn't be
@@ -124,6 +135,7 @@ ITEM_SCHEMA = {
         "category": {"type": "string", "minLength": 1},
         "brand": {"type": ["string", "null"]},
         "spec": {"type": ["string", "null"]},
+        "material_type": {"type": ["string", "null"]},
         "confidence": {"type": "number", "minimum": 0, "maximum": 1},
         "needs_clarification": {"type": "boolean"},
         "clarification_question": {"type": "string"},
@@ -152,19 +164,6 @@ def validate_items(items):
             logger.warning("Item %d rejected by schema: %s", i, e.message)
             rejected.append({"index": i, "error": str(e.message), "item": item})
     return valid, rejected
-
-    # Remove items no longer in the parsed result
-    to_delete = [
-        item for key, item in existing_items.items()
-        if key not in processed_keys
-    ]
-    if to_delete:
-        RequestItem.objects.filter(
-            id__in=[i.id for i in to_delete]
-        ).delete()
-
-
-
 
 
 def _fallback_parse_line(line, request_obj):
@@ -197,7 +196,15 @@ def _fallback_parse_line(line, request_obj):
     # Guess category from name
     cat = 'drugoe'
     name_lower = name.lower()
-    if 'керамогранит' in name_lower or 'плитка' in name_lower:
+    if 'брусчатка' in name_lower:
+        cat = 'bruschatka'
+    elif 'резиновая плитка' in name_lower:
+        cat = 'rezinovaya_plitka'
+    elif 'тротуарная плитка' in name_lower:
+        cat = 'trotuarnaya_plitka'
+    elif 'керамогранит' in name_lower:
+        cat = 'keramogranit'
+    elif 'плитка' in name_lower:
         cat = 'keramogranit'
     elif 'кирпич' in name_lower:
         cat = 'kirpich'
@@ -206,12 +213,31 @@ def _fallback_parse_line(line, request_obj):
     elif 'доска' in name_lower or 'брус' in name_lower:
         cat = 'pilomaterialy'
     elif 'цемент' in name_lower:
-        cat = 'suhie-smesi'
+        cat = 'cement'
     elif 'арматура' in name_lower:
         cat = 'metalloprokat'
+    # Guess material_type from name (used for supplier matching score)
+    mt = None
+    for key, val in [
+        ('брусчатка', 'брусчатка'),
+        ('резиновая плитка', 'резиновая плитка'),
+        ('тротуарная плитка', 'тротуарная плитка'),
+        ('керамогранит', 'керамогранит'),
+        ('планкен', 'планкен'),
+        ('бетон', 'бетон товарный'),
+        ('доска', 'доска обрезная'),
+        ('брус', 'брус'),
+        ('кирпич', 'кирпич керамический'),
+        ('цемент', 'цемент'),
+        ('арматура', 'арматура'),
+        ('гипсокартон', 'гипсокартон'),
+    ]:
+        if key in name_lower:
+            mt = val
+            break
     return {
         'name': name, 'quantity': qty, 'unit': unit,
-        'category': cat, 'brand': None, 'spec': None,
+        'category': cat, 'brand': None, 'spec': None, 'material_type': mt,
         'confidence': 0.5, 'needs_clarification': True,
         'clarification_question': f'{name}: уточните характеристики',
         'raw_text': line,
@@ -284,10 +310,12 @@ ALLOWED_CATEGORIES = {
     "pilomaterialy", "drevesno-plitnye", "metalloprokat", "truby",
     "krovelnye", "gidroizolyatsiya", "teploizolyatsiya", "zvukoizolyatsiya",
     "keramicheskaya-plitka", "keramogranit", "napolnye-pokrytiya",
-    "lakokrasochnye", "suhie-smesi", "beton", "zhbi", "bloki", "kirpich",
+    "lakokrasochnye", "suhie_smesi", "beton", "zhbi", "bloki", "kirpich",
     "kladochnye-smesi", "gipsokarton", "komplektuyushchie-dlya-gkl",
     "fasadnye", "ventfasad", "okna", "dveri", "metizy", "krepezh",
     "elektrotovary", "santekhnika", "instrument", "drugoe",
+    "bruschatka", "rezinovaya_plitka", "trotuarnaya_plitka",
+    "cement", "plitochnyj_klej",
 }
 
 ALLOWED_UNITS = {
@@ -296,11 +324,69 @@ ALLOWED_UNITS = {
 }
 
 def normalize_category(cat_name):
-    """Map category to whitelist or fallback to Drugoe."""
+    """Map category to whitelist or fallback to Drugoe.
+    Supports both Latin and Cyrillic category names."""
     slug = cat_name.lower().replace(" ", "_").replace("-", "_")[:40]
     if slug in ALLOWED_CATEGORIES:
         return slug
-    # Fuzzy fallback: try common aliases
+
+    # Cyrillic → Latin aliases for DB categories
+    CYRILLIC_ALIASES = {
+        "пиломатериалы": "pilomaterialy",
+        "древесно_плитные": "drevesno-plitnye",
+        "металлопрокат": "metalloprokat",
+        "трубы": "truby",
+        "кровельные": "krovelnye",
+        "гидроизоляция": "gidroizolyatsiya",
+        "теплоизоляция": "teploizolyatsiya",
+        "звукоизоляция": "zvukoizolyatsiya",
+        "керамическая_плитка": "keramicheskaya-plitka",
+        "керамогранит_и_плитка": "keramogranit",
+        "напольные_покрытия": "napolnye-pokrytiya",
+        "лакокрасочные": "lakokrasochnye",
+        "сухие_смеси": "suhie_smesi",
+        "бетон": "beton",
+        "жби": "zhbi",
+        "блоки": "bloki",
+        "кирпич": "kirpich",
+        "кладочные_смеси": "kladochnye-smesi",
+        "гипсокартон": "gipsokarton",
+        "комплектующие_для_гкл": "komplektuyushchie-dlya-gkl",
+        "фасадные": "fasadnye",
+        "вентфасад": "ventfasad",
+        "окна": "okna",
+        "двери": "dveri",
+        "метизы": "metizy",
+        "крепеж": "krepezh",
+        "электротовары": "elektrotovary",
+        "сантехника": "santekhnika",
+        "инструмент": "instrument",
+        "другое": "drugoe",
+        "брусчатка": "bruschatka",
+        "резиновая_плитка": "rezinovaya_plitka",
+        "тротуарная_плитка": "trotuarnaya_plitka",
+        "цемент": "cement",
+        "плиточный_клей": "plitochnyj_klej",
+        "утеплитель": "teploizolyatsiya",
+        "минвата": "teploizolyatsiya",
+        "арматура": "metalloprokat",
+        "профнастил": "krovelnye",
+        "пеноплекс": "teploizolyatsiya",
+        "краска": "lakokrasochnye",
+        "грунтовка": "lakokrasochnye",
+        "шпаклевка": "suhie_smesi",
+        "газобетон": "bloki",
+        "пеноблок": "bloki",
+        "фанера": "drevesno-plitnye",
+        "осб": "drevesno-plitnye",
+        "дсп": "drevesno-plitnye",
+        "двп": "drevesno-plitnye",
+        "пленка": "gidroizolyatsiya",
+    }
+    if slug in CYRILLIC_ALIASES:
+        return CYRILLIC_ALIASES[slug]
+
+    # Fuzzy fallback: try common Latin aliases
     aliases = {
         "doska": "pilomaterialy", "brus": "pilomaterialy",
         "fanera": "drevesno-plitnye", "osb": "drevesno-plitnye",
@@ -308,13 +394,14 @@ def normalize_category(cat_name):
         "uteplitel": "teploizolyatsiya", "minvata": "teploizolyatsiya",
         "penoplast": "teploizolyatsiya", "plenka": "gidroizolyatsiya",
         "kraska": "lakokrasochnye", "gruntovka": "lakokrasochnye",
-        "tsement": "suhie-smesi", "shpaklevka": "suhie-smesi",
+        "tsement": "cement", "shpaklevka": "suhie_smesi",
         "gazobeton": "bloki", "penoblok": "bloki",
     }
     for key, val in aliases.items():
         if key in slug:
             return val
     return "drugoe"
+
 
 def normalize_unit(unit_code):
     """Map unit to whitelist or fallback."""
@@ -364,6 +451,7 @@ def _save_items(request_obj, items):
             "unit": unit,
             "brand": item_data.get("brand") or "",
             "spec": item_data.get("spec") or "",
+            "material_type": item_data.get("material_type") or "",
             "confidence": conf,
             "is_confirmed": conf >= 0.7 and not needs_clarification,
         }
@@ -379,3 +467,13 @@ def _save_items(request_obj, items):
                 raw_text=item_data.get("raw_text", ""),
                 **defaults,
             )
+
+    # Remove items no longer in the parsed result
+    to_delete = [
+        item for key, item in existing_items.items()
+        if key not in processed_keys
+    ]
+    if to_delete:
+        RequestItem.objects.filter(
+            id__in=[i.id for i in to_delete]
+        ).delete()

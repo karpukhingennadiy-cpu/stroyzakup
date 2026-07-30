@@ -47,7 +47,7 @@ RFQ_TEMPLATE_TEXT = '''Здравствуйте, {supplier_name}!
 
 Или просто ответьте на это письмо — мы получим ваше предложение.
 
-По вопросам: ответьте на это письмо или напишите на rfq@minitender.ru
+По вопросам: ответьте на это письмо или напишите на rfq@минитендер.рф
 
 --
 С уважением,
@@ -89,7 +89,7 @@ th{{background:#fafafa;font-weight:600;font-size:12px;text-transform:uppercase;c
 </p>
 <p>Или просто ответьте на это письмо — мы получим ваше предложение.</p>
 <div class="footer">
-<p>По вопросам: ответьте на это письмо или напишите на rfq@minitender.ru</p>
+<p>По вопросам: ответьте на это письмо или напишите на rfq@минитендер.рф</p>
 <p>© Минитендер.рф — платформа строительных закупок</p>
 </div>
 </div>
@@ -100,6 +100,9 @@ th{{background:#fafafa;font-weight:600;font-size:12px;text-transform:uppercase;c
 def build_rfq_email(invitation):
     req = invitation.request
     items = req.items.filter(is_confirmed=True)
+    if not items.exists():
+        # Fallback: include unconfirmed items rather than sending an empty list
+        items = req.items.all()
 
     items_list = "\n".join(
         f"{i+1}. {item.name} — {item.quantity} {item.unit.short_name}"
@@ -118,7 +121,7 @@ def build_rfq_email(invitation):
         "items_html": items_html,
         "delivery_address": req.address.address if req.address else "Не указан",
         "deadline": (invitation.created_at + timedelta(days=3)).strftime("%d.%m.%Y"),
-        "quote_url": f"https://app.минитендер.рф/quote/{invitation.quote_token}",
+        "quote_url": f"{settings.FRONTEND_URL}/quote/{invitation.quote_token}",
     }
     return {
         "subject": f"[RFQ-{req.code}] Запрос КП: стройматериалы",

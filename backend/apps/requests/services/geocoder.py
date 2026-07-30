@@ -2,12 +2,12 @@
 Free tier: 1000 requests/day. Fully Russian service.
 """
 
-import json, time, urllib.request, urllib.parse, ssl
+import os, json, time, urllib.request, urllib.parse, ssl
 from typing import Optional
 import logging
 logger = logging.getLogger(__name__)
 
-YANDEX_API_KEY = "cb0b8e22-2e0b-4b02-b8e8-fd2a2f4d5e6f"
+YANDEX_API_KEY = os.environ.get("YANDEX_GEOCODER_KEY", "")
 GEOCODE_URL = "https://geocode-maps.yandex.ru/1.x/"
 
 _last_request = 0.0
@@ -69,9 +69,13 @@ def _geocode_raw(query: str) -> Optional[tuple[float, float, str, str]]:
         addr_details = geo["metaDataProperty"]["GeocoderMetaData"]["Address"]
         components = addr_details.get("Components", [])
         city = ""
-        for comp in components:
-            if comp["kind"] in ("locality", "area", "province"):
-                city = comp["name"]
+        # Prefer the most specific level: locality (city) first, then area, then province
+        for kind in ("locality", "area", "province"):
+            for comp in components:
+                if comp["kind"] == kind:
+                    city = comp["name"]
+                    break
+            if city:
                 break
         return lat, lon, city, full
     except (KeyError, IndexError, ValueError) as e:

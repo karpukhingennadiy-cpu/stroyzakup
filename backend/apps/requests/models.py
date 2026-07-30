@@ -1,4 +1,4 @@
-from django.contrib.gis.db import models
+from django.db import models
 from apps.accounts.models import User
 
 class Category(models.Model):
@@ -30,7 +30,8 @@ class Address(models.Model):
 class Request(models.Model):
     STATUS_CHOICES = [
         ("draft","draft"),("parsing","parsing"),("confirmed","confirmed"),
-        ("matching","matching"),("matched","matched"),("rfq_sent","rfq_sent"),("collecting_quotes","collecting_quotes"),
+        ("matching","matching"),("matched","matched"),("rfq_sent","rfq_sent"),
+        ("rfq_failed","rfq_failed"),("collecting_quotes","collecting_quotes"),
         ("ready","ready"),("completed","completed"),("cancelled","cancelled"),
     ]
     customer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="requests")
@@ -56,6 +57,7 @@ class RequestItem(models.Model):
     unit = models.ForeignKey(Unit, on_delete=models.SET_NULL, null=True)
     brand = models.CharField(max_length=200, blank=True)
     spec = models.TextField(blank=True)
+    material_type = models.CharField(max_length=200, blank=True, db_index=True)
     confidence = models.FloatField(default=0.0)
     is_confirmed = models.BooleanField(default=False)
     class Meta: db_table = "request_items"

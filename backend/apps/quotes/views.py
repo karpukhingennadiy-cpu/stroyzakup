@@ -75,6 +75,9 @@ def public_quote(request, token):
 
     if request.method == "GET":
         items = req.items.filter(is_confirmed=True)
+        if not items.exists():
+            # Fallback: unconfirmed items (low-confidence parse) — better than empty form
+            items = req.items.all()
         items_data = [{
             "id": item.id, "name": item.name,
             "quantity": float(item.quantity),

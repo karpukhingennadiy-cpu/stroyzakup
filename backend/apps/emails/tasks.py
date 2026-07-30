@@ -1,5 +1,6 @@
 """Async email tasks."""
 import logging
+from django.conf import settings
 from celery import shared_task
 
 logger = logging.getLogger(__name__)
@@ -18,7 +19,7 @@ def send_rfq_email_task(self, invitation_id):
         msg = EmailMultiAlternatives(
             subject=email_data["subject"],
             body=email_data["body_text"],
-            from_email="Минитендер RFQ <rfq@minitender.ru>",
+            from_email=settings.DEFAULT_FROM_EMAIL,
             to=[inv.supplier.email],
             reply_to=[inv.reply_email],
         )
@@ -29,7 +30,7 @@ def send_rfq_email_task(self, invitation_id):
 
         EmailMessage.objects.create(
             direction="outbound",
-            from_email="rfq@minitender.ru",
+            from_email="rfq@xn--d1abbjawic3ap.xn--p1ai",
             to_email=inv.supplier.email,
             subject=email_data["subject"],
             body_text=email_data["body_text"],

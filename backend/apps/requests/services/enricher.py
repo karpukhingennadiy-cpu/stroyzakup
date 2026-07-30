@@ -1,12 +1,12 @@
 """Supplier enrichment: scrape website + verify via DaData + geocode."""
 
-import json, time, urllib.request, urllib.parse, ssl, re
+import os, json, time, urllib.request, urllib.parse, ssl, re
 from apps.requests.llm_client import llm
 import logging
 logger = logging.getLogger(__name__)
 
 USER_AGENT = "Mozilla/5.0 (compatible; MinitenderRF/1.0)"
-DADATA_TOKEN=""
+DADATA_TOKEN = os.environ.get("DADATA_TOKEN", "")
 
 
 def scrape_site_for_products(site_url: str) -> dict:

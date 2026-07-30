@@ -5,6 +5,12 @@ from datetime import timedelta
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+# Export .env secrets to os.environ for service modules that read env directly
+# (decouple.config() does NOT populate os.environ by itself)
+for _env_key in ("LLM_API_KEY", "LLM_MODEL", "LLM_BASE_URL",
+                 "DADATA_TOKEN", "YANDEX_GEOCODER_KEY", "FROM_EMAIL"):
+    os.environ.setdefault(_env_key, config(_env_key, default=""))
+
 SECRET_KEY="dev-secret-key"
 DEBUG = False
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv())
@@ -105,14 +111,14 @@ LLM_MODEL = config("LLM_MODEL", default="deepseek-chat")
 LLM_BASE_URL = config("LLM_BASE_URL", default="https://api.deepseek.com/v1")
 
 # Email (configured via .env, defaults for dev)
-EMAIL_BACKEND = config("EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend")
+EMAIL_BACKEND = config("EMAIL_BACKEND", default="apps.emails.utf8_smtp.UTF8EmailBackend")
 EMAIL_HOST = config("EMAIL_HOST", default="smtp.beget.com")
 EMAIL_PORT = config("EMAIL_PORT", default=465, cast=int)
 EMAIL_USE_SSL = config("EMAIL_USE_SSL", default=True, cast=bool)
 EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="rfq@минитендер.рф")
-EMAIL_HOST_PASSWORD = ""
-DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="Минитендер RFQ <rfq@minitender.ru>")
-INBOUND_EMAIL_DOMAIN = config("INBOUND_EMAIL_DOMAIN", default="in.minitender.ru")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="Минитендер RFQ <rfq@xn--d1abbjawic3ap.xn--p1ai>")
+INBOUND_EMAIL_DOMAIN = config("INBOUND_EMAIL_DOMAIN", default="in.xn--d1abbjawic3ap.xn--p1ai")
 
 # Whitenoise
 STORAGES={"staticfiles":{"BACKEND":"whitenoise.storage.CompressedManifestStaticFilesStorage"}}

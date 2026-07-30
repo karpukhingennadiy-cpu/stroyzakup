@@ -27,6 +27,8 @@ class SupplierMatch:
     rating_score: float
     completeness_score: float
     manufacturer_bonus: float
+    material_type_score: float
+    product_match_score: float
     supplier_type: str
     total_score: float
 
@@ -53,11 +55,23 @@ class SupplierMatch:
             "rating_score": round(self.rating_score, 1),
             "completeness_score": round(self.completeness_score, 1),
             "manufacturer_bonus": round(self.manufacturer_bonus, 1),
+            "material_type_score": round(self.material_type_score, 1),
+            "product_match_score": round(self.product_match_score, 1),
             "supplier_type": getattr(self, 'supplier_type', 'unknown'),
             "source": getattr(self, 'source', 'seed'),
             "matched_categories": self.matched_categories,
             "matched_count": len(self.matched_categories),
             "total_categories": self.total_categories,
+            "score_breakdown": {
+                "category": f"{round(self.category_score, 1)} (совпало категорий: {len(self.matched_categories)} из {self.total_categories})",
+                "distance": f"{round(self.distance_score, 1)} (расстояние: {self.distance_km:.1f} км)" if self.distance_km else "0 (расстояние не указано)",
+                "rating": f"{round(self.rating_score, 1)} (рейтинг поставщика)",
+                "completeness": f"{round(self.completeness_score, 1)} (email + телефон + сайт + юр.название)",
+                "manufacturer_bonus": f"{round(self.manufacturer_bonus, 1)} (тип: {'Производитель' if self.supplier_type == 'manufacturer' else 'Дилер' if self.supplier_type == 'dealer' else 'Неизвестно'})",
+                "material_type": f"{round(self.material_type_score, 1)} (совпадение типа материала)",
+                "product_match": f"{round(self.product_match_score, 1)} (товар найден в ассортименте)",
+                "total": round(self.total_score, 1),
+            }
         }
 
 
@@ -70,6 +84,36 @@ def _haversine(lat1, lon1, lat2, lon2):
     return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 
+def _product_match(request_terms, supplier):
+    """Check if any request term appears in supplier's product catalog.
+    
+    Returns (matched: bool, score: float, matched_term: str)
+    - If supplier has product_keywords/description and no match -> (False, 0, "")
+    - If supplier has product_keywords/description and match -> (True, 20, term)
+    - If supplier has no catalog data -> (True, 0, "нет данных") [backward compat]
+    """
+    keywords = [k.lower().strip() for k in (supplier.product_keywords or []) if k]
+    description = (supplier.product_description or "").lower()
+    
+    # If supplier has no catalog data at all, allow them (backward compatibility)
+    if not keywords and not description.strip():
+        return True, 0.0, "нет данных об ассортименте"
+    
+    # Check product_keywords
+    for term in request_terms:
+        for kw in keywords:
+            if term in kw or kw in term:
+                return True, 20.0, term
+    
+    # Check product_description
+    for term in request_terms:
+        if term in description:
+            return True, 20.0, term
+    
+    # No match found in catalog -> reject
+    return False, 0.0, ""
+
+
 def match_suppliers(request_obj, limit=20):
     items = request_obj.items.filter(is_confirmed=True)
     if not items.exists():
@@ -78,6 +122,23 @@ def match_suppliers(request_obj, limit=20):
     request_categories = list(Category.objects.filter(requestitem__request=request_obj).distinct())
     if not request_categories:
         return []
+
+    # Collect search terms from request items (material_type, name, category name)
+    request_material_types = set()
+    request_terms = set()  # All terms to search in supplier catalog
+    for item in items:
+        mt = (item.material_type or "").strip().lower()
+        if mt:
+            request_material_types.add(mt)
+            request_terms.add(mt)
+        name = (item.name or "").strip().lower()
+        if name and len(name) > 2:
+            request_terms.add(name)
+        # Add category name if available
+        if item.category:
+            cat_name = (item.category.name or "").strip().lower()
+            if cat_name:
+                request_terms.add(cat_name)
 
     category_ids = set(c.id for c in request_categories)
     max_radius = max(c.default_radius_km for c in request_categories)
@@ -97,6 +158,13 @@ def match_suppliers(request_obj, limit=20):
     matches = []
 
     for s in suppliers:
+        # === PRODUCT MATCH RULE ===
+        # Supplier MUST have the requested product in their catalog (keywords/description)
+        has_product, product_score, matched_term = _product_match(request_terms, s)
+        if not has_product:
+            # Skip suppliers who don't carry this product
+            continue
+
         supplier_category_ids = set(
             sc.category_id for sc in s.supplier_categories.all()
         )
@@ -133,6 +201,20 @@ def match_suppliers(request_obj, limit=20):
         # Manufacturer bonus: +5 points if they produce the material
         mfr_bonus = 5.0 if s.supplier_type == "manufacturer" else 0
 
+        # Material type bonus: +15 if supplier produces/has the exact material type
+        material_type_score = 0
+        supplier_mts = set((mt or "").strip().lower() for mt in (s.material_types or []))
+        if request_material_types and supplier_mts:
+            if request_material_types & supplier_mts:
+                material_type_score = 15.0
+        # Fallback: check if material_type appears in supplier name
+        if material_type_score == 0 and request_material_types:
+            name_lower = s.name.lower()
+            for mt in request_material_types:
+                if mt in name_lower:
+                    material_type_score = 10.0
+                    break
+
         completeness = 0
         if s.email:
             completeness += 2.5
@@ -143,7 +225,7 @@ def match_suppliers(request_obj, limit=20):
         if s.legal_name:
             completeness += 2.5
 
-        total = category_score + distance_score + rating_score + completeness + mfr_bonus
+        total = category_score + distance_score + rating_score + completeness + mfr_bonus + material_type_score + product_score
 
         matches.append(SupplierMatch(
             supplier_id=s.id,
@@ -160,6 +242,8 @@ def match_suppliers(request_obj, limit=20):
             rating_score=rating_score,
             completeness_score=completeness,
             manufacturer_bonus=mfr_bonus,
+            material_type_score=material_type_score,
+            product_match_score=product_score,
             total_score=total,
             matched_categories=matched_names,
             total_categories=len(category_ids),
@@ -167,34 +251,3 @@ def match_suppliers(request_obj, limit=20):
 
     matches.sort(key=lambda m: m.total_score, reverse=True)
     return [m.to_dict() for m in matches[:limit]]
-
-
-# TODO: Replace in-memory dict with Redis cache for production
-# from django.core.cache import cache
-# category_weights = cache.get_or_set("category_weights", _load_category_weights, 3600)
-
-
-# --- PostGIS optimization (reference for future refactoring) ---
-# from django.contrib.gis.db.models.functions import Distance
-# from django.contrib.gis.geos import Point
-# from django.contrib.gis.measure import D
-#
-# def match_suppliers_postgis(request_obj, limit=20):
-#     """Production matcher using PostGIS spatial queries."""
-#     addr = request_obj.address
-#     if not addr or addr.latitude is None or addr.longitude is None:
-#         return []
-#     req_point = Point(addr.longitude, addr.latitude, srid=4326)
-#     category_ids = list(request_obj.items.values_list("category_id", flat=True).distinct())
-#     max_radius = max(
-#         c.default_radius_km for c in Category.objects.filter(id__in=category_ids)
-#     )
-#     addresses = (
-#         SupplierAddress.objects
-#         .filter(is_active=True, supplier__is_active=True)
-#         .annotate(distance=Distance("geom", req_point))
-#         .filter(distance__lte=D(km=max_radius))
-#         .select_related("supplier")
-#         .order_by("distance")[:limit]
-#     )
-#     return [a.supplier for a in addresses]

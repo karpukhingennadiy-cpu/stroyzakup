@@ -3,6 +3,9 @@ from .base import *
 DEBUG = True
 ALLOWED_HOSTS = ["testserver", "localhost", "127.0.0.1"]
 
+# Remove django.contrib.gis for local dev (no GDAL needed)
+INSTALLED_APPS = [app for app in INSTALLED_APPS if app != "django.contrib.gis"]
+
 # SQLite for local dev (no Docker needed)
 DATABASES = {
     "default": {
