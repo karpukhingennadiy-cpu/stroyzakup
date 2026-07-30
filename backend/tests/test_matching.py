@@ -95,4 +95,7 @@ class TestSupplierMatching:
             calc = (s["category_score"] + s["distance_score"] + s["rating_score"]
                     + s["completeness_score"] + s.get("manufacturer_bonus", 0)
                     + s.get("material_type_score", 0) + s.get("product_match_score", 0))
+            # B4: unverified suppliers get a 0.9 dampening coefficient
+            if s.get("moderation_status") == "unverified":
+                calc *= 0.9
             assert abs(calc - s["total_score"]) < 0.2, f"Score mismatch for {s['name']}: {calc} != {s['total_score']}"

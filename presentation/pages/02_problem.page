@@ -1,0 +1,67 @@
+pageType: content
+background:
+  type: solid
+  color: "#FFFFFF"
+elements:
+  - elementId: title
+    elementType: text
+    bounds: [60, 36, 840, 40]
+    content: {style: "$pagetitle", text: "Какую задачу решает платформа"}
+  - elementId: title-bar
+    elementType: shape
+    bounds: [60, 80, 48, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$amber"}
+  - elementId: left-head
+    elementType: text
+    bounds: [60, 108, 400, 24]
+    content: {style: "$h2", text: "Было: закупка вручную"}
+  - elementId: left-body
+    elementType: text
+    bounds: [60, 140, 400, 250]
+    content:
+      style: "$body"
+      text: |
+        <p><strong>Обзвон поставщиков.</strong> Менеджер тратит часы, чтобы найти, кто продаёт нужный материал рядом с объектом.</p>
+        <p style="margin-top:10px"><strong>Цены в сообщениях.</strong> КП приходят в мессенджеры и почту вразнобой — сравнивать неудобно, условия теряются.</p>
+        <p style="margin-top:10px"><strong>Нет формализации.</strong> «Брусчатка 200×100×60» у каждого поставщика понимается по-своему, цены несопоставимы.</p>
+  - elementId: right-head
+    elementType: text
+    bounds: [520, 108, 400, 24]
+    content: {style: "$h2", text: "Стало: тендер за 4 минуты"}
+  - elementId: right-body
+    elementType: text
+    bounds: [520, 140, 400, 250]
+    content:
+      style: "$body"
+      text: |
+        <p><strong>Текст → структура.</strong> LLM распознаёт позиции, характеристики и сама спрашивает, чего не хватает для точной цены.</p>
+        <p style="margin-top:10px"><strong>Автоподбор.</strong> Система находит поставщиков рядом с объектом, у которых этот материал реально есть в ассортименте.</p>
+        <p style="margin-top:10px"><strong>Единая форма КП.</strong> Все отвечают через одну форму — цены сопоставимы, конкурентный лист собирается автоматически.</p>
+  - elementId: divider-v
+    elementType: shape
+    bounds: [480, 108, 1, 250]
+    shapeName: rect
+    fill: {type: solid, color: "$line"}
+  - elementId: bottom-rule
+    elementType: shape
+    bounds: [60, 410, 840, 1]
+    shapeName: rect
+    fill: {type: solid, color: "$line"}
+  - elementId: bottom-note
+    elementType: text
+    bounds: [60, 424, 840, 60]
+    content:
+      fontSize: 14
+      color: "$navy"
+      lineHeight: 1.4
+      text: |
+        <p><strong>Принцип:</strong> заказчик описывает потребность своими словами — дальше система сама структурирует, подбирает, рассылает и сравнивает. Ручная работа остаётся только там, где нужно решение человека.</p>
+  - elementId: footer
+    elementType: text
+    bounds: [60, 505, 400, 18]
+    content: {style: "$small", text: "Минитендер.рф · v1.0.0"}
+  - elementId: pagenum
+    elementType: text
+    bounds: [880, 505, 40, 18]
+    content: {style: "$small", align: [right, top], text: "02"}

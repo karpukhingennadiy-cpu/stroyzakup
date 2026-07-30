@@ -1,48 +1,30 @@
 # 🏗️ Минитендер.рф — платформа строительных закупок
 
-> Строительные закупки без посредников. Отправил список материалов — AI распознал, нашёл поставщиков, разослал RFQ, собрал КП в конкурентный лист.
+> Строительные закупки без посредников. Отправил список материалов — AI распознал, нашёл поставщиков, разослал RFQ, собрал КП в конкурентный лист. Переписку с поставщиками ведёт LLM в деловом стиле.
 
 ---
 
 ## 🚀 Быстрый старт (5 минут)
 
-The virtual environment was not created successfully because ensurepip is not
-available.  On Debian/Ubuntu systems, you need to install the python3-venv
-package using the following command.
+```bash
+python start.py          # backend :8000 + frontend :3000
+```
 
-    apt install python3.14-venv
+Демо-вход: `dev@test.com` / `test12345`. Открой http://localhost:3000
 
-You may need to use sudo with that command.  After installing the python3-venv
-package, recreate your virtual environment.
-
-Failing command: /mnt/c/root/stroyzakup/stroyzakup/backend/.venv/bin/python3
-
-
-added 368 packages, and audited 369 packages in 3m
-
-149 packages are looking for funding
-  run `npm fund` for details
-
-12 high severity vulnerabilities
-
-To address issues that do not require attention, run:
-  npm audit fix
-
-To address all issues (including breaking changes), run:
-  npm audit fix --force
-
-Run `npm audit` for details.
-
-> frontend@0.1.0 build
-> next build
-
-Открой http://localhost:3000
+Требования: Python 3.13 + [uv](https://docs.astral.sh/uv/), Node.js 20+.
 
 ---
 
 ## 🎯 Основной сценарий
 
-
+1. Заказчик создаёт заявку списком материалов (мастер из 3 шагов).
+2. **MaterialIntel + LLM-парсер** разбирает позиции: категория, material_type, количество, confidence; по неполным позициям задаёт уточняющие вопросы.
+3. Заказчик указывает точку доставки (карта или текст).
+4. **Матчер** скорит поставщиков (категории, расстояние, рейтинг, ассортимент, тип, модерация); при нехватке — **автодiscovery** ищет новых в интернете.
+5. RFQ-рассылка: текст письма генерирует **LLM (llm_writer)** строго по фактам заявки; при сбое — статичный шаблон.
+6. Поставщик заполняет КП по ссылке `/quote/{token}` **или просто отвечает письмом** — inbound-парсер извлекает цены из текста письма.
+7. Заказчик получает уведомления о каждом КП и видит **конкурентный лист** с лучшим предложением.
 
 ---
 
@@ -51,178 +33,96 @@ Run `npm audit` for details.
 | Слой | Технология |
 |------|-----------|
 | Бэкенд | Django 5 + DRF + Celery |
-| Фронтенд | Next.js 16 + TypeScript |
+| Фронтенд | Next.js 15 + TypeScript + Tailwind |
 | База данных | PostgreSQL 16 + PostGIS (dev: SQLite) |
-| Кэш/очереди | Redis |
-| ИИ | DeepSeek API |
-| Карты | 2GIS |
+| Кэш/очереди | Redis (опционально, sync fallback в dev) |
+| ИИ | DeepSeek API (парсинг, материал-интеллект, переписка) |
+| Карты | 2GIS + Yandex Geocoder |
 | Поиск компаний | DaData API |
-| Статика | Whitenoise |
-| Прокси | Nginx |
-| Контейнеры | Docker Compose (6 сервисов) |
-
----
-
-## 🏛️ Архитектура
-
-
+| Прокси/контейнеры | Nginx, Docker Compose |
 
 ---
 
 ## 🔧 Ключевые возможности
 
-### Парсинг заявок
-- **Универсальный LLM-промпт** — понимает любые формулировки
-- **Оценка уверенности** — 0.0–1.0 по полноте описания
-- **Whitelist категорий** — 28 стандартизированных категорий
-- **Whitelist единиц** — 14 стандартных единиц измерения
-- **JSON Schema валидация** — отбрасывает некорректные ответы LLM
-- **Идемпотентность** — повторный parse не создаёт дубли
+### Парсинг заявок (MaterialIntel)
+- **Универсальный LLM-промпт** — понимает любые формулировки, включая опечатки («бурсчатка») и латиницу («bruschatka»); матрица из 20 реальных формулировок — 100% точности (см. `docs/QA_PARSE_MATRIX.md`)
+- **Оценка полноты** — confidence 0.0–1.0 + уточняющие вопросы по неполным позициям (хранятся в `RequestItem.clarification_question`, показываются в UI)
+- **Whitelist категорий/единиц** + JSON Schema валидация ответов LLM
+- **Идемпотентность** — повторный parse делает diff-update, не создаёт дубли
+- **Кэш материал-профилей** (`MaterialProfile`) — синонимы и поисковые запросы по нормализованному названию
 
 ### Поиск поставщиков
-- **Гибридный поиск** — LLM (первичный список) → DaData (верификация)
-- **Скоринг** — категории + расстояние + рейтинг + полнота
-- **Производитель/дилер** — AI-классификация с бонусом +10
-- **Источник** — seed / llm / web / 2gis / dadata / manual
-- **Модерация** — unverified / verified / rejected
-- **Защита от дублей** — проверка по имени перед созданием
+- **Скоринг**: категории (50) + расстояние (30) + рейтинг (10) + полнота профиля (10) + производитель (5) + material_type (15) + ассортимент (20); раскрываемый `score_breakdown` в UI
+- **Product-match rule** — поставщик без товара в ассортименте отсекается
+- **Модерация (B4)**: `rejected` исключён из подбора, `unverified` — понижающий коэффициент ×0.9 и бейдж «На проверке»; staff-кнопки в `/lk/suppliers`, bulk-verify
+- **Автодiscovery** — при <5 совпадениях поиск новых поставщиков в интернете, счётчик «найдено N новых» в UI
+- **Ручное добавление (B5)** — форма в `/lk/suppliers`, автообогащение каталога + геокодинг
 
-### Геоданные
-- **2GIS — адрес → координаты
-- **Реальные координаты поставщиков** — не фейковый разброс по кругу
-- **2GIS — маркеры поставщиков на карте
+### Переписка с поставщиками (LLM, B9)
+- **Библиотека промтов** (`apps/emails/prompts.py`): приглашение, напоминания 24ч/2ч, уточняющий вопрос, ответ на вопрос, благодарность за КП, победа/отказ
+- **Жёсткие правила безопасности**: только факты заявки, запрет обещаний («гарантируем», «скидка», «оплатим») — пост-проверка, нарушения → `needs_review`, письмо НЕ отправляется
+- **Fallback** — при недоступности LLM уходит статичный шаблон
+- **Eval-набор** — 21 эталонный тест (`backend/tests/test_llm_writer.py`)
 
-### Работа с поставщиками
-- **RFQ-рассылка** — фильтр активных + валидный email
-- **Публичная страница КП** — /quote/[token] без авторизации
-- **Inbound reply** — ответ на письмо создаёт КП через reply_code
-- **HTML-письмо** — таблица позиций, кнопка, контакты
+### Цикл КП
+- **Публичная страница КП** `/quote/{token}` — без авторизации, throttle 30/мин, валидация цен
+- **Inbound email (B1)** — ответ письмом на `rfq-XXX@in.минитендер.рф` создаёт КП; LLM извлекает цены из текста (`inbound_parser`), вопросы поставщика → авто-ответ из llm_writer; транспорт: IMAP-polling (`fetch_inbound`) или вебхуки Mailgun/ generic
+- **Напоминания (B10)** — `send_deadline_reminders` за 24ч и 2ч до дедлайна, идемпотентно
+- **Уведомления заказчику (B7)** — письмо о каждом КП и о готовности конкурентного листа
 
 ### Асинхронность
 - **5 Celery-задач** — parse, match, send_rfq, geocode, discover
-- **Sync fallback** — если Celery недоступен, выполняется синхронно
-- **Таймауты** — LLM (60с), geocoder (10с), websearch (15с)
+- **Sync fallback** — в dev всё выполняется синхронно, без Redis
 
 ---
 
-## 📦 Продакшен-деплой
+## 🧪 Тесты и QA
 
+```bash
+cd backend && uv run --extra dev python -m pytest tests/ -q   # 78 тестов
+cd frontend && node node_modules/next/dist/bin/next build     # чистая сборка
+```
 
-The command 'docker' could not be found in this WSL 2 distro.
-We recommend to activate the WSL integration in Docker Desktop settings.
-
-For details about using Docker Desktop with WSL 2, visit:
-
-https://docs.docker.com/go/wsl2/
-
-Порты: :80 (nginx), :8000 (backend), :3000 (frontend)
-
----
-
-## 🧪 Тесты
-
-
+- 78 автотестов: позитивные сценарии + 27 негативных (A2) + 21 eval LLM-писем; внешние API в тестах не вызываются
+- `docs/QA_SECURITY.md` — аудит безопасности (IDOR/XSS закрыты кодом)
+- `docs/QA_LOAD.md` — нагрузочный sanity (p95 создания 0.75с, подбора 0.47с)
+- `docs/QA_PARSE_MATRIX.md` — матрица парсинга граничных формулировок
 
 ---
 
 ## 📁 Структура проекта
 
+```
+backend/
+  apps/
+    accounts/     # auth, JWT, геокодинг
+    requests/     # заявки, парсер, матчер, discovery, MaterialIntel
+    suppliers/    # поставщики, модерация, каталог
+    quotes/       # КП, приглашения, конкурентный лист, публичный API
+    emails/       # шаблоны, llm_writer, inbound, напоминания
+  scripts/        # seed, parse_matrix, load_sanity, dedupe_suppliers
+  tests/          # 78 автотестов
+frontend/
+  app/lk/         # личный кабинет: заявки, мастер, поставщики
+  app/quote/      # публичная страница КП
+docs/             # QA-отчёты, API, OPERATIONS, INBOUND_SETUP
+deploy/           # prod-контур (docker-compose.prod.yml, nginx)
+```
 
+Документация: `docs/API.md`, `docs/OPERATIONS.md`, `docs/INBOUND_SETUP.md`.
 
 ---
 
 ## 🤝 Контрибьютинг
 
 1. Форкни репозиторий
-2. Создай ветку feat/твоя-фича
-3. Убедись что pytest проходит (31 тест)
-4. Убедись что npm run build проходит
-5. Открой Pull Request
+2. Создай ветку `feat/твоя-фича`
+3. Убедись, что pytest зелёный и фронт собирается
+4. Открой Pull Request
 
 ---
 
 ## 📄 Лицензия
 
 MIT © Минитендер.рф
-
-## 🏛️ Архитектура
-
-
-
----
-
-## 🔧 Ключевые возможности
-
-### Парсинг заявок
-- **Универсальный LLM-промпт** — понимает любые формулировки
-- **Оценка уверенности** — 0.0-1.0 по полноте описания
-- **Whitelist категорий** — 28 стандартизированных категорий
-- **Whitelist единиц** — 14 стандартных единиц измерения
-- **JSON Schema валидация** — отбрасывает некорректные ответы LLM
-- **Идемпотентность** — повторный parse не создаёт дубли
-
-### Поиск поставщиков
-- **Гибридный поиск** — LLM (первичный список) -> DaData (верификация)
-- **Скоринг** — категории + расстояние + рейтинг + полнота
-- **Производитель/дилер** — AI-классификация с бонусом +10
-- **Источник** — seed / llm / web / 2gis / dadata / manual
-- **Модерация** — unverified / verified / rejected
-- **Защита от дублей** — проверка по имени перед созданием
-
-### Геоданные
-- **2GIS — адрес → координаты
-- **Реальные координаты поставщиков** — не фейковый разброс по кругу
-- **2GIS — маркеры поставщиков на карте
-
-### Работа с поставщиками
-- **RFQ-рассылка** — фильтр активных + валидный email
-- **Публичная страница КП** — /quote/[token] без авторизации
-- **Inbound reply** — ответ на письмо создаёт КП через reply_code
-- **HTML-письмо** — таблица позиций, кнопка, контакты
-
-### Асинхронность
-- **5 Celery-задач** — parse, match, send_rfq, geocode, discover
-- **Sync fallback** — если Celery недоступен, выполняется синхронно
-- **Таймауты** — LLM (60с), geocoder (10с), websearch (15с)
-
----
-
-## 📦 Продакшен-деплой
-
-
-The command 'docker' could not be found in this WSL 2 distro.
-We recommend to activate the WSL integration in Docker Desktop settings.
-
-For details about using Docker Desktop with WSL 2, visit:
-
-https://docs.docker.com/go/wsl2/
-
-Порты: :80 (nginx), :8000 (backend), :3000 (frontend)
-
----
-
-## 🧪 Тесты
-
-
-
----
-
-## 📁 Структура проекта
-
-
-
----
-
-## 🤝 Контрибьютинг
-
-1. Форкни репозиторий
-2. Создай ветку feat/твоя-фича
-3. Убедись что pytest проходит (31 тест)
-4. Убедись что npm run build проходит
-5. Открой Pull Request
-
----
-
-## 📄 Лицензия
-
-MIT (c) Минитендер.рф

@@ -104,13 +104,41 @@ def build_rfq_email(invitation):
         # Fallback: include unconfirmed items rather than sending an empty list
         items = req.items.all()
 
+    # B9: try LLM-generated invitation first; static template is the fallback
+    try:
+        from .llm_writer import generate_email
+        llm_email = generate_email(
+            "rfq_invitation",
+            request_obj=req,
+            supplier=invitation.supplier,
+            context={
+                "quote_url": f"{settings.FRONTEND_URL}/quote/{invitation.quote_token}",
+                "deadline": (invitation.created_at + timedelta(days=3)).strftime("%d.%m.%Y"),
+            },
+        )
+        if llm_email:
+            return {
+                "subject": llm_email["subject"],
+                "body_text": llm_email["body_text"],
+                "body_html": llm_email["body_html"],
+                "reply_to": invitation.reply_email,
+                "needs_review": llm_email["needs_review"],
+                "review_reason": llm_email.get("review_reason", ""),
+                "source": "llm",
+            }
+    except Exception:
+        import logging
+        logging.getLogger(__name__).exception("LLM RFQ generation failed, using template")
+
+    import html as _html
     items_list = "\n".join(
         f"{i+1}. {item.name} — {item.quantity} {item.unit.short_name}"
         for i, item in enumerate(items)
     )
-    # FIX-H4: правильная HTML-таблица с <tr><td>
+    # FIX-H4: правильная HTML-таблица с <tr><td>; SEC: escape user-supplied names
     items_html = "".join(
-        f"<tr><td>{i+1}</td><td>{item.name}</td><td>{item.quantity} {item.unit.short_name}</td></tr>"
+        f"<tr><td>{i+1}</td><td>{_html.escape(item.name)}</td>"
+        f"<td>{item.quantity} {_html.escape(item.unit.short_name)}</td></tr>"
         for i, item in enumerate(items)
     )
 
@@ -119,15 +147,20 @@ def build_rfq_email(invitation):
         "request_code": req.code,
         "items_list": items_list,
         "items_html": items_html,
-        "delivery_address": req.address.address if req.address else "Не указан",
+        "delivery_address": _html.escape(req.address.address if req.address else "Не указан"),
         "deadline": (invitation.created_at + timedelta(days=3)).strftime("%d.%m.%Y"),
         "quote_url": f"{settings.FRONTEND_URL}/quote/{invitation.quote_token}",
     }
     return {
         "subject": f"[RFQ-{req.code}] Запрос КП: стройматериалы",
-        "body_text": RFQ_TEMPLATE_TEXT.format(**ctx),
-        "body_html": RFQ_TEMPLATE_HTML.format(**ctx),
+        # text part: raw values; HTML part: user data escaped above
+        "body_text": RFQ_TEMPLATE_TEXT.format(
+            **{**ctx, "delivery_address": req.address.address if req.address else "Не указан"}
+        ),
+        "body_html": RFQ_TEMPLATE_HTML.format(**{**ctx, "supplier_name": _html.escape(ctx["supplier_name"])}),
         "reply_to": invitation.reply_email,
+        "needs_review": False,
+        "source": "template",
     }
 
 
@@ -143,6 +176,105 @@ def create_rfq_invitation(request_obj, supplier):
         quote_token=generate_quote_token(),
     )
     return inv
+
+
+# === B7: customer notifications ===
+
+CUSTOMER_QUOTE_TEMPLATE = """Здравствуйте!
+
+Поставщик {supplier_name} прислал коммерческое предложение по вашей заявке RFQ-{request_code}{total_line}.
+
+Посмотреть конкурентный лист:
+{sheet_url}
+
+--
+команда Минитендер.рф
+"""
+
+CUSTOMER_SHEET_READY_TEMPLATE = """Здравствуйте!
+
+По вашей заявке RFQ-{request_code} собраны все ответы: получено {replied} КП из {total} отправленных приглашений.
+
+Конкурентный лист готов:
+{sheet_url}
+
+--
+команда Минитендер.рф
+"""
+
+
+def _quote_total(quote):
+    from decimal import Decimal
+    total = Decimal("0")
+    for qi in quote.items.select_related("request_item").all():
+        total += qi.price * qi.request_item.quantity
+    return total + (quote.delivery_cost or Decimal("0"))
+
+
+def _send_customer_email(customer, subject, body_text, request_obj=None, supplier=None):
+    import logging
+    from django.core.mail import EmailMultiAlternatives
+    logger = logging.getLogger(__name__)
+    if not customer or not customer.email:
+        return False
+    try:
+        msg = EmailMultiAlternatives(
+            subject=subject, body=body_text,
+            from_email=settings.DEFAULT_FROM_EMAIL, to=[customer.email],
+        )
+        msg.send(fail_silently=False)
+        from apps.quotes.models import EmailMessage
+        EmailMessage.objects.create(
+            direction="outbound",
+            from_email="rfq@xn--d1abbjawic3ap.xn--p1ai",
+            to_email=customer.email, subject=subject, body_text=body_text,
+            request=request_obj, supplier=supplier,
+        )
+        return True
+    except Exception:
+        logger.exception("Customer notification failed: %s", subject)
+        return False
+
+
+def notify_customer_quote_received(quote):
+    """B7: email the customer when a supplier's quote arrives."""
+    req = quote.request
+    customer = req.customer
+    total = _quote_total(quote)
+    total_line = f" на сумму {total:,.2f} ₽".replace(",", " ") if total else ""
+    sheet_url = f"{settings.FRONTEND_URL}/lk/requests/{req.id}/competitive"
+    subject = f"[RFQ-{req.code}] Поставщик {quote.supplier.name} прислал КП{total_line}"
+    body = CUSTOMER_QUOTE_TEMPLATE.format(
+        supplier_name=quote.supplier.name, request_code=req.code,
+        total_line=total_line, sheet_url=sheet_url,
+    )
+    sent = _send_customer_email(customer, subject, body, request_obj=req, supplier=quote.supplier)
+    _maybe_notify_sheet_ready(req)
+    return sent
+
+
+def _maybe_notify_sheet_ready(request_obj):
+    """B7: when every sent invitation has a reply, notify the customer once."""
+    from apps.quotes.models import RfqInvitation, EmailMessage
+    invitations = RfqInvitation.objects.filter(request=request_obj, status__in=["sent", "replied"])
+    total = invitations.count()
+    if total < 2:  # competitive sheet is meaningful from 2+ invitations
+        return False
+    replied = invitations.filter(status="replied").count()
+    if replied < total:
+        return False
+    marker = "Конкурентный лист готов"
+    already = EmailMessage.objects.filter(
+        request=request_obj, direction="outbound", subject__contains=marker,
+    ).exists()
+    if already:
+        return False
+    sheet_url = f"{settings.FRONTEND_URL}/lk/requests/{request_obj.id}/competitive"
+    subject = f"[RFQ-{request_obj.code}] {marker}: {replied} из {total} ответов"
+    body = CUSTOMER_SHEET_READY_TEMPLATE.format(
+        request_code=request_obj.code, replied=replied, total=total, sheet_url=sheet_url,
+    )
+    return _send_customer_email(request_obj.customer, subject, body, request_obj=request_obj)
 
 
 def process_inbound_email_reply(
@@ -192,4 +324,15 @@ def process_inbound_email_reply(
         "Processed reply: request=%s, supplier=%s, quote=%s",
         req.code, invitation.supplier.name, quote.id,
     )
+    # B1: try to extract prices from the email body via LLM
+    try:
+        from apps.emails.inbound_parser import extract_prices_to_quote
+        extract_prices_to_quote(quote, body_text or body_html)
+    except Exception:
+        logger.exception("Inbound price extraction failed for quote %s", quote.id)
+    # B7: notify the customer about the received quote
+    try:
+        notify_customer_quote_received(quote)
+    except Exception:
+        logger.exception("Customer notification failed for quote %s", quote.id)
     return quote

@@ -13,6 +13,8 @@ class RfqInvitation(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     sent_at = models.DateTimeField(null=True, blank=True)
     replied_at = models.DateTimeField(null=True, blank=True)
+    reminder_24h_sent_at = models.DateTimeField(null=True, blank=True)
+    reminder_2h_sent_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     class Meta: db_table = "rfq_invitations"
 

@@ -31,6 +31,19 @@ def send_rfq_to_suppliers(request_obj, supplier_ids):
 
         inv = create_rfq_invitation(request_obj, supplier)
         email_data = build_rfq_email(inv)
+        # B9: LLM-flagged emails are NOT sent — they wait for human review (admin)
+        if email_data.get("needs_review"):
+            inv.status = "pending"
+            inv.save(update_fields=["status"])
+            logger.warning(
+                "RFQ for %s flagged needs_review: %s",
+                supplier.email, email_data.get("review_reason", ""),
+            )
+            results.append({
+                "supplier": supplier.name, "status": "needs_review",
+                "reason": email_data.get("review_reason", "требует проверки человеком"),
+            })
+            continue
         msg = EmailMultiAlternatives(
             subject=email_data["subject"], body=email_data["body_text"],
             from_email=settings.DEFAULT_FROM_EMAIL,

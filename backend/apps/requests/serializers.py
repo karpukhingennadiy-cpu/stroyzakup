@@ -10,7 +10,7 @@ class RequestItemSerializer(serializers.ModelSerializer):
         model = RequestItem
         fields = ['id', 'raw_text', 'name', 'category', 'category_name', 'quantity',
                   'unit', 'unit_name', 'brand', 'spec', 'confidence', 'is_confirmed',
-                  'needs_clarification']
+                  'needs_clarification', 'material_type', 'clarification_question']
         read_only_fields = ['id', 'confidence', 'is_confirmed', 'needs_clarification']
 
     def get_needs_clarification(self, obj):

@@ -69,6 +69,16 @@ Score each item 0.0–1.0 based on how COMPLETE the description is:
 4. Quantity=1 with no unit mentioned = LOW confidence, ASK
 5. Return ONLY a JSON array, no markdown fences
 
+## CATEGORY ROUTING (follow strictly)
+
+- штукатурка/шпаклевка/ровнитель/наливной пол → Suhie_smesi
+- краска/грунтовка/лак/эмаль → Lakokraska
+- песок/щебень/гравий/отсев → Nerudnye
+- металлочерепица/профнастил/шифер/ондулин/гибкая черепица → Krovlya
+- газоблок/пеноблок/керамический блок/газобетон → Bloki (NEVER Beton)
+- трубы/фитинги → Truby or Inzhenerka
+- минвата/пеноплекс/экструдер/базальтовая вата → Uteplitel
+
 ## EXAMPLES
 
 Input: "Доска строганная — 100 пог.м"
@@ -120,6 +130,15 @@ CATEGORIES = [
     "Metalloprokat", "Pilomaterialy", "Nerudnye", "Uteplitel", "Krovlya", "Inzhenerka",
     "Lakokraska", "Gipsokarton", "Beton", "Armatura", "Vodostoki", "Krepezh", "Drugoe"
 ]
+
+# Category routing hints (LLM must follow these):
+# - штукатурка/шпаклевка/смеси/ровнитель → Suhie_smesi
+# - краска/грунтовка/лак/эмаль → Lakokraska
+# - песок/щебень/гравий/отсев/керамзит → Nerudnye
+# - металлочерепица/профнастил/шифер/ондулин/гибкая черепица → Krovlya
+# - газоблок/пеноблок/керамический блок → Bloki (НЕ Beton!)
+# - трубы/фитинги/арматура запорная → Truby или Inzhenerka
+# - минвата/пеноплекс/экструдер/базальтовая вата → Uteplitel
 
 
 
@@ -316,6 +335,9 @@ ALLOWED_CATEGORIES = {
     "elektrotovary", "santekhnika", "instrument", "drugoe",
     "bruschatka", "rezinovaya_plitka", "trotuarnaya_plitka",
     "cement", "plitochnyj_klej",
+    # SYSTEM_PROMPT vocabulary (matches seeded DB slugs)
+    "nerudnye", "krovlya", "inzhenerka", "lakokraska", "armatura",
+    "vodostoki", "uteplitel", "kabel",
 }
 
 ALLOWED_UNITS = {
@@ -367,8 +389,8 @@ def normalize_category(cat_name):
         "тротуарная_плитка": "trotuarnaya_plitka",
         "цемент": "cement",
         "плиточный_клей": "plitochnyj_klej",
-        "утеплитель": "teploizolyatsiya",
-        "минвата": "teploizolyatsiya",
+        "утеплитель": "uteplitel",
+        "минвата": "uteplitel",
         "арматура": "metalloprokat",
         "профнастил": "krovelnye",
         "пеноплекс": "teploizolyatsiya",
@@ -390,12 +412,16 @@ def normalize_category(cat_name):
     aliases = {
         "doska": "pilomaterialy", "brus": "pilomaterialy",
         "fanera": "drevesno-plitnye", "osb": "drevesno-plitnye",
-        "armatura": "metalloprokat", "profnastil": "krovelnye",
-        "uteplitel": "teploizolyatsiya", "minvata": "teploizolyatsiya",
-        "penoplast": "teploizolyatsiya", "plenka": "gidroizolyatsiya",
-        "kraska": "lakokrasochnye", "gruntovka": "lakokrasochnye",
+        "armatura": "metalloprokat", "profnastil": "krovlya",
+        "uteplitel": "uteplitel", "minvata": "uteplitel",
+        "penoplast": "uteplitel", "plenka": "gidroizolyatsiya",
+        "kraska": "lakokraska", "gruntovka": "lakokraska",
         "tsement": "cement", "shpaklevka": "suhie_smesi",
-        "gazobeton": "bloki", "penoblok": "bloki",
+        "shtukaturka": "suhie_smesi", "klej": "plitochnyj_klej",
+        "gazobeton": "bloki", "penoblok": "bloki", "gazoblok": "bloki",
+        "metallocherepitsa": "krovlya", "shifer": "krovlya",
+        "pesok": "nerudnye", "shcheben": "nerudnye", "gravij": "nerudnye",
+        "truba": "truby",
     }
     for key, val in aliases.items():
         if key in slug:
@@ -454,6 +480,7 @@ def _save_items(request_obj, items):
             "material_type": item_data.get("material_type") or "",
             "confidence": conf,
             "is_confirmed": conf >= 0.7 and not needs_clarification,
+            "clarification_question": item_data.get("clarification_question") or "",
         }
 
         if raw in existing_items:

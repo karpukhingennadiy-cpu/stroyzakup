@@ -1,5 +1,5 @@
 "use client";
-import { useState, Fragment } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { createRequest, matchSuppliers, sendRfq, api, geocodeAddress } from "@/lib/api";
@@ -45,10 +45,28 @@ interface SupplierMatch {
   total_categories: number;
   matched_categories: string[];
   supplier_type?: string;
+  moderation_status?: string;
   source?: string;
   manufacturer_bonus?: number;
   score_breakdown?: ScoreBreakdown;
 }
+
+interface ParsedItem {
+  id: number;
+  name: string;
+  spec: string;
+  confidence: number;
+  needs_clarification: boolean;
+  clarification_question: string;
+}
+
+const DRAFT_KEY = "minitender_request_draft";
+const STAGE_LABELS: Record<string, string> = {
+  create: "Создаём заявку...",
+  parse: "ИИ анализирует материалы: извлекаем позиции, определяем категории и единицы измерения...",
+  match: "Подбираем поставщиков: скоринг по категориям, расстоянию и ассортименту...",
+  send: "Отправляем запросы КП поставщикам...",
+};
 
 const UNITS = ["m2", "m3", "kg", "ton", "bag", "piece", "pack", "roll", "pog_m", "liter", "sht"];
 
@@ -56,12 +74,37 @@ export default function NewRequestPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [stage, setStage] = useState<string>("");
   const [error, setError] = useState("");
 
   const [rows, setRows] = useState<MaterialRow[]>([
     { id: 1, name: "", specs: "", quantity: "", unit: "m2" },
   ]);
   const [comment, setComment] = useState("");
+  const [draftRestored, setDraftRestored] = useState(false);
+
+  // B6: draft in localStorage — protection against accidental refresh
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(DRAFT_KEY);
+      if (saved) {
+        const draft = JSON.parse(saved);
+        if (draft.rows?.length && draft.rows.some((r: MaterialRow) => r.name?.trim())) {
+          setRows(draft.rows);
+          setComment(draft.comment || "");
+          setDraftRestored(true);
+        }
+      }
+    } catch { /* ignore broken drafts */ }
+  }, []);
+
+  useEffect(() => {
+    const hasContent = rows.some(r => r.name.trim()) || comment.trim();
+    try {
+      if (hasContent) localStorage.setItem(DRAFT_KEY, JSON.stringify({ rows, comment }));
+      else localStorage.removeItem(DRAFT_KEY);
+    } catch { /* storage full/blocked — non-fatal */ }
+  }, [rows, comment]);
   const addRow = () => setRows([...rows, { id: Date.now(), name: "", specs: "", quantity: "", unit: "m2" }]);
   const removeRow = (id: number) => rows.length > 1 && setRows(rows.filter(r => r.id !== id));
   const updateRow = (id: number, field: keyof MaterialRow, value: string) => {
@@ -77,6 +120,9 @@ export default function NewRequestPage() {
   const [suppliers, setSuppliers] = useState<SupplierMatch[]>([]);
   const [selectedSuppliers, setSelectedSuppliers] = useState<Set<number>>(new Set());
   const [sentCount, setSentCount] = useState(0);
+  const [discoveredCount, setDiscoveredCount] = useState(0);
+  const [clarifications, setClarifications] = useState<ParsedItem[]>([]);
+  const [clarifyAnswers, setClarifyAnswers] = useState<Record<number, string>>({});
   const [sourceFilter, setSourceFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [supplierLimit, setSupplierLimit] = useState(10);
@@ -97,17 +143,41 @@ export default function NewRequestPage() {
     setError("");
     setLoading(true);
     try {
+      setStage("create");
       const rawText = buildRawText();
       const req = await createRequest(rawText, comment || undefined, undefined, undefined);
       setRequestId(req.id);
+      setStage("parse");
       try {
-        await api("/requests/" + req.id + "/parse/", { method: "POST" });
+        const parsed = await api("/requests/" + req.id + "/parse/", { method: "POST" });
+        // B6: show LLM follow-up questions for low-confidence items
+        const unclear = (parsed.items || []).filter(
+          (i: ParsedItem) => i.clarification_question || i.needs_clarification
+        );
+        setClarifications(unclear);
       } catch (e) {
         console.warn("Parse failed, continuing anyway:", e);
       }
       setStep(2);
     } catch (e: any) { setError(e.message); }
-    finally { setLoading(false); }
+    finally { setLoading(false); setStage(""); }
+  };
+
+  // B6: answer an LLM clarification question — append to item spec
+  const handleClarify = async (item: ParsedItem) => {
+    const answer = (clarifyAnswers[item.id] || "").trim();
+    if (!answer || !requestId) return;
+    try {
+      await api("/requests/" + requestId + "/update_item/", {
+        method: "POST",
+        body: JSON.stringify({
+          item_id: item.id,
+          spec: (item.spec ? item.spec + "; " : "") + answer,
+          is_confirmed: true,
+        }),
+      });
+      setClarifications(clarifications.filter(c => c.id !== item.id));
+    } catch (e: any) { setError("Не удалось сохранить уточнение: " + e.message); }
   };
 
   // Fallback: geocode city name via backend API
@@ -141,11 +211,13 @@ export default function NewRequestPage() {
         method: "PATCH",
         body: JSON.stringify({ delivery_address: deliveryAddr, latitude: deliveryLat, longitude: deliveryLon }),
       });
+      setStage("match");
       const result = await matchSuppliers(requestId, supplierLimit);
       setSuppliers(result.suppliers || []);
+      setDiscoveredCount(result.discovered || 0);
       setStep(3);
     } catch (e: any) { setError(e.message); }
-    finally { setLoading(false); }
+    finally { setLoading(false); setStage(""); }
   };
 
   const toggleSupplier = (id: number) => {
@@ -160,10 +232,13 @@ export default function NewRequestPage() {
     setError("");
     setLoading(true);
     try {
+      setStage("send");
       const result = await sendRfq(requestId, Array.from(selectedSuppliers));
       setSentCount(result.sent || 0);
+      // Draft no longer needed once the tender is launched
+      try { localStorage.removeItem(DRAFT_KEY); } catch { /* non-fatal */ }
     } catch (e: any) { setError(e.message); }
-    finally { setLoading(false); }
+    finally { setLoading(false); setStage(""); }
   };
 
   const filteredSuppliers = suppliers.filter(s => {
@@ -188,6 +263,20 @@ export default function NewRequestPage() {
       </div>
 
       {error && <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">{error}</div>}
+
+      {loading && stage && (
+        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-center gap-3">
+          <div className="w-5 h-5 border-2 border-[#1e3a5f] border-t-transparent rounded-full animate-spin shrink-0" />
+          <p className="text-sm text-[#1e3a5f] font-medium">{STAGE_LABELS[stage] || stage}</p>
+        </div>
+      )}
+
+      {draftRestored && step === 1 && !loading && (
+        <div className="mb-6 p-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl text-sm flex items-center justify-between">
+          <span>Черновик заявки восстановлен из автосохранения.</span>
+          <button onClick={() => { setRows([{ id: 1, name: "", specs: "", quantity: "", unit: "m2" }]); setComment(""); setDraftRestored(false); try { localStorage.removeItem(DRAFT_KEY); } catch {} }} className="text-xs font-bold hover:underline ml-4 shrink-0">Очистить</button>
+        </div>
+      )}
 
       {step === 1 && (
         <div className="bg-white rounded-2xl border border-[#e2e8f0] shadow-sm overflow-hidden">
@@ -226,6 +315,35 @@ export default function NewRequestPage() {
       )}
 
       {step === 2 && (
+        <div>
+        {clarifications.length > 0 && (
+          <div className="mb-6 bg-white rounded-2xl border border-amber-300 shadow-sm overflow-hidden">
+            <div className="p-4 border-b border-amber-200 bg-amber-50">
+              <p className="font-semibold text-[#1a1a2e] text-sm">ИИ просит уточнить ({clarifications.length})</p>
+              <p className="text-xs text-[#64748b]">По этим позициям не хватает данных для точной оценки — ответьте, и поставщики получат полную спецификацию</p>
+            </div>
+            <div className="p-4 space-y-3">
+              {clarifications.map(item => (
+                <div key={item.id} className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm">
+                  <div className="flex-1">
+                    <p className="font-medium text-[#1a1a2e]">{item.name}</p>
+                    <p className="text-xs text-[#64748b]">{item.clarification_question || "Уточните характеристики"}</p>
+                  </div>
+                  <div className="flex gap-2 sm:w-1/2">
+                    <input
+                      value={clarifyAnswers[item.id] || ""}
+                      onChange={e => setClarifyAnswers({ ...clarifyAnswers, [item.id]: e.target.value })}
+                      onKeyDown={e => e.key === 'Enter' && handleClarify(item)}
+                      placeholder="Ваш ответ (например: сосна, 25×150 мм)"
+                      className="flex-1 px-3 py-2 bg-[#f5f7fa] border border-[#e2e8f0] rounded-lg text-sm focus:border-[#1e3a5f] outline-none"
+                    />
+                    <button onClick={() => handleClarify(item)} disabled={!(clarifyAnswers[item.id] || "").trim()} className="px-3 py-2 bg-[#1e3a5f] text-white rounded-lg text-xs font-bold hover:bg-[#2a4a7f] transition disabled:opacity-50">OK</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="bg-white rounded-2xl border border-[#e2e8f0] shadow-sm overflow-hidden">
           <div className="p-6 border-b border-[#e2e8f0] bg-[#f5f7fa]">
             <div className="flex items-center gap-3">
@@ -267,6 +385,7 @@ export default function NewRequestPage() {
             <button onClick={handleStep2Next} disabled={loading || !deliveryLat} className="flex-1 py-3.5 bg-[#f0a500] text-[#1a1a2e] rounded-xl font-bold text-base hover:bg-[#fcc419] hover:shadow-lg transition disabled:opacity-50">{loading ? "Подбираем поставщиков..." : "Подобрать поставщиков →"}</button>
           </div>
         </div>
+        </div>
       )}
 
       {step === 3 && (
@@ -279,6 +398,12 @@ export default function NewRequestPage() {
               <button onClick={() => router.push("/lk/requests/" + requestId)} className="px-6 py-3 bg-[#f0a500] text-[#1a1a2e] rounded-xl font-bold hover:bg-[#fcc419] transition">Перейти к заявке</button>
             </div>
           ) : (
+            <div>
+            {discoveredCount > 0 && (
+              <div className="mb-4 p-3 bg-violet-50 border border-violet-200 text-violet-800 rounded-xl text-sm">
+                Найдено {discoveredCount} новых поставщиков из интернета — они добавлены в базу и участвуют в подборе.
+              </div>
+            )}
             <div className="bg-white rounded-2xl border border-[#e2e8f0] shadow-sm overflow-hidden">
               <div className="p-6 border-b border-[#e2e8f0] bg-[#f5f7fa]">
                 <div className="flex items-center gap-3">
@@ -326,7 +451,7 @@ export default function NewRequestPage() {
                         <Fragment key={s.supplier_id}>
                         <tr className={"border-b border-[#f5f7fa] cursor-pointer hover:bg-[#f8fafc] " + (selectedSuppliers.has(s.supplier_id) ? "bg-amber-50" : "")} onClick={() => toggleSupplier(s.supplier_id)}>
                           <td className="py-2"><input type="checkbox" checked={selectedSuppliers.has(s.supplier_id)} onChange={() => toggleSupplier(s.supplier_id)} className="w-4 h-4 accent-[#f0a500]" /></td>
-                          <td className="py-2"><p className="font-medium text-[#1a1a2e] flex items-center gap-2">{s.name}{s.supplier_type === "manufacturer" && <span className="inline-flex items-center px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-[10px] font-bold">Производитель</span>}{s.supplier_type === "dealer" && <span className="inline-flex items-center px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-bold">Дилер</span>}</p><p className="text-xs text-[#94a3b8]">{s.email}</p></td>
+                          <td className="py-2"><p className="font-medium text-[#1a1a2e] flex items-center gap-2 flex-wrap">{s.name}{s.supplier_type === "manufacturer" && <span className="inline-flex items-center px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-[10px] font-bold">Производитель</span>}{s.supplier_type === "dealer" && <span className="inline-flex items-center px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-bold">Дилер</span>}{s.moderation_status === "unverified" && <span className="inline-flex items-center px-1.5 py-0.5 bg-orange-100 text-orange-700 rounded text-[10px] font-bold" title="Поставщик ещё не прошёл модерацию">На проверке</span>}</p><p className="text-xs text-[#94a3b8]">{s.email}</p></td>
                           <td className="py-2 text-center">
                             <button onClick={(e) => { e.stopPropagation(); setExpandedSupplier(expandedSupplier === s.supplier_id ? null : s.supplier_id); }} className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full text-xs font-bold hover:bg-amber-200 transition">
                               {s.total_score.toFixed(0)}
@@ -363,6 +488,7 @@ export default function NewRequestPage() {
                   <button onClick={handleSendRfq} disabled={loading || selectedSuppliers.size === 0} className="flex-1 py-3.5 bg-[#27ae60] text-white rounded-xl font-bold text-base hover:bg-[#219a52] transition disabled:opacity-50">{loading ? "Отправляем..." : "Начать тендер (" + selectedSuppliers.size + ")"}</button>
                 </div>
               </div>
+            </div>
             </div>
           )}
         </div>

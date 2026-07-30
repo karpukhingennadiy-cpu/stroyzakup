@@ -1,0 +1,60 @@
+version: v2
+title: Минитендер.рф — как работает платформа
+size: [960, 540]
+theme:
+  colors:
+    navy: "#1A1A2E"
+    amber: "#F0A500"
+    amberdark: "#B97A00"
+    gray: "#64748B"
+    light: "#F5F6F8"
+    line: "#D9DEE6"
+    green: "#1E9E57"
+    red: "#C0392B"
+  textStyles:
+    pagetitle:
+      fontSize: 27
+      color: "$navy"
+      bold: true
+    h2:
+      fontSize: 16
+      bold: true
+      color: "$navy"
+    body:
+      fontSize: 13
+      color: "#333A47"
+      lineHeight: 1.45
+    small:
+      fontSize: 11
+      color: "$gray"
+      lineHeight: 1.35
+    node:
+      fontSize: 12.5
+      bold: true
+      color: "$navy"
+  tableStyles:
+    default:
+      cellStyle:
+        fontSize: 12
+        color: "#333A47"
+        align: [left, middle]
+        border: [null, null, {style: solid, width: 1, color: "$line"}, null]
+      firstRowStyle:
+        bold: true
+        color: "$navy"
+        fill: {type: solid, color: "$light"}
+        border: [null, null, {style: solid, width: 1.5, color: "$navy"}, null]
+pages:
+  - pages/01_cover.page
+  - pages/02_problem.page
+  - pages/03_cycle.page
+  - pages/04_parse.page
+  - pages/05_address.page
+  - pages/06_matching.page
+  - pages/07_rfq.page
+  - pages/08_quote.page
+  - pages/09_architecture.page
+  - pages/10_discovery.page
+  - pages/11_verified.page
+  - pages/12_run.page
+  - pages/13_roadmap.page

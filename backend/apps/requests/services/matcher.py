@@ -31,6 +31,7 @@ class SupplierMatch:
     product_match_score: float
     supplier_type: str
     total_score: float
+    moderation_status: str = "unverified"
 
     matched_categories: list[str] = field(default_factory=list)
     total_categories: int = 0
@@ -58,6 +59,7 @@ class SupplierMatch:
             "material_type_score": round(self.material_type_score, 1),
             "product_match_score": round(self.product_match_score, 1),
             "supplier_type": getattr(self, 'supplier_type', 'unknown'),
+            "moderation_status": getattr(self, 'moderation_status', 'unverified'),
             "source": getattr(self, 'source', 'seed'),
             "matched_categories": self.matched_categories,
             "matched_count": len(self.matched_categories),
@@ -165,6 +167,7 @@ def match_suppliers(request_obj, limit=20):
     suppliers = (
         Supplier.objects
         .filter(is_active=True)
+        .exclude(moderation_status="rejected")  # B4: rejected suppliers never match
         .prefetch_related("addresses", "supplier_categories__category")
     )
 
@@ -240,9 +243,14 @@ def match_suppliers(request_obj, limit=20):
 
         total = category_score + distance_score + rating_score + completeness + mfr_bonus + material_type_score + product_score
 
+        # B4: unverified suppliers get a dampening coefficient until moderated
+        if s.moderation_status == "unverified":
+            total *= 0.9
+
         matches.append(SupplierMatch(
             supplier_id=s.id,
             supplier_type=s.supplier_type,
+            moderation_status=getattr(s, "moderation_status", "unverified"),
             source=getattr(s, "source", "seed"),
             name=s.name,
             email=s.email,

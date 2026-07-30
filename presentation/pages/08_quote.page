@@ -1,0 +1,92 @@
+pageType: content
+background:
+  type: solid
+  color: "#FFFFFF"
+elements:
+  - elementId: title
+    elementType: text
+    bounds: [60, 36, 840, 40]
+    content: {style: "$pagetitle", text: "Шаг 6 · КП поставщика и конкурентный лист"}
+  - elementId: title-bar
+    elementType: shape
+    bounds: [60, 80, 48, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$amber"}
+  - elementId: left-head
+    elementType: text
+    bounds: [60, 108, 430, 22]
+    content: {style: "$h2", text: "Что видит поставщик по ссылке"}
+  - elementId: left-body
+    elementType: text
+    bounds: [60, 136, 430, 160]
+    content:
+      style: "$body"
+      text: |
+        <p>Публичная страница <strong>/quote/{token}</strong> — регистрация не нужна:</p>
+        <p style="margin-top:8px">— позиции заявки с количеством и характеристиками</p>
+        <p>— адрес доставки и срок подачи КП</p>
+        <p>— цена по каждой позиции, флаг «аналог» + бренд</p>
+        <p>— стоимость и срок доставки, условия оплаты, комментарий</p>
+        <p style="margin-top:8px">Повторный переход по ссылке показывает уже отправленное КП — можно исправить.</p>
+  - elementId: right-head
+    elementType: text
+    bounds: [540, 108, 380, 22]
+    content: {style: "$h2", text: "Что получает заказчик"}
+  - elementId: right-body
+    elementType: text
+    bounds: [540, 136, 380, 160]
+    content:
+      style: "$body"
+      text: |
+        <p><strong>Конкурентный лист</strong> собирается автоматически:</p>
+        <p style="margin-top:8px">— итог по материалам: Σ цена × количество</p>
+        <p>— + доставка → grand total по каждому</p>
+        <p>— сортировка от дешёвого к дорогому</p>
+        <p>— <strong>лучший поставщик</strong> выделяется отдельно</p>
+        <p style="margin-top:8px">Все КП в одном формате — сравнение честное, «под диктовку в мессенджере» больше нет.</p>
+  - elementId: divider-v
+    elementType: shape
+    bounds: [510, 108, 1, 190]
+    shapeName: rect
+    fill: {type: solid, color: "$line"}
+  - elementId: bottom-rule
+    elementType: shape
+    bounds: [60, 322, 840, 1]
+    shapeName: rect
+    fill: {type: solid, color: "$line"}
+  - elementId: ex-head
+    elementType: text
+    bounds: [60, 340, 840, 22]
+    content: {style: "$h2", text: "Пример из сквозного теста (30.07.2026)"}
+  - elementId: ex-table
+    elementType: table
+    bounds: [60, 370, 840, 110]
+    columnWidths: [0.3, 0.18, 0.14, 0.16, 0.22]
+    rowHeights: [0.34, 0.33, 0.33]
+    style: "$default"
+    rows:
+      - - text: "Поставщик"
+        - text: "Материалы"
+        - text: "Доставка"
+        - text: "Итого"
+        - text: "Условия"
+      - - text: "ООО «ЮгБрусчатка» (производитель)"
+        - text: "170 000 ₽"
+        - text: "5 000 ₽"
+        - text: "175 000 ₽  ← лучший"
+          bold: true
+          color: "$green"
+        - text: "3 дня · 50% предоплата"
+      - - text: "…остальные КП по мере ответов"
+        - text: "—"
+        - text: "—"
+        - text: "—"
+        - text: "—"
+  - elementId: footer
+    elementType: text
+    bounds: [60, 505, 400, 18]
+    content: {style: "$small", text: "Минитендер.рф · v1.0.0"}
+  - elementId: pagenum
+    elementType: text
+    bounds: [880, 505, 40, 18]
+    content: {style: "$small", align: [right, top], text: "08"}

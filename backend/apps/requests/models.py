@@ -74,4 +74,5 @@ class RequestItem(models.Model):
     material_type = models.CharField(max_length=200, blank=True, db_index=True)
     confidence = models.FloatField(default=0.0)
     is_confirmed = models.BooleanField(default=False)
+    clarification_question = models.TextField(blank=True)  # B6: LLM follow-up question
     class Meta: db_table = "request_items"

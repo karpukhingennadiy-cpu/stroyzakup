@@ -120,6 +120,13 @@ EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="Минитендер RFQ <rfq@xn--d1abbjawic3ap.xn--p1ai>")
 INBOUND_EMAIL_DOMAIN = config("INBOUND_EMAIL_DOMAIN", default="in.xn--d1abbjawic3ap.xn--p1ai")
 
+# B1: IMAP polling for supplier replies
+INBOUND_IMAP_HOST = config("INBOUND_IMAP_HOST", default="")
+INBOUND_IMAP_PORT = config("INBOUND_IMAP_PORT", default=993, cast=int)
+INBOUND_IMAP_USER = config("INBOUND_IMAP_USER", default="")
+INBOUND_IMAP_PASSWORD = config("INBOUND_IMAP_PASSWORD", default="")
+INBOUND_IMAP_FOLDER = config("INBOUND_IMAP_FOLDER", default="INBOX")
+
 # Whitenoise
 STORAGES={"staticfiles":{"BACKEND":"whitenoise.storage.CompressedManifestStaticFilesStorage"}}
 # Frontend URL

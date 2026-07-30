@@ -9,10 +9,12 @@ class QuoteViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        # IDOR fix: always scope to the authenticated customer's requests
+        qs = Quote.objects.filter(request__customer=self.request.user)
         request_id = self.request.query_params.get('request_id')
         if request_id:
-            return Quote.objects.filter(request_id=request_id)
-        return Quote.objects.filter(request__customer=self.request.user)
+            qs = qs.filter(request_id=request_id)
+        return qs
 
     @decorators.action(detail=False, methods=['get'])
     def competitive_sheet(self, request):
@@ -20,7 +22,15 @@ class QuoteViewSet(viewsets.ModelViewSet):
         if not request_id:
             return Response({'error': 'request_id required'}, status=400)
 
-        quotes = Quote.objects.filter(request_id=request_id, status__in=['received', 'valid'])
+        # IDOR fix: only the request owner may see its competitive sheet
+        from apps.requests.models import Request as ReqModel
+        if not ReqModel.objects.filter(id=request_id, customer=request.user).exists():
+            return Response({'error': 'Request not found'}, status=404)
+
+        quotes = Quote.objects.filter(
+            request_id=request_id, request__customer=request.user,
+            status__in=['received', 'valid'],
+        )
         items = []
         from decimal import Decimal
         for quote in quotes:
@@ -108,6 +118,17 @@ def public_quote(request, token):
 
     elif request.method == "POST":
         data = request.data
+        # Validation: at least one item, all prices strictly positive
+        items_payload = data.get("items") or []
+        if not items_payload:
+            return Response({"error": "items required"}, status=http_status.HTTP_400_BAD_REQUEST)
+        for item_data in items_payload:
+            try:
+                price = float(item_data.get("price", 0))
+            except (TypeError, ValueError):
+                return Response({"error": "price must be a number"}, status=http_status.HTTP_400_BAD_REQUEST)
+            if price <= 0:
+                return Response({"error": "price must be positive"}, status=http_status.HTTP_400_BAD_REQUEST)
         quote, created = Quote.objects.update_or_create(
             request=req, supplier=invitation.supplier, invitation=invitation,
             defaults={
@@ -139,4 +160,11 @@ def public_quote(request, token):
             QuoteItem.objects.filter(id__in=to_delete).delete()
         invitation.status = "replied"
         invitation.save(update_fields=["status"])
+        # B7: notify the customer about the received quote
+        try:
+            from apps.emails.services import notify_customer_quote_received
+            notify_customer_quote_received(quote)
+        except Exception:
+            import logging
+            logging.getLogger(__name__).exception("Customer notification failed")
         return Response({"status": "ok", "quote_id": quote.id, "message": "Quote submitted successfully"})

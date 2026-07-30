@@ -74,7 +74,10 @@ class RequestViewSet(viewsets.ModelViewSet):
         # FIX: clear prefetch cache so serializer sees newly created items
         if hasattr(req, '_prefetched_objects_cache'):
             req._prefetched_objects_cache.pop('items', None)
-        return Response(RequestSerializer(req).data)
+        # B6: return clarifications so the UI can show follow-up questions
+        data = RequestSerializer(req).data
+        data["clarifications"] = result.get("clarifications", [])
+        return Response(data)
 
     @decorators.action(detail=True, methods=["post"])
     def confirm(self, request, pk=None):
@@ -125,7 +128,12 @@ class RequestViewSet(viewsets.ModelViewSet):
     @decorators.action(detail=True, methods=["post"])
     def match_suppliers(self, request, pk=None):
         req = self.get_object()
-        limit = request.data.get("limit", 20)
+        try:
+            limit = int(request.data.get("limit", 20))
+        except (TypeError, ValueError):
+            return Response({"error": "limit must be an integer"},
+                            status=status.HTTP_400_BAD_REQUEST)
+        limit = max(1, min(limit, 100))
         if req.status not in ("parsed", "confirmed", "matched", "matching", "parsing", "draft", "rfq_sent", "rfq_failed"):
             return Response(
                 {"error": "Cannot match in current status"},
