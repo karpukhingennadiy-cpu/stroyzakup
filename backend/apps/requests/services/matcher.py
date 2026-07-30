@@ -84,9 +84,21 @@ def _haversine(lat1, lon1, lat2, lon2):
     return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
 
+def _word_match(a: str, b: str) -> bool:
+    """Whole-word match either direction. Prevents false positives like
+    'лист' inside 'лиственница'. Short terms (<4 chars) require exact equality."""
+    import re
+    if len(a) < 4 or len(b) < 4:
+        return a == b
+    return bool(
+        re.search(r"\b" + re.escape(a) + r"\b", b)
+        or re.search(r"\b" + re.escape(b) + r"\b", a)
+    )
+
+
 def _product_match(request_terms, supplier):
     """Check if any request term appears in supplier's product catalog.
-    
+
     Returns (matched: bool, score: float, matched_term: str)
     - If supplier has product_keywords/description and no match -> (False, 0, "")
     - If supplier has product_keywords/description and match -> (True, 20, term)
@@ -94,22 +106,24 @@ def _product_match(request_terms, supplier):
     """
     keywords = [k.lower().strip() for k in (supplier.product_keywords or []) if k]
     description = (supplier.product_description or "").lower()
-    
+
     # If supplier has no catalog data at all, allow them (backward compatibility)
     if not keywords and not description.strip():
         return True, 0.0, "нет данных об ассортименте"
-    
-    # Check product_keywords
+
+    # Check product_keywords (whole-word matching)
     for term in request_terms:
         for kw in keywords:
-            if term in kw or kw in term:
+            if _word_match(term, kw):
                 return True, 20.0, term
-    
-    # Check product_description
+
+    # Check product_description (whole-word)
     for term in request_terms:
-        if term in description:
-            return True, 20.0, term
-    
+        if len(term) >= 4:
+            import re
+            if re.search(r"\b" + re.escape(term) + r"\b", description):
+                return True, 20.0, term
+
     # No match found in catalog -> reject
     return False, 0.0, ""
 
@@ -124,16 +138,15 @@ def match_suppliers(request_obj, limit=20):
         return []
 
     # Collect search terms from request items (material_type, name, category name)
+    # + AI-expanded synonyms from material_intel (canonical name, market synonyms)
+    from apps.requests.services.material_intel import expand_terms_for_item
     request_material_types = set()
     request_terms = set()  # All terms to search in supplier catalog
     for item in items:
         mt = (item.material_type or "").strip().lower()
         if mt:
             request_material_types.add(mt)
-            request_terms.add(mt)
-        name = (item.name or "").strip().lower()
-        if name and len(name) > 2:
-            request_terms.add(name)
+        request_terms |= expand_terms_for_item(item.name, mt)
         # Add category name if available
         if item.category:
             cat_name = (item.category.name or "").strip().lower()

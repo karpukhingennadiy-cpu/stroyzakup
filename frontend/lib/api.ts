@@ -54,6 +54,14 @@ export async function api(path: string, options?: Record<string, any>): Promise<
       res = await fetch(API_BASE + path, Object.assign({}, options, { headers }));
     }
   }
+  // Session expired and refresh failed -> back to login instead of a dead error
+  if (res.status === 401) {
+    clearTokens();
+    if (typeof window !== "undefined" && !window.location.pathname.startsWith("/login")) {
+      window.location.href = "/login";
+    }
+    throw new Error("Сессия истекла. Войдите снова.");
+  }
   if (!res.ok) {
     let errorData: ApiError = {};
     try { errorData = await res.json(); } catch { errorData = { detail: res.statusText }; }

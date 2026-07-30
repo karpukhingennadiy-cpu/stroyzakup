@@ -48,6 +48,20 @@ class Request(models.Model):
         ordering = ["-created_at"]
     def __str__(self): return f"RFQ-{self.code}"
 
+class MaterialProfile(models.Model):
+    """LLM-analyzed material knowledge: what the material is, its synonyms,
+    and who typically produces/supplies it. Cached per normalized query."""
+    query = models.CharField(max_length=300, unique=True, db_index=True)
+    canonical_name = models.CharField(max_length=300, blank=True)
+    material_type = models.CharField(max_length=200, blank=True, db_index=True)
+    category_hint = models.CharField(max_length=100, blank=True)
+    synonyms = models.JSONField(default=list, blank=True)
+    search_queries = models.JSONField(default=list, blank=True)
+    supplier_hints = models.JSONField(default=list, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    class Meta: db_table = "material_profiles"
+    def __str__(self): return f"{self.query} → {self.canonical_name}"
+
 class RequestItem(models.Model):
     request = models.ForeignKey(Request, on_delete=models.CASCADE, related_name="items")
     raw_text = models.TextField()

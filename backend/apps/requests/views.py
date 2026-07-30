@@ -137,6 +137,19 @@ class RequestViewSet(viewsets.ModelViewSet):
         # Sync-only in dev: no Celery async, immediate result
         from .services.matcher import match_suppliers
         matches = match_suppliers(req, limit)
+
+        # Auto-discovery: too few suppliers -> search new ones online, then re-match
+        discovered = 0
+        if len(matches) < 5:
+            from .services.websearch import discover_suppliers_for_request
+            try:
+                discovered = discover_suppliers_for_request(req)
+                if discovered:
+                    matches = match_suppliers(req, limit)
+            except Exception:
+                import logging
+                logging.getLogger(__name__).exception("Auto-discovery failed")
+
         req.status = "matched"
         req.save(update_fields=["status"])
         return Response(
@@ -144,6 +157,7 @@ class RequestViewSet(viewsets.ModelViewSet):
                 "status": "matched",
                 "suppliers": matches,
                 "count": len(matches),
+                "discovered": discovered,
                 "request": RequestSerializer(req).data,
             }
         )

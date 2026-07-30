@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { createRequest, matchSuppliers, sendRfq, api, geocodeAddress } from "@/lib/api";
@@ -323,8 +323,8 @@ export default function NewRequestPage() {
                     </tr></thead>
                     <tbody>
                       {filteredSuppliers.map(s => (
-                        <>
-                        <tr key={s.supplier_id} className={"border-b border-[#f5f7fa] cursor-pointer hover:bg-[#f8fafc] " + (selectedSuppliers.has(s.supplier_id) ? "bg-amber-50" : "")} onClick={() => toggleSupplier(s.supplier_id)}>
+                        <Fragment key={s.supplier_id}>
+                        <tr className={"border-b border-[#f5f7fa] cursor-pointer hover:bg-[#f8fafc] " + (selectedSuppliers.has(s.supplier_id) ? "bg-amber-50" : "")} onClick={() => toggleSupplier(s.supplier_id)}>
                           <td className="py-2"><input type="checkbox" checked={selectedSuppliers.has(s.supplier_id)} onChange={() => toggleSupplier(s.supplier_id)} className="w-4 h-4 accent-[#f0a500]" /></td>
                           <td className="py-2"><p className="font-medium text-[#1a1a2e] flex items-center gap-2">{s.name}{s.supplier_type === "manufacturer" && <span className="inline-flex items-center px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-[10px] font-bold">Производитель</span>}{s.supplier_type === "dealer" && <span className="inline-flex items-center px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-bold">Дилер</span>}</p><p className="text-xs text-[#94a3b8]">{s.email}</p></td>
                           <td className="py-2 text-center">
@@ -353,7 +353,7 @@ export default function NewRequestPage() {
                             </td>
                           </tr>
                         )}
-                        </>
+                        </Fragment>
                       ))}
                     </tbody>
                   </table>

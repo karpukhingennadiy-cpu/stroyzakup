@@ -210,9 +210,21 @@ def discover_suppliers_for_request(request_obj) -> int:
     seen_names = set(Supplier.objects.values_list("name", flat=True))
 
     for item in items:
-        logger.info(f"Discovering: {item.name} in {city or 'Moscow'}")
-        found = search_suppliers_for_material(item.name, city or "Moscow")
-        time.sleep(0.5)
+        # AI preprocessing: what is this material + best queries + who supplies it
+        from apps.requests.services.material_intel import analyze_material, search_queries_for_item
+        from apps.suppliers.services import fill_supplier_catalog
+
+        profile = analyze_material(item.name)
+        extra_kw = [k for k in [item.material_type, profile.get("material_type"), item.name]
+                    if k] + (profile.get("synonyms") or [])
+
+        found = []
+        for q in search_queries_for_item(item.name, fallback_query=item.name):
+            logger.info(f"Discovering: {q} in {city or 'Moscow'}")
+            found.extend(search_suppliers_for_material(q, city or "Moscow"))
+            time.sleep(0.5)
+            if len(found) >= 8:
+                break
 
         for sup_data in found:
             name = (sup_data.get("name") or "").strip()
@@ -249,14 +261,37 @@ def discover_suppliers_for_request(request_obj) -> int:
             if created:
                 sup_city = sup_data.get("city") or city
                 if sup_city:
+                    addr_defaults = {"address": sup_city, "city": sup_city}
+                    # Geocode city so the supplier participates in distance scoring
+                    try:
+                        from .geocoder import geocode
+                        geo = geocode(sup_city)
+                        if geo:
+                            addr_defaults.update({
+                                "latitude": geo[0], "longitude": geo[1],
+                                "city": geo[2] or sup_city,
+                            })
+                    except Exception:
+                        pass
                     SupplierAddress.objects.get_or_create(
                         supplier=supplier,
-                        defaults={"address": sup_city, "city": sup_city}
+                        defaults=addr_defaults,
                     )
                 if item.category:
                     SupplierCategory.objects.get_or_create(
                         supplier=supplier, category=item.category
                     )
+                # Enrich immediately: material_types from the request item +
+                # rule-based catalog from categories + synonyms as keywords.
+                mts = list(dict.fromkeys(
+                    m.strip().lower()
+                    for m in [item.material_type, profile.get("material_type")]
+                    if m and m.strip()
+                ))
+                if mts:
+                    supplier.material_types = mts
+                    supplier.save(update_fields=["material_types"])
+                fill_supplier_catalog(supplier, extra_keywords=extra_kw)
                 new_count += 1
                 logger.info(f"  + [{src}] {name} ({sup_city})")
 
