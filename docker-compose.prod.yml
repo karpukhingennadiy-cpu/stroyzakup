@@ -28,7 +28,16 @@ services:
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.prod
       DB_HOST: db
+      DB_NAME: ${DB_NAME:-minitender}
+      DB_USER: ${DB_USER:-minitender}
+      DB_PASSWORD: ${DB_PASSWORD:-minitender}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      DADATA_TOKEN: ${DADATA_TOKEN:-}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
+      YANDEX_GEOCODER_KEY: ${YANDEX_GEOCODER_KEY:-}
       REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
+      SECURE_SSL_REDIRECT: ${SECURE_SSL_REDIRECT:-false}
       SECRET_KEY: ${SECRET_KEY}
     depends_on:
       db:
@@ -44,7 +53,15 @@ services:
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.prod
       DB_HOST: db
+      DB_NAME: ${DB_NAME:-minitender}
+      DB_USER: ${DB_USER:-minitender}
+      DB_PASSWORD: ${DB_PASSWORD:-minitender}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      DADATA_TOKEN: ${DADATA_TOKEN:-}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
+      YANDEX_GEOCODER_KEY: ${YANDEX_GEOCODER_KEY:-}
       REDIS_URL: redis://redis:6379/0
+      CELERY_BROKER_URL: redis://redis:6379/0
       SECRET_KEY: ${SECRET_KEY}
     depends_on:
       - db

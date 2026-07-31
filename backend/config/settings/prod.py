@@ -4,11 +4,14 @@ DEBUG = False
 
 SECRET_KEY = config("SECRET_KEY")
 
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="минитендер.рф,app.минитендер.рф", cast=Csv())
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="минитендер.рф,app.минитендер.рф,localhost,127.0.0.1", cast=Csv())
+
+# Геоданные хранятся в Float-полях — django.contrib.gis и GDAL не нужны
+INSTALLED_APPS = [app for app in INSTALLED_APPS if app != "django.contrib.gis"]
 
 # Security
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", default=True, cast=bool)
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_HSTS_SECONDS = 31536000
@@ -32,10 +35,10 @@ EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="Минитендер RFQ <rfq@xn--d1abbjawic3ap.xn--p1ai>")
 INBOUND_EMAIL_DOMAIN = config("INBOUND_EMAIL_DOMAIN", default="in.xn--d1abbjawic3ap.xn--p1ai")
 
-# Database — use PostgreSQL in production
+# Database — PostgreSQL in production (без PostGIS: координаты — FloatField)
 DATABASES = {
     "default": {
-        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "ENGINE": "django.db.backends.postgresql",
         "NAME": config("DB_NAME", default="minitender"),
         "USER": config("DB_USER", default="minitender"),
         "PASSWORD": config("DB_PASSWORD", default=""),

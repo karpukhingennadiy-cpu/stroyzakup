@@ -138,30 +138,30 @@ class TestSendRfqNegative:
         req_id = create_request(client_a)
         client_a.post(f"/api/requests/{req_id}/parse/")
         client_a.post(f"/api/requests/{req_id}/match_suppliers/")
-        r = client_a.post(f"/api/requests/{req_id}/send_rfq/", {"supplier_ids": []})
+        r = client_a.post(f"/api/requests/{req_id}/send_rfq/", {"supplier_ids": []}, format="json")
         assert r.status_code == 400
 
     def test_nonexistent_supplier_ids(self, client_a):
         req_id = create_request(client_a)
         client_a.post(f"/api/requests/{req_id}/parse/")
         client_a.post(f"/api/requests/{req_id}/match_suppliers/")
-        r = client_a.post(f"/api/requests/{req_id}/send_rfq/", {"supplier_ids": [999999]})
+        r = client_a.post(f"/api/requests/{req_id}/send_rfq/", {"supplier_ids": [999999]}, format="json")
         assert r.status_code == 200
         assert all(x["status"] != "sent" for x in r.data["results"])
         assert r.data["status"] == "rfq_failed"
 
     def test_supplier_without_email_skipped(self, client_a):
         req_id, sup = self._setup(client_a)
-        r = client_a.post(f"/api/requests/{req_id}/send_rfq/", {"supplier_ids": [sup.id]})
+        r = client_a.post(f"/api/requests/{req_id}/send_rfq/", {"supplier_ids": [sup.id]}, format="json")
         assert r.status_code == 200
         assert r.data["results"][0]["status"] == "skipped"
 
     def test_repeat_send_rfq_does_not_break(self, client_a):
         req_id, sup = self._setup(client_a, email="repeat@t.ru")
         Request.objects.filter(id=req_id).update(status="matched")
-        r1 = client_a.post(f"/api/requests/{req_id}/send_rfq/", {"supplier_ids": [sup.id]})
+        r1 = client_a.post(f"/api/requests/{req_id}/send_rfq/", {"supplier_ids": [sup.id]}, format="json")
         assert r1.status_code == 200
-        r2 = client_a.post(f"/api/requests/{req_id}/send_rfq/", {"supplier_ids": [sup.id]})
+        r2 = client_a.post(f"/api/requests/{req_id}/send_rfq/", {"supplier_ids": [sup.id]}, format="json")
         assert r2.status_code == 200
 
 

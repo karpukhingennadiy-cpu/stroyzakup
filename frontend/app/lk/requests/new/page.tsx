@@ -254,9 +254,18 @@ export default function NewRequestPage() {
     try {
       setStage("send");
       const result = await sendRfq(requestId, Array.from(selectedSuppliers));
-      setSentCount(result.sent || 0);
+      // Backend returns {status, results[]} — count actual sends and skips
+      const results = result.results || [];
+      const sent = results.filter((r: any) => r.status === "sent").length;
+      const skipped = results.filter((r: any) => r.status === "skipped" || r.status === "needs_review").length;
+      setSentCount(sent);
+      if (sent === 0) {
+        setError(skipped > 0
+          ? `Письма не отправлены: у ${skipped} поставщик(ов) нет валидного email или письмо на модерации`
+          : "Письма не отправлены");
+      }
       // Draft no longer needed once the tender is launched
-      try { localStorage.removeItem(DRAFT_KEY); } catch { /* non-fatal */ }
+      if (sent > 0) { try { localStorage.removeItem(DRAFT_KEY); } catch { /* non-fatal */ } }
     } catch (e: any) { setError(e.message); }
     finally { setLoading(false); setStage(""); }
   };

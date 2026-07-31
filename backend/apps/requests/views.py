@@ -194,6 +194,12 @@ class RequestViewSet(viewsets.ModelViewSet):
     def send_rfq(self, request, pk=None):
         req = self.get_object()
         supplier_ids = request.data.get("supplier_ids", [])
+        # Robustness: multipart forms deliver repeated fields, not a JSON list
+        if isinstance(supplier_ids, (str, int)):
+            if hasattr(request.data, "getlist"):
+                supplier_ids = request.data.getlist("supplier_ids")
+            else:
+                supplier_ids = [supplier_ids]
         if not supplier_ids:
             return Response(
                 {"error": "supplier_ids required"},

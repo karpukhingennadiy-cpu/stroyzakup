@@ -92,12 +92,12 @@ export default function SuppliersPage() {
 
   return (
     <div>
-      <div className="mb-8 flex items-start justify-between">
+      <div className="mb-8 flex flex-col sm:flex-row gap-4 items-start sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-[#1a1a2e]">Поставщики</h1>
           <p className="text-[#64748b] mt-1">База проверенных поставщиков стройматериалов</p>
         </div>
-        <button onClick={() => setShowAddForm(!showAddForm)} className="flex items-center gap-2 px-5 py-3 bg-[#f0a500] text-[#1a1a2e] rounded-xl font-bold hover:bg-[#fcc419] transition">
+        <button onClick={() => setShowAddForm(!showAddForm)} className="flex items-center gap-2 px-5 py-3 bg-[#f0a500] text-[#1a1a2e] rounded-xl font-bold hover:bg-[#fcc419] transition shrink-0">
           <IconPlus className="w-4 h-4" /> Добавить поставщика
         </button>
       </div>

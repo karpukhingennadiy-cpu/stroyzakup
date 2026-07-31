@@ -16,6 +16,7 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     getMe()
@@ -23,6 +24,9 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
       .catch(() => { clearTokens(); router.push("/login"); })
       .finally(() => setLoading(false));
   }, []);
+
+  // Close the mobile menu on navigation
+  useEffect(() => { setMenuOpen(false); }, [pathname]);
 
   const handleLogout = () => { clearTokens(); router.push("/"); };
 
@@ -36,7 +40,29 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex bg-[#f5f7fa]">
-      <aside className="w-64 bg-[#1a1a2e] text-white flex flex-col fixed inset-y-0 left-0 z-40">
+      {/* Mobile top bar */}
+      <div className="md:hidden fixed top-0 inset-x-0 z-50 h-14 bg-[#1a1a2e] text-white flex items-center gap-3 px-4">
+        <button onClick={() => setMenuOpen(!menuOpen)} aria-label="Меню"
+          className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/10 transition text-xl leading-none">
+          {menuOpen ? "✕" : "☰"}
+        </button>
+        <Link href="/" className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-[#f0a500] flex items-center justify-center">
+            <IconHardHat className="w-4 h-4 text-[#1a1a2e]" />
+          </div>
+          <span className="font-bold tracking-tight">Минитендер</span>
+        </Link>
+      </div>
+
+      {/* Backdrop for mobile menu */}
+      {menuOpen && (
+        <div className="md:hidden fixed inset-0 z-40 bg-black/40" onClick={() => setMenuOpen(false)} />
+      )}
+
+      <aside className={
+        "w-64 bg-[#1a1a2e] text-white flex flex-col fixed inset-y-0 left-0 z-40 transition-transform duration-200 " +
+        (menuOpen ? "translate-x-0" : "-translate-x-full") + " md:translate-x-0"
+      }>
         <div className="p-6 border-b border-white/10">
           <Link href="/" className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-[#f0a500] flex items-center justify-center">
@@ -69,7 +95,7 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
           </button>
         </div>
       </aside>
-      <main className="flex-1 ml-64 p-8">{children}</main>
+      <main className="flex-1 md:ml-64 p-4 pt-20 md:p-8 w-full min-w-0">{children}</main>
     </div>
   );
 }
