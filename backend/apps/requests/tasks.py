@@ -56,7 +56,8 @@ def match_suppliers_task(self, request_id, limit=20):
         matches = match_suppliers(req)
         req.refresh_from_db()
         req.status = "matched"
-        req.save(update_fields=["status"])
+        req.match_results = {"suppliers": matches, "count": len(matches), "discovered": 0}
+        req.save(update_fields=["status", "match_results"])
 
         return {"status": "ok", "count": len(matches)}
     except Exception as exc:

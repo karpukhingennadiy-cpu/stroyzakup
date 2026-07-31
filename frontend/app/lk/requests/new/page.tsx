@@ -70,6 +70,17 @@ const STAGE_LABELS: Record<string, string> = {
 
 const UNITS = ["m2", "m3", "kg", "ton", "bag", "piece", "pack", "roll", "pog_m", "liter", "sht"];
 
+// B2: poll request status while a Celery task is running (202 mode)
+async function pollUntilDone(requestId: number, pendingStatuses: string[], timeoutSec: number): Promise<any> {
+  const deadline = Date.now() + timeoutSec * 1000;
+  while (Date.now() < deadline) {
+    await new Promise((r) => setTimeout(r, 2000));
+    const req = await api("/requests/" + requestId + "/");
+    if (!pendingStatuses.includes(req.status)) return req;
+  }
+  throw new Error("Превышено время ожидания обработки");
+}
+
 export default function NewRequestPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
@@ -149,7 +160,11 @@ export default function NewRequestPage() {
       setRequestId(req.id);
       setStage("parse");
       try {
-        const parsed = await api("/requests/" + req.id + "/parse/", { method: "POST" });
+        let parsed = await api("/requests/" + req.id + "/parse/", { method: "POST" });
+        // B2: async mode (202 + task_id) — poll until parsing finishes
+        if (parsed.status === "parsing" && parsed.task_id) {
+          parsed = await pollUntilDone(req.id, ["parsing"], 90);
+        }
         // B6: show LLM follow-up questions for low-confidence items
         const unclear = (parsed.items || []).filter(
           (i: ParsedItem) => i.clarification_question || i.needs_clarification
@@ -212,7 +227,12 @@ export default function NewRequestPage() {
         body: JSON.stringify({ delivery_address: deliveryAddr, latitude: deliveryLat, longitude: deliveryLon }),
       });
       setStage("match");
-      const result = await matchSuppliers(requestId, supplierLimit);
+      let result = await matchSuppliers(requestId, supplierLimit);
+      // B2: async mode (202 + task_id) — poll until matching finishes
+      if (result.status === "matching" && result.task_id) {
+        const done = await pollUntilDone(requestId, ["matching"], 120);
+        result = { ...result, ...(done.match_results || {}), status: done.status };
+      }
       setSuppliers(result.suppliers || []);
       setDiscoveredCount(result.discovered || 0);
       setStep(3);

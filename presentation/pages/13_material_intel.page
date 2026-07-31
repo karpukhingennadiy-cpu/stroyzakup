@@ -1,0 +1,99 @@
+pageType: content
+background:
+  type: solid
+  color: "#FFFFFF"
+elements:
+  - elementId: title
+    elementType: text
+    bounds: [60, 36, 840, 40]
+    content: {style: "$pagetitle", text: "MaterialIntel: ИИ понимает материалы, а не просто слова"}
+  - elementId: title-bar
+    elementType: shape
+    bounds: [60, 80, 48, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$amber"}
+  - elementId: lead
+    elementType: text
+    bounds: [60, 104, 840, 22]
+    content: {style: "$h2", text: "Каждый материал получает профиль знания — один раз анализируется, дальше работает кэш"}
+  - elementId: f1-box
+    elementType: shape
+    bounds: [60, 140, 260, 96]
+    shapeName: rect
+    fill: {type: solid, color: "$light"}
+    border: {style: solid, width: 1, color: "$navy"}
+  - elementId: f1-tag
+    elementType: text
+    bounds: [72, 148, 236, 16]
+    content: {fontSize: 11, bold: true, color: "$amberdark", text: "ПРОФИЛЬ МАТЕРИАЛА"}
+  - elementId: f1-txt
+    elementType: text
+    bounds: [72, 168, 236, 60]
+    content: {style: "$small", text: "LLM определяет каноническое название, material_type, синонимы и поисковые запросы. Кэшируется в MaterialProfile — повторный анализ не нужен."}
+  - elementId: f2-box
+    elementType: shape
+    bounds: [352, 140, 260, 96]
+    shapeName: rect
+    fill: {type: solid, color: "#FFFFFF"}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: f2-tag
+    elementType: text
+    bounds: [364, 148, 236, 16]
+    content: {fontSize: 11, bold: true, color: "$gray", text: "УСТОЙЧИВОСТЬ К ВВОДУ"}
+  - elementId: f2-txt
+    elementType: text
+    bounds: [364, 168, 236, 60]
+    content: {style: "$small", text: "Опечатки («бурсчатка»), латиница («bruschatka»), разговорные единицы («куб бетона», «пачка», «штук») — нормализуются в каталог."}
+  - elementId: f3-box
+    elementType: shape
+    bounds: [644, 140, 256, 96]
+    shapeName: rect
+    fill: {type: solid, color: "#FFFFFF"}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: f3-tag
+    elementType: text
+    bounds: [656, 148, 232, 16]
+    content: {fontSize: 11, bold: true, color: "$gray", text: "МАРШРУТИЗАЦИЯ КАТЕГОРИЙ"}
+  - elementId: f3-txt
+    elementType: text
+    bounds: [656, 168, 232, 60]
+    content: {style: "$small", text: "Жёсткие правила в промте: газоблок → Блоки (не Бетон), профнастил → Кровля, песок → Нерудные. Whitelist 35+ категорий."}
+  - elementId: m-head
+    elementType: text
+    bounds: [60, 262, 840, 22]
+    content: {style: "$h2", text: "Проверено на реальных формулировках закупок"}
+  - elementId: m-table
+    elementType: table
+    bounds: [60, 292, 840, 150]
+    columnWidths: [0.36, 0.2, 0.23, 0.21]
+    rowHeights: [0.167, 0.167, 0.167, 0.167, 0.166, 0.166]
+    style: "$default"
+    rows:
+      - - text: "Вход заказчика"
+        - text: "Категория"
+        - text: "material_type"
+        - text: "Результат"
+      - - text: "бурсчатка 100х200 серая - 200 м2"
+        - text: "Брусчатка"
+        - text: "брусчатка"
+        - text: "✓ верно"
+      - - text: "куб бетона М300"
+        - text: "Бетон"
+        - text: "бетон товарный"
+        - text: "✓ верно"
+      - - text: "газоблок D500 625х250х400"
+        - text: "Блоки"
+        - text: "газоблок"
+        - text: "✓ верно"
+      - - text: "пачка гипсокартона 12.5мм"
+        - text: "Гипсокартон"
+        - text: "гипсокартон"
+        - text: "✓ верно"
+      - - text: "bruschatka - 50 m2"
+        - text: "Брусчатка"
+        - text: "брусчатка"
+        - text: "✓ верно"
+  - elementId: m-note
+    elementType: text
+    bounds: [60, 456, 840, 40]
+    content: {style: "$small", text: "Матрица из 20 формулировок (docs/QA_PARSE_MATRIX.md): точность категоризации 100% (20/20) при цели ≥ 85%. Провалы превращаются в правила промта и словарей — матрица перезапускается после каждой доработки."}

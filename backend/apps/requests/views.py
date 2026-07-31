@@ -1,6 +1,7 @@
 # backend/apps/requests/views.py
 from rest_framework import viewsets, status, decorators, permissions
 from rest_framework.response import Response
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 from .models import Request, RequestItem
 from .serializers import (
@@ -62,7 +63,16 @@ class RequestViewSet(viewsets.ModelViewSet):
         req.status = "parsing"
         req.save(update_fields=["status"])
 
-        # Sync-only in dev: no Celery async, immediate result
+        # B2: async via Celery when enabled (202 + task_id), sync fallback otherwise
+        if getattr(settings, "USE_CELERY", False):
+            from .tasks import parse_request_task
+            task = parse_request_task.delay(req.id)
+            return Response(
+                {"status": "parsing", "task_id": task.id,
+                 "request": RequestSerializer(req).data},
+                status=status.HTTP_202_ACCEPTED,
+            )
+
         result = parse_material_list(req)
         if "error" in result:
             # FIX-K1: 'parse_failed' → 'draft' (такого статуса нет в модели)
@@ -142,7 +152,16 @@ class RequestViewSet(viewsets.ModelViewSet):
         req.status = "matching"
         req.save(update_fields=["status"])
 
-        # Sync-only in dev: no Celery async, immediate result
+        # B2: async via Celery when enabled (202 + task_id), sync fallback otherwise
+        if getattr(settings, "USE_CELERY", False):
+            from .tasks import match_suppliers_task
+            task = match_suppliers_task.delay(req.id, limit)
+            return Response(
+                {"status": "matching", "task_id": task.id,
+                 "request": RequestSerializer(req).data},
+                status=status.HTTP_202_ACCEPTED,
+            )
+
         from .services.matcher import match_suppliers
         matches = match_suppliers(req, limit)
 
@@ -159,7 +178,8 @@ class RequestViewSet(viewsets.ModelViewSet):
                 logging.getLogger(__name__).exception("Auto-discovery failed")
 
         req.status = "matched"
-        req.save(update_fields=["status"])
+        req.match_results = {"suppliers": matches, "count": len(matches), "discovered": discovered}
+        req.save(update_fields=["status", "match_results"])
         return Response(
             {
                 "status": "matched",
@@ -185,7 +205,15 @@ class RequestViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Sync-only in dev: no Celery async, immediate result
+        # B2: async via Celery when enabled (202 + task_id), sync fallback otherwise
+        if getattr(settings, "USE_CELERY", False):
+            from .tasks import send_rfq_task
+            task = send_rfq_task.delay(req.id, supplier_ids)
+            return Response(
+                {"status": "sending", "task_id": task.id},
+                status=status.HTTP_202_ACCEPTED,
+            )
+
         from .services.send_rfq import send_rfq_to_suppliers
         results = send_rfq_to_suppliers(req, supplier_ids)
         # Status: rfq_sent only if at least one email went out

@@ -39,6 +39,7 @@ class Request(models.Model):
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default="draft")
     address = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True, blank=True)
     raw_text = models.TextField(blank=True)
+    match_results = models.JSONField(null=True, blank=True)  # B2: last match output for async polling
     source = models.CharField(max_length=20, default="web")
     comment = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

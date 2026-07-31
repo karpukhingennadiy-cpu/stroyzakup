@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 
 USER_AGENT = "Mozilla/5.0 (compatible; MinitenderRF/1.0)"
 DADATA_TOKEN = os.environ.get("DADATA_TOKEN", "")
+DADATA_URL = "https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/party"
 
 
 def scrape_site_for_products(site_url: str) -> dict:
@@ -78,10 +79,10 @@ def enrich_with_dadata(company_name: str) -> dict:
     d = suggestions[0].get("data", {})
     return {
         "inn": d.get("inn", ""), "ogrn": d.get("ogrn", ""),
-        "legal_name": d.get("name", {}).get("full_with_opf", ""),
-        "legal_address": d.get("address", {}).get("value", ""),
-        "director": d.get("management", {}).get("name", ""),
-        "phone": (d.get("phones", [{}]) or [{}])[0].get("value", ""),
+        "legal_name": (d.get("name") or {}).get("full_with_opf", ""),
+        "legal_address": (d.get("address") or {}).get("value", ""),
+        "director": (d.get("management") or {}).get("name", ""),
+        "phone": ((d.get("phones") or [{}])[0] or {}).get("value", ""),
         "site": d.get("site", "") or d.get("www", ""),
         "okved": d.get("okved", ""),
     }

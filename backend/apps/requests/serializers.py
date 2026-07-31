@@ -31,8 +31,9 @@ class RequestSerializer(serializers.ModelSerializer):
         model = Request
         fields = ['id', 'code', 'status', 'raw_text', 'address', 'address_detail',
                   'delivery_address', 'source', 'comment', 'items',
-                  'customer_email', 'created_at', 'updated_at']
-        read_only_fields = ['id', 'code', 'status', 'created_at', 'updated_at', 'customer_email']
+                  'match_results', 'customer_email', 'created_at', 'updated_at']
+        read_only_fields = ['id', 'code', 'status', 'created_at', 'updated_at',
+                            'customer_email', 'match_results']
 
 class RequestCreateSerializer(serializers.ModelSerializer):
     delivery_address = serializers.CharField(write_only=True, required=False)

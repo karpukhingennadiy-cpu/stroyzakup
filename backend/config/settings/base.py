@@ -88,6 +88,9 @@ SIMPLE_JWT = {
 }
 
 CELERY_BROKER_URL = config("CELERY_BROKER_URL", default="redis://localhost:6379/0")
+# B2: when True, parse/match/send_rfq run as Celery tasks and views return 202+task_id.
+# When False (dev default), everything stays synchronous.
+USE_CELERY = config("USE_CELERY", default=False, cast=bool)
 
 TEMPLATES = [
     {
