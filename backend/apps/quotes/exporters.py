@@ -119,7 +119,7 @@ def build_competitive_sheet_xlsx(request_obj) -> bytes:
         ws.cell(row=r, column=2, value=row["supplier_name"])
         ws.cell(row=r, column=3, value=row["materials_total"]).number_format = MONEY_FMT
         ws.cell(row=r, column=4, value=row["delivery"]).number_format = MONEY_FMT
-        ws.cell(row=r, column=5, value=row["delivery_time"] or "—")
+        ws.cell(row=r, column=5, value=format_delivery_term(row["delivery_time"]))
         ws.cell(row=r, column=6, value=row["payment_terms"] or "—")
         # Keep the total formula-driven (materials + delivery), not a static value
         total_cell = ws.cell(row=r, column=7, value=f"=C{r}+D{r}")
