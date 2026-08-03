@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { IconHardHat } from "@/components/icons";
 import { Button, Field, Card } from "@/components/ui";
+import { ThemeToggle } from "@/components/theme";
 
 interface QuoteItem {
   id: number;
@@ -153,6 +154,9 @@ export default function QuotePage() {
             <IconHardHat className="w-5 h-5 text-brand" />
           </div>
           <span className="font-semibold text-label-1">Минитендер</span>
+          <div className="ml-auto [&_button]:text-[var(--label-secondary)] [&_button:hover]:bg-[var(--fill-1)]">
+            <ThemeToggle />
+          </div>
         </header>
         {children}
       </div>
