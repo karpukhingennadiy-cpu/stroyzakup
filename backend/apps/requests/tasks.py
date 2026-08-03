@@ -20,7 +20,9 @@ def parse_request_task(self, request_id):
 
         req.refresh_from_db()
         if "error" in result:
-            req.status = "parse_failed"
+            # Align with the sync path (FIX-K1): 'parse_failed' is not a valid
+            # status and would brick the request (views only re-parse 'draft')
+            req.status = "draft"
             req.save(update_fields=["status"])
             return {"status": "failed", "error": result["error"]}
 
@@ -35,7 +37,7 @@ def parse_request_task(self, request_id):
         logger.exception("Parse task failed for request %s", request_id)
         try:
             req = Request.objects.get(id=request_id)
-            req.status = "parse_failed"
+            req.status = "draft"  # see FIX-K1: 'parse_failed' is not a valid status
             req.save(update_fields=["status"])
         except Exception:
             pass
@@ -53,7 +55,7 @@ def match_suppliers_task(self, request_id, limit=20):
         req.status = "matching"
         req.save(update_fields=["status"])
 
-        matches = match_suppliers(req)
+        matches = match_suppliers(req, limit)  # FIX: limit was silently dropped
         req.refresh_from_db()
         req.status = "matched"
         req.match_results = {"suppliers": matches, "count": len(matches), "discovered": 0}
@@ -64,7 +66,9 @@ def match_suppliers_task(self, request_id, limit=20):
         logger.exception("Match task failed for request %s", request_id)
         try:
             req = Request.objects.get(id=request_id)
-            req.status = "match_failed"
+            # 'match_failed' is not a valid status; revert to 'confirmed' so the
+            # user can retry matching from the UI
+            req.status = "confirmed"
             req.save(update_fields=["status"])
         except Exception:
             pass
