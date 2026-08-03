@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { createRequest, matchSuppliers, sendRfq, api, geocodeAddress } from "@/lib/api";
 const SupplierMap = dynamic(() => import("./SupplierMap"), { ssr: false });
 import { IconPlus, IconMapPin, IconHardHat, IconTruck } from "@/components/icons";
+import { Button, Card, Badge } from "@/components/ui";
 
 const DeliveryMap = dynamic(() => import("./DeliveryMap"), { ssr: false });
 
@@ -69,6 +70,7 @@ const STAGE_LABELS: Record<string, string> = {
 };
 
 const UNITS = ["m2", "m3", "kg", "ton", "bag", "piece", "pack", "roll", "pog_m", "liter", "sht"];
+const STEP_LABELS = ["Материалы", "Доставка", "Поставщики"];
 
 // B2: poll request status while a Celery task is running (202 mode)
 async function pollUntilDone(requestId: number, pendingStatuses: string[], timeoutSec: number): Promise<any> {
@@ -79,6 +81,29 @@ async function pollUntilDone(requestId: number, pendingStatuses: string[], timeo
     if (!pendingStatuses.includes(req.status)) return req;
   }
   throw new Error("Превышено время ожидания обработки");
+}
+
+/** Индикатор шагов мастера — a11y: ol + aria-current */
+function Stepper({ step }: { step: number }) {
+  return (
+    <ol className="flex flex-wrap gap-x-6 gap-y-2 mt-4" aria-label="Шаги создания заявки">
+      {STEP_LABELS.map((label, i) => {
+        const n = i + 1;
+        const active = step >= n;
+        return (
+          <li key={n} aria-current={step === n ? "step" : undefined}
+            className={"flex items-center gap-2 " + (active ? "text-label-1" : "text-label-4")}>
+            <span className={"w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold " +
+              (active ? "bg-[var(--label-primary)] text-[var(--bg-primary)]" : "bg-[var(--fill-2)] text-label-4")}>
+              {n}
+            </span>
+            <span className="text-sm font-medium">{label}</span>
+            {n < 3 && <span className="text-label-4 ml-2" aria-hidden="true">→</span>}
+          </li>
+        );
+      })}
+    </ol>
+  );
 }
 
 export default function NewRequestPage() {
@@ -279,245 +304,349 @@ export default function NewRequestPage() {
   return (
     <div className="max-w-5xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#1a1a2e]">Новая заявка</h1>
-        <div className="flex gap-6 mt-4">
-          {[1, 2, 3].map(s => (
-            <div key={s} className={"flex items-center gap-2 " + (step >= s ? "text-[#1e3a5f]" : "text-[#cbd5e1]")}>
-              <div className={"w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold " + (step >= s ? "bg-[#1e3a5f] text-white" : "bg-[#e2e8f0] text-[#94a3b8]")}>{s}</div>
-              <span className="text-sm font-medium">{s === 1 ? "Материалы" : s === 2 ? "Доставка" : "Поставщики"}</span>
-              {s < 3 && <span className="text-[#cbd5e1] mx-2">→</span>}
-            </div>
-          ))}
-        </div>
+        <h1 className="text-xl font-semibold text-label-1">Новая заявка</h1>
+        <Stepper step={step} />
       </div>
 
-      {error && <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">{error}</div>}
+      {error && (
+        <div className="mb-6 p-4 bg-[var(--danger-soft)] border border-[var(--separator)] text-[var(--danger)] rounded-[var(--radius-lg)] text-sm" role="alert">
+          {error}
+        </div>
+      )}
 
       {loading && stage && (
-        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-center gap-3">
-          <div className="w-5 h-5 border-2 border-[#1e3a5f] border-t-transparent rounded-full animate-spin shrink-0" />
-          <p className="text-sm text-[#1e3a5f] font-medium">{STAGE_LABELS[stage] || stage}</p>
+        <div className="mb-6 p-4 bg-[var(--accent-soft)] border border-[var(--separator)] rounded-[var(--radius-lg)] flex items-center gap-3" role="status">
+          <div className="w-5 h-5 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin shrink-0" aria-hidden="true" />
+          <p className="text-sm text-[var(--accent)] font-medium">{STAGE_LABELS[stage] || stage}</p>
         </div>
       )}
 
       {draftRestored && step === 1 && !loading && (
-        <div className="mb-6 p-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl text-sm flex items-center justify-between">
+        <div className="mb-6 p-3 bg-[var(--warning-soft)] border border-[var(--separator)] text-label-1 rounded-[var(--radius-lg)] text-sm flex items-center justify-between gap-3" role="status">
           <span>Черновик заявки восстановлен из автосохранения.</span>
-          <button onClick={() => { setRows([{ id: 1, name: "", specs: "", quantity: "", unit: "m2" }]); setComment(""); setDraftRestored(false); try { localStorage.removeItem(DRAFT_KEY); } catch {} }} className="text-xs font-bold hover:underline ml-4 shrink-0">Очистить</button>
+          <Button size={26} variant="outline" onClick={() => { setRows([{ id: 1, name: "", specs: "", quantity: "", unit: "m2" }]); setComment(""); setDraftRestored(false); try { localStorage.removeItem(DRAFT_KEY); } catch {} }}>
+            Очистить
+          </Button>
         </div>
       )}
 
       {step === 1 && (
-        <div className="bg-white rounded-2xl border border-[#e2e8f0] shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-[#e2e8f0] bg-[#f5f7fa]">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#1e3a5f]/10 flex items-center justify-center"><IconHardHat className="w-5 h-5 text-[#1e3a5f]" /></div>
-              <div><p className="font-semibold text-[#1a1a2e]">Шаг 1: Список материалов</p><p className="text-xs text-[#64748b]">Заполните таблицу — каждый товар отдельной строкой</p></div>
-            </div>
-          </div>
-          <div className="p-6">
+        <Card
+          title="Шаг 1: Список материалов"
+          subtitle="Заполните таблицу — каждый товар отдельной строкой"
+          icon={<IconHardHat className="w-5 h-5" />}
+        >
+          {/* Desktop: таблица */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
-              <thead><tr className="border-b border-[#e2e8f0] text-left">
-                <th className="py-2 pr-2 font-semibold text-[#64748b] w-1/3">Материал</th>
-                <th className="py-2 px-2 font-semibold text-[#64748b] w-1/3">Габариты / Спецификация</th>
-                <th className="py-2 px-2 font-semibold text-[#64748b] w-1/6">Кол-во</th>
-                <th className="py-2 px-2 font-semibold text-[#64748b] w-20">Ед.</th>
-                <th className="py-2 w-10"></th>
+              <thead><tr className="border-b border-separator text-left">
+                <th scope="col" className="py-2 pr-2 font-medium text-label-3 text-xs w-1/3">Материал</th>
+                <th scope="col" className="py-2 px-2 font-medium text-label-3 text-xs w-1/3">Габариты / Спецификация</th>
+                <th scope="col" className="py-2 px-2 font-medium text-label-3 text-xs w-1/6">Кол-во</th>
+                <th scope="col" className="py-2 px-2 font-medium text-label-3 text-xs w-20">Ед.</th>
+                <th scope="col" className="py-2 w-10"><span className="sr-only">Действия</span></th>
               </tr></thead>
               <tbody>
-                {rows.map((row, i) => (
-                  <tr key={row.id} className="border-b border-[#f5f7fa]">
-                    <td className="py-1.5 pr-2"><input value={row.name} onChange={e => updateRow(row.id, "name", e.target.value)} placeholder="Керамогранит, Доска, Бетон..." className="w-full px-2 py-2 bg-[#f5f7fa] border border-[#e2e8f0] rounded-lg focus:bg-white focus:border-[#1e3a5f] transition text-sm" /></td>
-                    <td className="py-1.5 px-2"><input value={row.specs} onChange={e => updateRow(row.id, "specs", e.target.value)} placeholder="600x600 серый, 25x150x6000, М300..." className="w-full px-2 py-2 bg-[#f5f7fa] border border-[#e2e8f0] rounded-lg focus:bg-white focus:border-[#1e3a5f] transition text-sm" /></td>
-                    <td className="py-1.5 px-2"><input value={row.quantity} onChange={e => updateRow(row.id, "quantity", e.target.value)} type="number" min="0" step="any" placeholder="150" className="w-full px-2 py-2 bg-[#f5f7fa] border border-[#e2e8f0] rounded-lg focus:bg-white focus:border-[#1e3a5f] transition text-sm" /></td>
-                    <td className="py-1.5 px-2"><select value={row.unit} onChange={e => updateRow(row.id, "unit", e.target.value)} className="w-full px-1 py-2 bg-[#f5f7fa] border border-[#e2e8f0] rounded-lg focus:bg-white text-sm">{UNITS.map(u => <option key={u} value={u}>{u}</option>)}</select></td>
-                    <td className="py-1.5 text-center">{rows.length > 1 && <button onClick={() => removeRow(row.id)} className="p-1 text-[#94a3b8] hover:text-red-500 transition" title="Удалить строку">✕</button>}</td>
+                {rows.map((row) => (
+                  <tr key={row.id} className="border-b border-[var(--fill-1)]">
+                    <td className="py-1.5 pr-2">
+                      <label htmlFor={"mat-name-" + row.id} className="sr-only">Материал, строка</label>
+                      <input id={"mat-name-" + row.id} value={row.name} onChange={e => updateRow(row.id, "name", e.target.value)} placeholder="Керамогранит, Доска, Бетон..." className="field-input" />
+                    </td>
+                    <td className="py-1.5 px-2">
+                      <label htmlFor={"mat-specs-" + row.id} className="sr-only">Спецификация</label>
+                      <input id={"mat-specs-" + row.id} value={row.specs} onChange={e => updateRow(row.id, "specs", e.target.value)} placeholder="600x600 серый, 25x150x6000, М300..." className="field-input" />
+                    </td>
+                    <td className="py-1.5 px-2">
+                      <label htmlFor={"mat-qty-" + row.id} className="sr-only">Количество</label>
+                      <input id={"mat-qty-" + row.id} value={row.quantity} onChange={e => updateRow(row.id, "quantity", e.target.value)} type="number" min="0" step="any" placeholder="150" className="field-input" />
+                    </td>
+                    <td className="py-1.5 px-2">
+                      <label htmlFor={"mat-unit-" + row.id} className="sr-only">Единица измерения</label>
+                      <select id={"mat-unit-" + row.id} value={row.unit} onChange={e => updateRow(row.id, "unit", e.target.value)} className="field-input">{UNITS.map(u => <option key={u} value={u}>{u}</option>)}</select>
+                    </td>
+                    <td className="py-1.5 text-center">
+                      {rows.length > 1 && (
+                        <button type="button" onClick={() => removeRow(row.id)} aria-label="Удалить строку"
+                          className="w-8 h-8 inline-flex items-center justify-center rounded-[var(--radius-sm)] text-label-4 hover:text-[var(--danger)] hover:bg-[var(--danger-soft)] transition-colors">✕</button>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            <button onClick={addRow} className="mt-3 flex items-center gap-1 text-sm text-[#1e3a5f] hover:text-[#f0a500] transition font-medium"><IconPlus className="w-4 h-4" /> Добавить строку</button>
-            <div className="mt-4"><input value={comment} onChange={e => setComment(e.target.value)} placeholder="Комментарий к заявке (необязательно)" className="w-full px-4 py-2.5 bg-[#f5f7fa] border border-[#e2e8f0] rounded-xl focus:bg-white focus:border-[#1e3a5f] transition text-sm" /></div>
-            <button onClick={handleStep1Next} disabled={loading || !rows.some(r => r.name.trim())} className="mt-6 w-full py-3.5 bg-[#f0a500] text-[#1a1a2e] rounded-xl font-bold text-base hover:bg-[#fcc419] hover:shadow-lg transition disabled:opacity-50">{loading ? "Создаём..." : "Далее: точка доставки →"}</button>
           </div>
-        </div>
+
+          {/* Mobile (320px+): карточки вместо таблицы */}
+          <div className="md:hidden space-y-4">
+            {rows.map((row, i) => (
+              <fieldset key={row.id} className="rounded-[var(--radius-md)] border border-separator p-3 space-y-2.5">
+                <legend className="text-xs text-label-3 px-1">Позиция {i + 1}</legend>
+                <div>
+                  <label htmlFor={"m-name-" + row.id} className="block text-xs font-medium text-label-2 mb-1">Материал</label>
+                  <input id={"m-name-" + row.id} value={row.name} onChange={e => updateRow(row.id, "name", e.target.value)} placeholder="Керамогранит, Доска, Бетон..." className="field-input" />
+                </div>
+                <div>
+                  <label htmlFor={"m-specs-" + row.id} className="block text-xs font-medium text-label-2 mb-1">Габариты / Спецификация</label>
+                  <input id={"m-specs-" + row.id} value={row.specs} onChange={e => updateRow(row.id, "specs", e.target.value)} placeholder="600x600 серый, М300..." className="field-input" />
+                </div>
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <label htmlFor={"m-qty-" + row.id} className="block text-xs font-medium text-label-2 mb-1">Кол-во</label>
+                    <input id={"m-qty-" + row.id} value={row.quantity} onChange={e => updateRow(row.id, "quantity", e.target.value)} type="number" min="0" step="any" placeholder="150" className="field-input" />
+                  </div>
+                  <div className="w-24">
+                    <label htmlFor={"m-unit-" + row.id} className="block text-xs font-medium text-label-2 mb-1">Ед.</label>
+                    <select id={"m-unit-" + row.id} value={row.unit} onChange={e => updateRow(row.id, "unit", e.target.value)} className="field-input">{UNITS.map(u => <option key={u} value={u}>{u}</option>)}</select>
+                  </div>
+                  {rows.length > 1 && (
+                    <div className="flex items-end">
+                      <button type="button" onClick={() => removeRow(row.id)} aria-label={"Удалить позицию " + (i + 1)}
+                        className="w-10 h-10 inline-flex items-center justify-center rounded-[var(--radius-sm)] text-label-4 hover:text-[var(--danger)] hover:bg-[var(--danger-soft)] transition-colors">✕</button>
+                    </div>
+                  )}
+                </div>
+              </fieldset>
+            ))}
+          </div>
+
+          <Button variant="outline" size={32} onClick={addRow} leftIcon={<IconPlus className="w-[18px] h-[18px]" />} className="mt-3">
+            Добавить строку
+          </Button>
+          <div className="mt-4">
+            <label htmlFor="request-comment" className="sr-only">Комментарий к заявке</label>
+            <input id="request-comment" value={comment} onChange={e => setComment(e.target.value)} placeholder="Комментарий к заявке (необязательно)" className="field-input" />
+          </div>
+          <Button
+            variant="primary" size={44} className="mt-6 w-full"
+            onClick={handleStep1Next}
+            loading={loading}
+            disabled={!rows.some(r => r.name.trim())}
+          >
+            {loading ? "Создаём..." : "Далее: точка доставки →"}
+          </Button>
+        </Card>
       )}
 
       {step === 2 && (
         <div>
-        {clarifications.length > 0 && (
-          <div className="mb-6 bg-white rounded-2xl border border-amber-300 shadow-sm overflow-hidden">
-            <div className="p-4 border-b border-amber-200 bg-amber-50">
-              <p className="font-semibold text-[#1a1a2e] text-sm">ИИ просит уточнить ({clarifications.length})</p>
-              <p className="text-xs text-[#64748b]">По этим позициям не хватает данных для точной оценки — ответьте, и поставщики получат полную спецификацию</p>
-            </div>
-            <div className="p-4 space-y-3">
-              {clarifications.map(item => (
-                <div key={item.id} className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm">
-                  <div className="flex-1">
-                    <p className="font-medium text-[#1a1a2e]">{item.name}</p>
-                    <p className="text-xs text-[#64748b]">{item.clarification_question || "Уточните характеристики"}</p>
+          {clarifications.length > 0 && (
+            <div className="mb-6 surface-card overflow-hidden border-[var(--warning)]">
+              <div className="p-4 border-b border-separator bg-[var(--warning-soft)]">
+                <p className="font-medium text-label-1 text-sm">ИИ просит уточнить ({clarifications.length})</p>
+                <p className="text-xs text-label-3 mt-0.5">По этим позициям не хватает данных для точной оценки — ответьте, и поставщики получат полную спецификацию</p>
+              </div>
+              <div className="p-4 space-y-3">
+                {clarifications.map(item => (
+                  <div key={item.id} className="flex flex-col sm:flex-row sm:items-center gap-2 text-sm">
+                    <div className="flex-1">
+                      <p className="font-medium text-label-1">{item.name}</p>
+                      <p className="text-xs text-label-3">{item.clarification_question || "Уточните характеристики"}</p>
+                    </div>
+                    <div className="flex gap-2 sm:w-1/2">
+                      <label htmlFor={"clarify-" + item.id} className="sr-only">Ответ на уточнение по позиции {item.name}</label>
+                      <input
+                        id={"clarify-" + item.id}
+                        value={clarifyAnswers[item.id] || ""}
+                        onChange={e => setClarifyAnswers({ ...clarifyAnswers, [item.id]: e.target.value })}
+                        onKeyDown={e => e.key === 'Enter' && handleClarify(item)}
+                        placeholder="Ваш ответ (например: сосна, 25×150 мм)"
+                        className="field-input flex-1"
+                      />
+                      <Button size={32} variant="primary" onClick={() => handleClarify(item)} disabled={!(clarifyAnswers[item.id] || "").trim()}>OK</Button>
+                    </div>
                   </div>
-                  <div className="flex gap-2 sm:w-1/2">
-                    <input
-                      value={clarifyAnswers[item.id] || ""}
-                      onChange={e => setClarifyAnswers({ ...clarifyAnswers, [item.id]: e.target.value })}
-                      onKeyDown={e => e.key === 'Enter' && handleClarify(item)}
-                      placeholder="Ваш ответ (например: сосна, 25×150 мм)"
-                      className="flex-1 px-3 py-2 bg-[#f5f7fa] border border-[#e2e8f0] rounded-lg text-sm focus:border-[#1e3a5f] outline-none"
-                    />
-                    <button onClick={() => handleClarify(item)} disabled={!(clarifyAnswers[item.id] || "").trim()} className="px-3 py-2 bg-[#1e3a5f] text-white rounded-lg text-xs font-bold hover:bg-[#2a4a7f] transition disabled:opacity-50">OK</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-        <div className="bg-white rounded-2xl border border-[#e2e8f0] shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-[#e2e8f0] bg-[#f5f7fa]">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#f0a500]/10 flex items-center justify-center"><IconMapPin className="w-5 h-5 text-[#f0a500]" /></div>
-              <div><p className="font-semibold text-[#1a1a2e]">Шаг 2: Точка доставки</p><p className="text-xs text-[#64748b]">Кликните на карту или введите город</p></div>
-            </div>
-          </div>
-          <div className="h-[450px] relative">
-            <DeliveryMap onSelect={(lat: number, lon: number, addr: string) => { setDeliveryLat(lat); setDeliveryLon(lon); setDeliveryAddr(addr); }} />
-          </div>
-          {/* Fallback: text city input */}
-          <div className="p-4 border-t border-[#e2e8f0] bg-[#f8fafc]">
-            <p className="text-xs text-[#64748b] mb-2">Или введите город вручную:</p>
-            <div className="flex gap-2">
-              <input
-                value={cityInput}
-                onChange={e => setCityInput(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleCitySearch()}
-                placeholder="Например: Подольск, Московская обл."
-                className="flex-1 px-3 py-2 bg-white border border-[#e2e8f0] rounded-lg text-sm focus:border-[#1e3a5f] outline-none"
-              />
-              <button
-                onClick={handleCitySearch}
-                disabled={cityLoading || !cityInput.trim()}
-                className="px-4 py-2 bg-[#1e3a5f] text-white rounded-lg text-sm font-medium hover:bg-[#2a4a7f] transition disabled:opacity-50"
-              >
-                {cityLoading ? "..." : "Найти"}
-              </button>
-            </div>
-          </div>
-          {deliveryLat && deliveryLon && (
-            <div className="p-4 bg-green-50 border-t border-green-200 flex items-center gap-3">
-              <IconMapPin className="w-5 h-5 text-green-600" />
-              <div><p className="text-sm font-medium text-green-800">{deliveryAddr || deliveryLat.toFixed(5) + ", " + deliveryLon.toFixed(5)}</p><p className="text-xs text-green-600">Координаты: {deliveryLat.toFixed(5)}, {deliveryLon.toFixed(5)}</p></div>
+                ))}
+              </div>
             </div>
           )}
-          <div className="p-6 flex gap-3">
-            <button onClick={() => setStep(1)} className="px-5 py-3 border border-[#e2e8f0] rounded-xl text-sm font-medium hover:bg-[#f5f7fa] transition">← Назад к материалам</button>
-            <button onClick={handleStep2Next} disabled={loading || !deliveryLat} className="flex-1 py-3.5 bg-[#f0a500] text-[#1a1a2e] rounded-xl font-bold text-base hover:bg-[#fcc419] hover:shadow-lg transition disabled:opacity-50">{loading ? "Подбираем поставщиков..." : "Подобрать поставщиков →"}</button>
-          </div>
-        </div>
+          <Card
+            title="Шаг 2: Точка доставки"
+            subtitle="Кликните на карту или введите город"
+            icon={<IconMapPin className="w-5 h-5" />}
+            padding={false}
+          >
+            <div className="h-[300px] sm:h-[450px] relative">
+              <DeliveryMap onSelect={(lat: number, lon: number, addr: string) => { setDeliveryLat(lat); setDeliveryLon(lon); setDeliveryAddr(addr); }} />
+            </div>
+            {/* Fallback: text city input */}
+            <div className="p-4 border-t border-separator bg-[var(--fill-1)]">
+              <label htmlFor="city-input" className="block text-xs text-label-3 mb-2">Или введите город вручную:</label>
+              <div className="flex gap-2">
+                <input
+                  id="city-input"
+                  value={cityInput}
+                  onChange={e => setCityInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleCitySearch()}
+                  placeholder="Например: Подольск, Московская обл."
+                  className="field-input flex-1 bg-[var(--bg-primary)]"
+                />
+                <Button size={32} variant="primary" onClick={handleCitySearch} loading={cityLoading} disabled={!cityInput.trim()}>
+                  {cityLoading ? "..." : "Найти"}
+                </Button>
+              </div>
+            </div>
+            {deliveryLat && deliveryLon && (
+              <div className="p-4 bg-[var(--success-soft)] border-t border-separator flex items-center gap-3" role="status">
+                <IconMapPin className="w-5 h-5 text-[var(--success)] shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-label-1 truncate">{deliveryAddr || deliveryLat.toFixed(5) + ", " + deliveryLon.toFixed(5)}</p>
+                  <p className="text-xs text-[var(--success)] tabular-nums">Координаты: {deliveryLat.toFixed(5)}, {deliveryLon.toFixed(5)}</p>
+                </div>
+              </div>
+            )}
+            <div className="p-6 flex flex-col sm:flex-row gap-3">
+              <Button variant="outline" size={44} onClick={() => setStep(1)}>← Назад к материалам</Button>
+              <Button
+                variant="primary" size={44} className="flex-1"
+                onClick={handleStep2Next}
+                loading={loading}
+                disabled={!deliveryLat}
+              >
+                {loading ? "Подбираем поставщиков..." : "Подобрать поставщиков →"}
+              </Button>
+            </div>
+          </Card>
         </div>
       )}
 
       {step === 3 && (
         <div>
           {sentCount > 0 ? (
-            <div className="bg-white rounded-2xl border border-[#e2e8f0] shadow-sm p-12 text-center">
-              <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4"><IconTruck className="w-8 h-8 text-green-600" /></div>
-              <h2 className="text-2xl font-bold text-[#1a1a2e] mb-2">Тендер запущен!</h2>
-              <p className="text-[#64748b] mb-6">РФК отправлены {sentCount} поставщикам. Ожидайте коммерческие предложения.</p>
-              <button onClick={() => router.push("/lk/requests/" + requestId)} className="px-6 py-3 bg-[#f0a500] text-[#1a1a2e] rounded-xl font-bold hover:bg-[#fcc419] transition">Перейти к заявке</button>
-            </div>
+            <Card padding={false} className="p-8 sm:p-12 text-center">
+              <div className="w-16 h-16 rounded-full bg-[var(--success-soft)] flex items-center justify-center mx-auto mb-4">
+                <IconTruck className="w-8 h-8 text-[var(--success)]" />
+              </div>
+              <h2 className="text-xl font-semibold text-label-1 mb-2">Тендер запущен!</h2>
+              <p className="text-label-3 text-sm mb-6">РФК отправлены {sentCount} поставщикам. Ожидайте коммерческие предложения.</p>
+              <Button variant="primary" size={44} onClick={() => router.push("/lk/requests/" + requestId)}>Перейти к заявке</Button>
+            </Card>
           ) : (
             <div>
-            {discoveredCount > 0 && (
-              <div className="mb-4 p-3 bg-violet-50 border border-violet-200 text-violet-800 rounded-xl text-sm">
-                Найдено {discoveredCount} новых поставщиков из интернета — они добавлены в базу и участвуют в подборе.
-              </div>
-            )}
-            <div className="bg-white rounded-2xl border border-[#e2e8f0] shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-[#e2e8f0] bg-[#f5f7fa]">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#27ae60]/10 flex items-center justify-center"><IconTruck className="w-5 h-5 text-[#27ae60]" /></div>
-                  <div><p className="font-semibold text-[#1a1a2e]">Шаг 3: Выбор поставщиков</p><p className="text-xs text-[#64748b]">Найдено {filteredSuppliers.length} поставщиков.
-              <select value={sourceFilter} onChange={e => setSourceFilter(e.target.value)}
-                className="ml-2 px-2 py-0.5 border rounded text-xs">
-                <option value="all">Все источники</option>
-                <option value="seed">Из базы</option>
-                <option value="llm">AI-поиск</option>
-                <option value="web">Веб-поиск</option>
-                <option value="2gis">2GIS</option>
-                <option value="dadata">DaData</option>
-              </select>
-              <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)}
-                className="ml-2 px-2 py-0.5 border rounded text-xs">
-                <option value="all">Все типы</option>
-                <option value="manufacturer">Только производители</option>
-                <option value="dealer">Только дилеры</option>
-                <option value="unknown">Неизвестно</option>
-              </select>
-              Отметьте кому отправить запрос КП. <select value={supplierLimit} onChange={e => setSupplierLimit(Number(e.target.value))} className="ml-2 px-2 py-0.5 border rounded text-xs">{[5,10,15,20].map(n => <option key={n} value={n}>{n}</option>)}</select> показывать</p></div>
+              {discoveredCount > 0 && (
+                <div className="mb-4 p-3 bg-[var(--accent-soft)] border border-[var(--separator)] text-label-1 rounded-[var(--radius-lg)] text-sm" role="status">
+                  Найдено {discoveredCount} новых поставщиков из интернета — они добавлены в базу и участвуют в подборе.
                 </div>
-              </div>
-              <div className="p-6">
+              )}
+              <Card
+                title="Шаг 3: Выбор поставщиков"
+                subtitle={"Найдено " + filteredSuppliers.length + " поставщиков. Отметьте, кому отправить запрос КП."}
+                icon={<IconTruck className="w-5 h-5" />}
+              >
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <label htmlFor="source-filter" className="sr-only">Источник</label>
+                  <select id="source-filter" value={sourceFilter} onChange={e => setSourceFilter(e.target.value)} className="field-input w-auto">
+                    <option value="all">Все источники</option>
+                    <option value="seed">Из базы</option>
+                    <option value="llm">AI-поиск</option>
+                    <option value="web">Веб-поиск</option>
+                    <option value="2gis">2GIS</option>
+                    <option value="dadata">DaData</option>
+                  </select>
+                  <label htmlFor="type-filter" className="sr-only">Тип поставщика</label>
+                  <select id="type-filter" value={typeFilter} onChange={e => setTypeFilter(e.target.value)} className="field-input w-auto">
+                    <option value="all">Все типы</option>
+                    <option value="manufacturer">Только производители</option>
+                    <option value="dealer">Только дилеры</option>
+                    <option value="unknown">Неизвестно</option>
+                  </select>
+                  <label htmlFor="supplier-limit" className="sr-only">Показывать поставщиков</label>
+                  <select id="supplier-limit" value={supplierLimit} onChange={e => setSupplierLimit(Number(e.target.value))} className="field-input w-auto">
+                    {[5, 10, 15, 20].map(n => <option key={n} value={n}>{n} шт.</option>)}
+                  </select>
+                </div>
+
                 {deliveryLat && deliveryLon && filteredSuppliers.length > 0 && (
-            <div className="h-[300px] mb-4 rounded-xl overflow-hidden border border-[#e2e8f0]">
-              <SupplierMap suppliers={filteredSuppliers as any} centerLat={deliveryLat} centerLon={deliveryLon} />
-            </div>
-          )}
-          {filteredSuppliers.length === 0 ? (
-                  <div className="text-center py-8 text-[#64748b]">Поставщики не найдены. Попробуйте изменить точку доставки или снять фильтры.</div>
-                ) : (
-                  <table className="w-full text-sm">
-                    <thead><tr className="border-b border-[#e2e8f0] text-left">
-                      <th className="py-2 w-10"><input type="checkbox" onChange={e => { if (e.target.checked) setSelectedSuppliers(new Set(filteredSuppliers.map(s => s.supplier_id))); else setSelectedSuppliers(new Set()); }} checked={selectedSuppliers.size === filteredSuppliers.length && filteredSuppliers.length > 0} className="w-4 h-4 accent-[#f0a500]" /></th>
-                      <th className="py-2 font-semibold text-[#64748b]">Поставщик</th>
-                      <th className="py-2 font-semibold text-[#64748b] text-center">Баллы</th>
-                      <th className="py-2 font-semibold text-[#64748b] text-center">Категории</th>
-                      <th className="py-2 font-semibold text-[#64748b] text-center">Расст.</th>
-                      <th className="py-2 font-semibold text-[#64748b]">Город</th>
-                    </tr></thead>
-                    <tbody>
-                      {filteredSuppliers.map(s => (
-                        <Fragment key={s.supplier_id}>
-                        <tr className={"border-b border-[#f5f7fa] cursor-pointer hover:bg-[#f8fafc] " + (selectedSuppliers.has(s.supplier_id) ? "bg-amber-50" : "")} onClick={() => toggleSupplier(s.supplier_id)}>
-                          <td className="py-2"><input type="checkbox" checked={selectedSuppliers.has(s.supplier_id)} onChange={() => toggleSupplier(s.supplier_id)} className="w-4 h-4 accent-[#f0a500]" /></td>
-                          <td className="py-2"><p className="font-medium text-[#1a1a2e] flex items-center gap-2 flex-wrap">{s.name}{s.supplier_type === "manufacturer" && <span className="inline-flex items-center px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-[10px] font-bold">Производитель</span>}{s.supplier_type === "dealer" && <span className="inline-flex items-center px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[10px] font-bold">Дилер</span>}{s.moderation_status === "unverified" && <span className="inline-flex items-center px-1.5 py-0.5 bg-orange-100 text-orange-700 rounded text-[10px] font-bold" title="Поставщик ещё не прошёл модерацию">На проверке</span>}</p><p className="text-xs text-[#94a3b8]">{s.email}</p></td>
-                          <td className="py-2 text-center">
-                            <button onClick={(e) => { e.stopPropagation(); setExpandedSupplier(expandedSupplier === s.supplier_id ? null : s.supplier_id); }} className="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full text-xs font-bold hover:bg-amber-200 transition">
-                              {s.total_score.toFixed(0)}
-                              <span className="text-[8px]">{expandedSupplier === s.supplier_id ? "▲" : "▼"}</span>
-                            </button>
-                          </td>
-                          <td className="py-2 text-center text-xs text-[#64748b]">{s.matched_count}/{s.total_categories}</td>
-                          <td className="py-2 text-center text-xs text-[#64748b]">{s.distance_km ? s.distance_km + " км" : "—"}</td>
-                          <td className="py-2 text-xs text-[#64748b]">{s.city || "—"}</td>
-                        </tr>
-                        {expandedSupplier === s.supplier_id && s.score_breakdown && (
-                          <tr className="bg-[#f8fafc]">
-                            <td colSpan={6} className="px-4 py-3 text-xs">
-                              <div className="grid grid-cols-2 gap-2 text-[#64748b]">
-                                <div><span className="font-semibold">Категории:</span> {s.score_breakdown.category}</div>
-                                <div><span className="font-semibold">Расстояние:</span> {s.score_breakdown.distance}</div>
-                                <div><span className="font-semibold">Рейтинг:</span> {s.score_breakdown.rating}</div>
-                                <div><span className="font-semibold">Полнота:</span> {s.score_breakdown.completeness}</div>
-                                <div><span className="font-semibold">Производитель:</span> {s.score_breakdown.manufacturer_bonus}</div>
-                                <div><span className="font-semibold">Тип материала:</span> {s.score_breakdown.material_type}</div>
-                                <div><span className="font-semibold">Ассортимент:</span> {s.score_breakdown.product_match}</div>
-                                <div className="col-span-2 font-bold text-[#1a1a2e]">Итого: {s.score_breakdown.total} баллов</div>
-                              </div>
-                            </td>
-                          </tr>
-                        )}
-                        </Fragment>
-                      ))}
-                    </tbody>
-                  </table>
+                  <div className="h-[250px] sm:h-[300px] mb-4 rounded-[var(--radius-lg)] overflow-hidden border border-separator">
+                    <SupplierMap suppliers={filteredSuppliers as any} centerLat={deliveryLat} centerLon={deliveryLon} />
+                  </div>
                 )}
-                <div className="mt-6 flex gap-3">
-                  <button onClick={() => setStep(2)} className="px-5 py-3 border border-[#e2e8f0] rounded-xl text-sm font-medium hover:bg-[#f5f7fa] transition">← Назад к карте</button>
-                  <button onClick={handleSendRfq} disabled={loading || selectedSuppliers.size === 0} className="flex-1 py-3.5 bg-[#27ae60] text-white rounded-xl font-bold text-base hover:bg-[#219a52] transition disabled:opacity-50">{loading ? "Отправляем..." : "Начать тендер (" + selectedSuppliers.size + ")"}</button>
+                {filteredSuppliers.length === 0 ? (
+                  <div className="text-center py-8 text-label-3 text-sm">Поставщики не найдены. Попробуйте изменить точку доставки или снять фильтры.</div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm min-w-[640px]">
+                      <thead><tr className="border-b border-separator text-left">
+                        <th scope="col" className="py-2 w-10">
+                          <input type="checkbox" aria-label="Выбрать всех поставщиков"
+                            onChange={e => { if (e.target.checked) setSelectedSuppliers(new Set(filteredSuppliers.map(s => s.supplier_id))); else setSelectedSuppliers(new Set()); }}
+                            checked={selectedSuppliers.size === filteredSuppliers.length && filteredSuppliers.length > 0}
+                            className="w-4 h-4 accent-[var(--accent)]" />
+                        </th>
+                        <th scope="col" className="py-2 font-medium text-label-3 text-xs">Поставщик</th>
+                        <th scope="col" className="py-2 font-medium text-label-3 text-xs text-center">Баллы</th>
+                        <th scope="col" className="py-2 font-medium text-label-3 text-xs text-center">Категории</th>
+                        <th scope="col" className="py-2 font-medium text-label-3 text-xs text-center">Расст.</th>
+                        <th scope="col" className="py-2 font-medium text-label-3 text-xs">Город</th>
+                      </tr></thead>
+                      <tbody>
+                        {filteredSuppliers.map(s => (
+                          <Fragment key={s.supplier_id}>
+                            <tr className={"border-b border-[var(--fill-1)] cursor-pointer hover:bg-[var(--fill-1)] transition-colors " + (selectedSuppliers.has(s.supplier_id) ? "bg-[var(--accent-soft)]" : "")}
+                              onClick={() => toggleSupplier(s.supplier_id)}>
+                              <td className="py-2">
+                                <input type="checkbox" aria-label={"Выбрать " + s.name}
+                                  checked={selectedSuppliers.has(s.supplier_id)} onChange={() => toggleSupplier(s.supplier_id)}
+                                  onClick={e => e.stopPropagation()}
+                                  className="w-4 h-4 accent-[var(--accent)]" />
+                              </td>
+                              <td className="py-2">
+                                <p className="font-medium text-label-1 flex items-center gap-2 flex-wrap">
+                                  {s.name}
+                                  {s.supplier_type === "manufacturer" && <Badge tone="accent">Производитель</Badge>}
+                                  {s.supplier_type === "dealer" && <Badge>Дилер</Badge>}
+                                  {s.moderation_status === "unverified" && <Badge tone="warning">На проверке</Badge>}
+                                </p>
+                                <p className="text-xs text-label-4">{s.email}</p>
+                              </td>
+                              <td className="py-2 text-center">
+                                <button type="button"
+                                  onClick={(e) => { e.stopPropagation(); setExpandedSupplier(expandedSupplier === s.supplier_id ? null : s.supplier_id); }}
+                                  aria-expanded={expandedSupplier === s.supplier_id}
+                                  aria-label={"Детализация баллов: " + s.name}
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-[var(--fill-2)] text-label-1 rounded-full text-xs font-semibold hover:bg-[var(--fill-3)] transition-colors tabular-nums">
+                                  {s.total_score.toFixed(0)}
+                                  <span className="text-[8px]" aria-hidden="true">{expandedSupplier === s.supplier_id ? "▲" : "▼"}</span>
+                                </button>
+                              </td>
+                              <td className="py-2 text-center text-xs text-label-3 tabular-nums">{s.matched_count}/{s.total_categories}</td>
+                              <td className="py-2 text-center text-xs text-label-3 tabular-nums">{s.distance_km ? s.distance_km + " км" : "—"}</td>
+                              <td className="py-2 text-xs text-label-3">{s.city || "—"}</td>
+                            </tr>
+                            {expandedSupplier === s.supplier_id && s.score_breakdown && (
+                              <tr className="bg-[var(--fill-1)]">
+                                <td colSpan={6} className="px-4 py-3 text-xs">
+                                  <dl className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-label-3">
+                                    <div><dt className="inline font-medium text-label-2">Категории: </dt><dd className="inline">{s.score_breakdown.category}</dd></div>
+                                    <div><dt className="inline font-medium text-label-2">Расстояние: </dt><dd className="inline">{s.score_breakdown.distance}</dd></div>
+                                    <div><dt className="inline font-medium text-label-2">Рейтинг: </dt><dd className="inline">{s.score_breakdown.rating}</dd></div>
+                                    <div><dt className="inline font-medium text-label-2">Полнота: </dt><dd className="inline">{s.score_breakdown.completeness}</dd></div>
+                                    <div><dt className="inline font-medium text-label-2">Производитель: </dt><dd className="inline">{s.score_breakdown.manufacturer_bonus}</dd></div>
+                                    <div><dt className="inline font-medium text-label-2">Тип материала: </dt><dd className="inline">{s.score_breakdown.material_type}</dd></div>
+                                    <div><dt className="inline font-medium text-label-2">Ассортимент: </dt><dd className="inline">{s.score_breakdown.product_match}</dd></div>
+                                    <div className="sm:col-span-2 font-semibold text-label-1">Итого: {s.score_breakdown.total} баллов</div>
+                                  </dl>
+                                </td>
+                              </tr>
+                            )}
+                          </Fragment>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+                <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                  <Button variant="outline" size={44} onClick={() => setStep(2)}>← Назад к карте</Button>
+                  <Button
+                    variant="primary" size={44} className="flex-1"
+                    onClick={handleSendRfq}
+                    loading={loading}
+                    disabled={selectedSuppliers.size === 0}
+                  >
+                    {loading ? "Отправляем..." : "Начать тендер (" + selectedSuppliers.size + ")"}
+                  </Button>
                 </div>
-              </div>
-            </div>
+              </Card>
             </div>
           )}
         </div>

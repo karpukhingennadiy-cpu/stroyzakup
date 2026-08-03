@@ -55,15 +55,17 @@ export default function DeliveryMap({ onSelect, initialLat, initialLon }: Props)
   }, [loaded, initialLat, initialLon, apiKey, handleMapClick]);
 
   if (!apiKey) {
-    return <div style={{ padding: 40, textAlign: "center", color: "#94a3b8", border: "1px solid #e2e8f0", borderRadius: 8 }}>
-      Карта недоступна — не указан ключ 2GIS
-    </div>;
+    return (
+      <div className="p-10 text-center text-label-3 border border-separator rounded-[var(--radius-md)] text-sm">
+        Карта недоступна — не указан ключ 2GIS
+      </div>
+    );
   }
 
   return (
-    <div>
-      <div ref={containerRef} style={{ width: "100%", height: 400, borderRadius: 8, border: "1px solid #e2e8f0" }} />
-      {address && <p style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>📍 {address}</p>}
+    <div className="h-full">
+      <div ref={containerRef} className="w-full h-full min-h-[280px] rounded-[var(--radius-md)]" />
+      {address && <p className="text-xs text-label-3 mt-1">📍 {address}</p>}
     </div>
   );
 }

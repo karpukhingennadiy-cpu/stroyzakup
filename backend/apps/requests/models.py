@@ -29,7 +29,8 @@ class Address(models.Model):
 
 class Request(models.Model):
     STATUS_CHOICES = [
-        ("draft","draft"),("parsing","parsing"),("confirmed","confirmed"),
+        ("draft","draft"),("parsing","parsing"),("parsed","parsed"),
+        ("confirmed","confirmed"),
         ("matching","matching"),("matched","matched"),("rfq_sent","rfq_sent"),
         ("rfq_failed","rfq_failed"),("collecting_quotes","collecting_quotes"),
         ("ready","ready"),("completed","completed"),("cancelled","cancelled"),
