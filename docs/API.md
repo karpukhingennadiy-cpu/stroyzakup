@@ -44,6 +44,8 @@
 | GET | `/quotes/` | Только КП по своим заявкам (IDOR закрыт); фильтр `?request_id=` |
 | POST | `/quotes/` | Ручное внесение КП |
 | GET | `/quotes/competitive_sheet/?request_id=` | Сравнение КП + лучший; без id → 400, чужая/несуществующая → 404 |
+| GET | `/quotes/competitive_sheet_xlsx/?request_id=` | Экспорт конкурентного листа в XLSX (поставщик, материалы, доставка, сроки, оплата, итог; лучшее КП выделено); 400/404 как у JSON-версии |
+| GET | `/quotes/winner_protocol_pdf/?request_id=` | Протокол выбора победителя в PDF (таблица КП, победитель, основание); 400/404 как у JSON-версии |
 
 ## Публичное API (без авторизации)
 
@@ -57,7 +59,7 @@
 | Метод | Путь | Описание |
 |-------|------|----------|
 | POST | `/emails/webhook/mailgun/` | Mailgun inbound (HMAC-подпись при заданном `INBOUND_EMAIL_WEBHOOK_SECRET`) |
-| POST | `/emails/webhook/inbound/` | Generic JSON webhook |
+| POST | `/emails/webhook/inbound/` | Generic JSON webhook (при заданном `INBOUND_GENERIC_WEBHOOK_SECRET` требуется заголовок `X-Webhook-Secret`) |
 
 Альтернатива вебхукам: `python manage.py fetch_inbound` (IMAP-polling, см. `docs/INBOUND_SETUP.md`).
 

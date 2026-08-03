@@ -30,7 +30,7 @@ class QuoteViewSet(viewsets.ModelViewSet):
         quotes = Quote.objects.filter(
             request_id=request_id, request__customer=request.user,
             status__in=['received', 'valid'],
-        )
+        ).select_related('supplier').prefetch_related('items__request_item')
         items = []
         from decimal import Decimal
         for quote in quotes:
@@ -57,6 +57,49 @@ class QuoteViewSet(viewsets.ModelViewSet):
 
         return Response({'suppliers': sorted(items, key=lambda x: x['grand_total']),
                         'best': best, 'total_quotes': len(items)})
+
+    def _get_owned_request(self, request):
+        """Fetch the request scoped to the caller or return (None, Response)."""
+        from apps.requests.models import Request as ReqModel
+        request_id = request.query_params.get('request_id')
+        if not request_id:
+            return None, Response({'error': 'request_id required'}, status=400)
+        try:
+            req = ReqModel.objects.get(id=request_id, customer=request.user)
+        except (ReqModel.DoesNotExist, ValueError):
+            return None, Response({'error': 'Request not found'}, status=404)
+        return req, None
+
+    @decorators.action(detail=False, methods=['get'])
+    def competitive_sheet_xlsx(self, request):
+        """P1: download the competitive sheet as .xlsx (best offer highlighted)."""
+        req, error = self._get_owned_request(request)
+        if error:
+            return error
+        from django.http import HttpResponse
+        from .exporters import build_competitive_sheet_xlsx
+        payload = build_competitive_sheet_xlsx(req)
+        response = HttpResponse(
+            payload,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        )
+        response['Content-Disposition'] = (
+            f'attachment; filename="competitive_sheet_RFQ-{req.code}.xlsx"')
+        return response
+
+    @decorators.action(detail=False, methods=['get'])
+    def winner_protocol_pdf(self, request):
+        """P1: download the winner-selection protocol as .pdf."""
+        req, error = self._get_owned_request(request)
+        if error:
+            return error
+        from django.http import HttpResponse
+        from .exporters import build_winner_protocol_pdf
+        payload = build_winner_protocol_pdf(req)
+        response = HttpResponse(payload, content_type='application/pdf')
+        response['Content-Disposition'] = (
+            f'attachment; filename="winner_protocol_RFQ-{req.code}.pdf"')
+        return response
 
 
 # === Public API (no auth) ===
