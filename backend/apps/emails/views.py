@@ -56,7 +56,17 @@ def mailgun_inbound_webhook(request):
 @csrf_exempt
 @require_POST
 def generic_inbound_webhook(request):
-    """Generic inbound webhook for SendGrid or other providers."""
+    """Generic inbound webhook for SendGrid or other providers.
+
+    Auth: when INBOUND_GENERIC_WEBHOOK_SECRET is set, the request must carry
+    the same value in the X-Webhook-Secret header (shared-secret scheme —
+    most generic providers cannot sign HMAC like Mailgun)."""
+    secret = getattr(settings, "INBOUND_GENERIC_WEBHOOK_SECRET", "")
+    if secret:
+        provided = request.headers.get("X-Webhook-Secret", "")
+        if not hmac.compare_digest(provided.encode(), secret.encode()):
+            logger.warning("Invalid generic inbound webhook secret")
+            return HttpResponseForbidden("Invalid webhook secret")
     try:
         data = json.loads(request.body)
     except json.JSONDecodeError:

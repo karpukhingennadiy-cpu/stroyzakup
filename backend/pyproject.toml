@@ -20,6 +20,8 @@ dependencies = [
     "django-environ>=0.11",   # FIX-M3: для 12-factor config
     "whitenoise>=6.8",        # static files serving (was only in requirements.txt)
     "faker>=30.0",            # demo/seed data generation
+    "openpyxl>=3.1",          # XLSX export of the competitive sheet (P1)
+    "reportlab>=4.0",         # PDF export of the winner-selection protocol (P1)
 ]
 
 [project.optional-dependencies]
@@ -31,6 +33,7 @@ dev = [
     "isort>=5.13",
     "ruff>=0.6",
     "factory-boy>=3.3",       # FIX-M3: для тестовых данных
+    "pypdf>=4.0",             # text extraction in PDF-export tests (dev-only)
 ]
 
 [tool.pytest.ini_options]

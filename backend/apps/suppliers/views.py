@@ -91,9 +91,13 @@ class SupplierViewSet(viewsets.ModelViewSet):
 
     @decorators.action(detail=False, methods=['get'])
     def search_radius(self, request):
-        lat = float(request.query_params.get('lat', 0))
-        lon = float(request.query_params.get('lon', 0))
-        radius_km = float(request.query_params.get('radius', 150))
+        try:
+            lat = float(request.query_params.get('lat', 0))
+            lon = float(request.query_params.get('lon', 0))
+            radius_km = float(request.query_params.get('radius', 150))
+        except (TypeError, ValueError):
+            return Response({'error': 'lat, lon and radius must be numbers'},
+                            status=status.HTTP_400_BAD_REQUEST)
         category = request.query_params.get('category')
 
         suppliers = Supplier.objects.filter(is_active=True, addresses__is_active=True)

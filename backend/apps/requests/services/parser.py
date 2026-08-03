@@ -305,6 +305,14 @@ def parse_material_list(request_obj):
             return {"error": "Unexpected response format", "items": [], "clarifications": []}
         if not items:
             return {"error": "No items found", "items": [], "clarifications": []}
+        # FIX-M3 follow-up: schema validation was defined but never called —
+        # malformed LLM items went straight into the DB
+        items, rejected = validate_items(items)
+        if rejected:
+            logger.warning("LLM parse: %d item(s) rejected by schema", len(rejected))
+        if not items:
+            return {"error": "No valid items after schema validation",
+                    "items": [], "clarifications": []}
         with transaction.atomic():
             _save_items(request_obj, items)
         return {
