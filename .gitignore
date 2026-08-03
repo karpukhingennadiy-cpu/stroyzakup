@@ -93,3 +93,6 @@ backend/run_tender1.py
 backend/test_parse_api.py
 backend/test_tenders.py
 backend/seed_categories.py
+
+# Архив протоколов генерируется автоматизацией Kimi Work (артефакт рантайма)
+protocols/
