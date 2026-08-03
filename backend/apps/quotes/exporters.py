@@ -225,8 +225,11 @@ def build_winner_protocol_pdf(request_obj) -> bytes:
         # overflowing the narrow columns
         cell_style = ParagraphStyle("cell", fontName=font, fontSize=8.5, leading=11)
         cell_style_b = ParagraphStyle("cellb", fontName=font_bold, fontSize=8.5, leading=11)
-        table_data = [["№", "Поставщик", "Материалы, ₽", "Доставка, ₽",
-                       "Срок поставки", "Оплата", "Итого, ₽"]]
+        head_style = ParagraphStyle("head", fontName=font_bold, fontSize=8.5,
+                                    leading=10, textColor=colors.white)
+        headers = ["№", "Поставщик", "Материалы, ₽", "Доставка, ₽",
+                   "Срок поставки", "Оплата", "Итого, ₽"]
+        table_data = [[Paragraph(h, head_style) for h in headers]]
         for i, row in enumerate(rows, 1):
             cstyle = cell_style_b if i == 1 else cell_style
             table_data.append([
@@ -236,7 +239,7 @@ def build_winner_protocol_pdf(request_obj) -> bytes:
                 Paragraph(row["payment_terms"] or "—", cstyle),
                 fmt_money(row["grand_total"]),
             ])
-        col_widths = [10 * mm, 52 * mm, 25 * mm, 22 * mm, 22 * mm, 22 * mm, 25 * mm]
+        col_widths = [8 * mm, 46 * mm, 26 * mm, 22 * mm, 22 * mm, 22 * mm, 24 * mm]
         table = Table(table_data, colWidths=col_widths, repeatRows=1)
         style = [
             ("FONTNAME", (0, 0), (-1, 0), font_bold),
