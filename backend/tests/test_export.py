@@ -123,6 +123,36 @@ class TestWinnerProtocolPdf:
         r = owner_client.get("/api/quotes/winner_protocol_pdf/")
         assert r.status_code == 400
 
+    def test_pdf_delivery_term_has_unit(self, owner_client, request_with_quotes):
+        """Regression (protocol_ZUABCR): a bare numeric delivery_time must be
+        rendered with its unit, declined ('5' -> '5 дней')."""
+        from pypdf import PdfReader
+
+        req = request_with_quotes
+        best_quote = Quote.objects.get(supplier__name="BestSup")
+        best_quote.delivery_time = "5"
+        best_quote.save(update_fields=["delivery_time"])
+
+        r = owner_client.get(f"/api/quotes/winner_protocol_pdf/?request_id={req.id}")
+        assert r.status_code == 200
+        text = "".join(
+            page.extract_text() for page in PdfReader(io.BytesIO(r.content)).pages
+        )
+        assert "5 дней" in text
+
+    def test_format_delivery_term_plural_rules(self, db):
+        from apps.quotes.exporters import format_delivery_term
+
+        assert format_delivery_term("1") == "1 день"
+        assert format_delivery_term("2") == "2 дня"
+        assert format_delivery_term("5") == "5 дней"
+        assert format_delivery_term("11") == "11 дней"
+        assert format_delivery_term("21") == "21 день"
+        assert format_delivery_term(3) == "3 дня"
+        assert format_delivery_term("3 дня") == "3 дня"  # already has a unit
+        assert format_delivery_term("") == "—"
+        assert format_delivery_term(None) == "—"
+
 
 class TestUpdateItemIdorRegression:
     """update_item used to accept any request id — a user could edit items

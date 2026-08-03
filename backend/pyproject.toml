@@ -33,6 +33,7 @@ dev = [
     "isort>=5.13",
     "ruff>=0.6",
     "factory-boy>=3.3",       # FIX-M3: для тестовых данных
+    "pypdf>=4.0",             # text extraction in PDF-export tests (dev-only)
 ]
 
 [tool.pytest.ini_options]

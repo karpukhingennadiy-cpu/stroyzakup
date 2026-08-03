@@ -15,6 +15,30 @@ logger = logging.getLogger(__name__)
 MONEY_FMT = '#,##0.00 "₽"'
 
 
+def _plural_days(n: int) -> str:
+    """день/дня/дней by Russian plural rules."""
+    if 11 <= n % 100 <= 14:
+        return "дней"
+    return {1: "день", 2: "дня", 3: "дня", 4: "дня"}.get(n % 10, "дней")
+
+
+def format_delivery_term(value) -> str:
+    """Human-readable delivery term: a bare number gets its unit declined
+    ('3' -> '3 дня'); values that already contain text pass through."""
+    if value is None:
+        return "—"
+    text = str(value).strip()
+    if not text:
+        return "—"
+    try:
+        num = float(text.replace(",", "."))
+    except ValueError:
+        return text  # already descriptive, e.g. '3 дня', 'на следующей неделе'
+    if num.is_integer():
+        return f"{int(num)} {_plural_days(int(num))}"
+    return f"{num:g} дня"
+
+
 def get_competitive_rows(request_obj) -> list[dict]:
     """Quotes of a request ranked by grand total (materials + delivery)."""
     from .models import Quote
@@ -197,13 +221,19 @@ def build_winner_protocol_pdf(request_obj) -> bytes:
     ]
 
     if rows:
+        # Wrap text cells in Paragraphs so long values wrap instead of
+        # overflowing the narrow columns
+        cell_style = ParagraphStyle("cell", fontName=font, fontSize=8.5, leading=11)
+        cell_style_b = ParagraphStyle("cellb", fontName=font_bold, fontSize=8.5, leading=11)
         table_data = [["№", "Поставщик", "Материалы, ₽", "Доставка, ₽",
-                       "Сроки", "Оплата", "Итого, ₽"]]
+                       "Срок поставки", "Оплата", "Итого, ₽"]]
         for i, row in enumerate(rows, 1):
+            cstyle = cell_style_b if i == 1 else cell_style
             table_data.append([
-                str(i), row["supplier_name"],
+                str(i), Paragraph(row["supplier_name"], cstyle),
                 fmt_money(row["materials_total"]), fmt_money(row["delivery"]),
-                row["delivery_time"] or "—", row["payment_terms"] or "—",
+                Paragraph(format_delivery_term(row["delivery_time"]), cstyle),
+                Paragraph(row["payment_terms"] or "—", cstyle),
                 fmt_money(row["grand_total"]),
             ])
         col_widths = [10 * mm, 52 * mm, 25 * mm, 22 * mm, 22 * mm, 22 * mm, 25 * mm]
@@ -231,7 +261,9 @@ def build_winner_protocol_pdf(request_obj) -> bytes:
                 f"Победителем признан поставщик <b>{best['supplier_name']}</b> "
                 f"с наименьшей итоговой стоимостью <b>{fmt_money(best['grand_total'])}</b> "
                 f"(материалы — {fmt_money(best['materials_total'])}, "
-                f"доставка — {fmt_money(best['delivery'])}).",
+                f"доставка — {fmt_money(best['delivery'])}).<br/>"
+                f"Срок поставки: {format_delivery_term(best['delivery_time'])}.<br/>"
+                f"Условия оплаты: {best['payment_terms'] or '—'}.",
                 body_style,
             ),
             Paragraph(
