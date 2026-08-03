@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { registerUser, login } from "@/lib/api";
 import { IconHardHat } from "@/components/icons";
+import { Button, Field } from "@/components/ui";
+import { ThemeToggle } from "@/components/theme";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -30,53 +32,59 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f5f7fa] to-[#e8ecf1] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-surface-ground px-4 py-8">
+      <div className="fixed top-4 right-4">
+        <span className="[&_button]:text-[var(--label-secondary)] [&_button:hover]:bg-[var(--fill-1)]">
+          <ThemeToggle />
+        </span>
+      </div>
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#1e3a5f] mb-4 shadow-lg">
-            <IconHardHat className="w-8 h-8 text-[#f0a500]" />
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-[var(--radius-xl)] bg-brand-sidebar mb-4 shadow-small">
+            <IconHardHat className="w-8 h-8 text-brand" />
           </div>
-          <h1 className="text-2xl font-bold text-[#1a1a2e]">Регистрация</h1>
-          <p className="text-[#64748b] mt-1">Создайте аккаунт для доступа к сервису</p>
+          <h1 className="text-xl font-semibold text-label-1">Регистрация</h1>
+          <p className="text-label-3 text-sm mt-1">Создайте аккаунт для доступа к сервису</p>
         </div>
 
-        <div className="bg-white p-8 rounded-2xl shadow-lg border border-[#e2e8f0]">
+        <div className="surface-card p-8">
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">{error}</div>
+            <div className="mb-4 p-3 bg-[var(--danger-soft)] border border-[var(--separator)] text-[var(--danger)] rounded-[var(--radius-md)] text-sm" role="alert">
+              {error}
+            </div>
           )}
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-semibold text-[#1a1a2e] mb-1.5">Email</label>
-              <input type="email" required value={form.email} onChange={update("email")}
-                className="w-full px-4 py-3 bg-[#f5f7fa] border border-[#e2e8f0] rounded-xl focus:bg-white focus:border-[#1e3a5f] transition"
-                placeholder="you@company.ru" />
+            <Field
+              id="reg-email" label="Email" type="email" required
+              autoComplete="email"
+              value={form.email} onChange={update("email")}
+              placeholder="you@company.ru"
+            />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Field
+                id="reg-first-name" label="Имя" type="text"
+                autoComplete="given-name"
+                value={form.first_name} onChange={update("first_name")}
+              />
+              <Field
+                id="reg-last-name" label="Фамилия" type="text"
+                autoComplete="family-name"
+                value={form.last_name} onChange={update("last_name")}
+              />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-[#1a1a2e] mb-1.5">Имя</label>
-                <input type="text" value={form.first_name} onChange={update("first_name")}
-                  className="w-full px-4 py-3 bg-[#f5f7fa] border border-[#e2e8f0] rounded-xl focus:bg-white focus:border-[#1e3a5f] transition" />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-[#1a1a2e] mb-1.5">Фамилия</label>
-                <input type="text" value={form.last_name} onChange={update("last_name")}
-                  className="w-full px-4 py-3 bg-[#f5f7fa] border border-[#e2e8f0] rounded-xl focus:bg-white focus:border-[#1e3a5f] transition" />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-[#1a1a2e] mb-1.5">Пароль</label>
-              <input type="password" required minLength={8} value={form.password} onChange={update("password")}
-                className="w-full px-4 py-3 bg-[#f5f7fa] border border-[#e2e8f0] rounded-xl focus:bg-white focus:border-[#1e3a5f] transition"
-                placeholder="Минимум 8 символов" />
-            </div>
-            <button type="submit" disabled={loading}
-              className="w-full py-3.5 bg-[#f0a500] text-[#1a1a2e] rounded-xl font-bold text-base hover:bg-[#fcc419] hover:shadow-lg transition disabled:opacity-50">
+            <Field
+              id="reg-password" label="Пароль" type="password" required minLength={8}
+              autoComplete="new-password"
+              value={form.password} onChange={update("password")}
+              placeholder="Минимум 8 символов"
+            />
+            <Button type="submit" variant="primary" size={44} loading={loading} className="w-full">
               {loading ? "Регистрация..." : "Зарегистрироваться"}
-            </button>
+            </Button>
           </form>
-          <div className="mt-6 pt-6 border-t border-[#e2e8f0] text-center">
-            <p className="text-sm text-[#64748b]">
-              Уже есть аккаунт? <Link href="/login" className="text-[#1e3a5f] font-semibold hover:text-[#2d5a8e]">Войти</Link>
+          <div className="mt-6 pt-6 border-t border-separator text-center">
+            <p className="text-sm text-label-3">
+              Уже есть аккаунт? <Link href="/login" className="text-[var(--accent)] font-medium hover:underline">Войти</Link>
             </p>
           </div>
         </div>
