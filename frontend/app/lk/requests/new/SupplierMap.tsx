@@ -68,9 +68,9 @@ export default function SupplierMap({ suppliers, centerLat, centerLon }: Props) 
   }, [suppliers, centerLat, centerLon]);
 
   return (
-    <div>
-      <div ref={containerRef} style={{ width: "100%", height: 400, borderRadius: 8, border: "1px solid #e2e8f0" }} />
-      <p style={{ fontSize: 12, color: "#94a3b8", marginTop: 4 }}>
+    <div className="h-full">
+      <div ref={containerRef} className="w-full h-full min-h-[220px] rounded-[var(--radius-md)]" />
+      <p className="text-xs text-label-3 mt-1">
         Поставщики с координатами: {suppliers.filter((s) => s.latitude && s.longitude).length} из {suppliers.length}
       </p>
     </div>

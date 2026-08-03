@@ -2,6 +2,8 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { IconHardHat } from "@/components/icons";
+import { Button, Field, Card } from "@/components/ui";
 
 interface QuoteItem {
   id: number;
@@ -97,7 +99,7 @@ export default function QuotePage() {
       }
     }
     load();
-  }, [token]);
+  }, [token, API]);
 
   const updateItem = (idx: number, field: keyof FormItem, value: any) => {
     setFormItems((prev) => {
@@ -143,135 +145,157 @@ export default function QuotePage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div style={{ maxWidth: 800, margin: "40px auto", padding: 20 }}>
-        <p>Загрузка заявки...</p>
+  const shell = (children: React.ReactNode) => (
+    <div className="min-h-screen bg-surface-ground py-6 sm:py-10 px-4">
+      <div className="max-w-3xl mx-auto">
+        <header className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 rounded-[var(--radius-md)] bg-brand-sidebar flex items-center justify-center shrink-0">
+            <IconHardHat className="w-5 h-5 text-brand" />
+          </div>
+          <span className="font-semibold text-label-1">Минитендер</span>
+        </header>
+        {children}
       </div>
-    );
+    </div>
+  );
+
+  if (loading) {
+    return shell(<p className="text-label-3 text-base" role="status">Загрузка заявки...</p>);
   }
 
   if (error && !data) {
-    return (
-      <div style={{ maxWidth: 800, margin: "40px auto", padding: 20 }}>
-        <h2>Ошибка</h2>
-        <p style={{ color: "red" }}>{error}</p>
-        <p>Проверьте ссылку или обратитесь к отправителю.</p>
-      </div>
+    return shell(
+      <Card>
+        <h1 className="text-xl font-semibold text-label-1 mb-2">Ошибка</h1>
+        <p className="text-[var(--danger)]" role="alert">{error}</p>
+        <p className="text-label-3 text-sm mt-2">Проверьте ссылку или обратитесь к отправителю.</p>
+      </Card>
     );
   }
 
   if (success) {
-    return (
-      <div style={{ maxWidth: 800, margin: "40px auto", padding: 20 }}>
-        <h2>Коммерческое предложение отправлено!</h2>
-        <p>Спасибо! Ваше КП по заявке <strong>RFQ-{data?.request_code}</strong> принято.</p>
-        <p>Мы свяжемся с вами при необходимости.</p>
-      </div>
+    return shell(
+      <Card className="text-center p-10">
+        <h1 className="text-xl font-semibold text-label-1 mb-2">Коммерческое предложение отправлено!</h1>
+        <p className="text-label-2">Спасибо! Ваше КП по заявке <strong className="text-label-1">RFQ-{data?.request_code}</strong> принято.</p>
+        <p className="text-label-3 text-sm mt-1">Мы свяжемся с вами при необходимости.</p>
+      </Card>
     );
   }
 
-  return (
-    <div style={{ maxWidth: 900, margin: "20px auto", padding: 20, fontFamily: "Arial, sans-serif" }}>
-      <h1>Запрос КП: RFQ-{data?.request_code}</h1>
-      <p><strong>Поставщик:</strong> {data?.supplier_name}</p>
-      {data?.delivery_address && <p><strong>Адрес доставки:</strong> {data.delivery_address}</p>}
+  return shell(
+    <>
+      <div className="mb-6">
+        <h1 className="text-xl font-semibold text-label-1">Запрос КП: RFQ-{data?.request_code}</h1>
+        <p className="text-label-3 text-sm mt-1">
+          <strong className="text-label-2 font-medium">Поставщик:</strong> {data?.supplier_name}
+        </p>
+        {data?.delivery_address && (
+          <p className="text-label-3 text-sm">
+            <strong className="text-label-2 font-medium">Адрес доставки:</strong> {data.delivery_address}
+          </p>
+        )}
+      </div>
 
       <form onSubmit={handleSubmit}>
-        <h3>Позиции заявки</h3>
-        <table style={{ width: "100%", borderCollapse: "collapse", marginBottom: 20 }}>
-          <thead>
-            <tr style={{ background: "#f0f0f0", textAlign: "left" }}>
-              <th style={{ padding: 8 }}>Материал</th>
-              <th style={{ padding: 8 }}>Кол-во</th>
-              <th style={{ padding: 8 }}>Ед.</th>
-              <th style={{ padding: 8 }}>Цена за ед., руб</th>
-              <th style={{ padding: 8 }}>Аналог</th>
-              <th style={{ padding: 8 }}>Бренд</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data?.items.map((item, idx) => (
-              <tr key={item.id} style={{ borderBottom: "1px solid #ddd" }}>
-                <td style={{ padding: 8 }}>
-                  <div><strong>{item.name}</strong></div>
-                  {item.spec && <div style={{ fontSize: 12, color: "#666" }}>{item.spec}</div>}
-                </td>
-                <td style={{ padding: 8 }}>{item.quantity}</td>
-                <td style={{ padding: 8 }}>{item.unit}</td>
-                <td style={{ padding: 8 }}>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    required
-                    value={formItems[idx]?.price || ""}
-                    onChange={(e) => updateItem(idx, "price", e.target.value)}
-                    style={{ width: 100, padding: 4 }}
-                    placeholder="0.00"
-                  />
-                </td>
-                <td style={{ padding: 8, textAlign: "center" }}>
-                  <input
-                    type="checkbox"
-                    checked={formItems[idx]?.is_analog || false}
-                    onChange={(e) => updateItem(idx, "is_analog", e.target.checked)}
-                  />
-                </td>
-                <td style={{ padding: 8 }}>
-                  <input
-                    type="text"
-                    value={formItems[idx]?.brand || ""}
-                    onChange={(e) => updateItem(idx, "brand", e.target.value)}
-                    style={{ width: 120, padding: 4 }}
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <Card title="Позиции заявки" padding={false} className="mb-6">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm min-w-[640px]">
+              <thead>
+                <tr className="border-b border-separator text-left">
+                  <th scope="col" className="px-6 py-3 text-xs font-medium text-label-3">Материал</th>
+                  <th scope="col" className="px-3 py-3 text-xs font-medium text-label-3 text-right">Кол-во</th>
+                  <th scope="col" className="px-3 py-3 text-xs font-medium text-label-3">Ед.</th>
+                  <th scope="col" className="px-3 py-3 text-xs font-medium text-label-3">Цена за ед., руб</th>
+                  <th scope="col" className="px-3 py-3 text-xs font-medium text-label-3 text-center">Аналог</th>
+                  <th scope="col" className="px-6 py-3 text-xs font-medium text-label-3">Бренд</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data?.items.map((item, idx) => (
+                  <tr key={item.id} className="border-b border-[var(--fill-1)]">
+                    <td className="px-6 py-3">
+                      <div className="font-medium text-label-1">{item.name}</div>
+                      {item.spec && <div className="text-xs text-label-3 mt-0.5">{item.spec}</div>}
+                    </td>
+                    <td className="px-3 py-3 text-right text-label-1 tabular-nums">{item.quantity}</td>
+                    <td className="px-3 py-3 text-label-3">{item.unit}</td>
+                    <td className="px-3 py-3">
+                      <label htmlFor={"price-" + item.id} className="sr-only">Цена за единицу: {item.name}</label>
+                      <input
+                        id={"price-" + item.id}
+                        type="number" step="0.01" min="0" required
+                        value={formItems[idx]?.price || ""}
+                        onChange={(e) => updateItem(idx, "price", e.target.value)}
+                        className="field-input w-28"
+                        placeholder="0.00"
+                      />
+                    </td>
+                    <td className="px-3 py-3 text-center">
+                      <label htmlFor={"analog-" + item.id} className="sr-only">Предлагаю аналог: {item.name}</label>
+                      <input
+                        id={"analog-" + item.id}
+                        type="checkbox"
+                        checked={formItems[idx]?.is_analog || false}
+                        onChange={(e) => updateItem(idx, "is_analog", e.target.checked)}
+                        className="w-4 h-4 accent-[var(--accent)]"
+                      />
+                    </td>
+                    <td className="px-6 py-3">
+                      <label htmlFor={"brand-" + item.id} className="sr-only">Бренд: {item.name}</label>
+                      <input
+                        id={"brand-" + item.id}
+                        type="text"
+                        value={formItems[idx]?.brand || ""}
+                        onChange={(e) => updateItem(idx, "brand", e.target.value)}
+                        className="field-input w-32"
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
 
-        <h3>Условия поставки</h3>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
-          <div>
-            <label>Стоимость доставки, руб</label>
-            <input type="number" step="0.01" min="0" value={deliveryCost}
-              onChange={(e) => setDeliveryCost(e.target.value)}
-              style={{ width: "100%", padding: 8, marginTop: 4 }} />
+        <Card title="Условия поставки" className="mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Field
+              id="delivery-cost" label="Стоимость доставки, руб"
+              type="number" step="0.01" min="0"
+              value={deliveryCost} onChange={(e) => setDeliveryCost(e.target.value)}
+            />
+            <Field
+              id="delivery-time" label="Срок поставки"
+              type="text" placeholder="например: 5 рабочих дней"
+              value={deliveryTime} onChange={(e) => setDeliveryTime(e.target.value)}
+            />
+            <Field
+              id="payment-terms" label="Условия оплаты"
+              type="text" placeholder="например: 100% постоплата"
+              value={paymentTerms} onChange={(e) => setPaymentTerms(e.target.value)}
+            />
+            <div>
+              <label htmlFor="quote-comment" className="block text-sm font-medium text-label-1 mb-1.5">Комментарий</label>
+              <textarea
+                id="quote-comment"
+                value={comment} onChange={(e) => setComment(e.target.value)}
+                className="field-input min-h-[60px] resize-y"
+              />
+            </div>
           </div>
-          <div>
-            <label>Срок поставки</label>
-            <input type="text" value={deliveryTime}
-              onChange={(e) => setDeliveryTime(e.target.value)}
-              style={{ width: "100%", padding: 8, marginTop: 4 }}
-              placeholder="например: 5 рабочих дней" />
-          </div>
-          <div>
-            <label>Условия оплаты</label>
-            <input type="text" value={paymentTerms}
-              onChange={(e) => setPaymentTerms(e.target.value)}
-              style={{ width: "100%", padding: 8, marginTop: 4 }}
-              placeholder="например: 100% постоплата" />
-          </div>
-          <div>
-            <label>Комментарий</label>
-            <textarea value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              style={{ width: "100%", padding: 8, marginTop: 4, minHeight: 60 }} />
-          </div>
-        </div>
+        </Card>
 
-        {error && <p style={{ color: "red", marginBottom: 12 }}>{error}</p>}
+        {error && (
+          <p className="mb-4 p-3 bg-[var(--danger-soft)] border border-[var(--separator)] text-[var(--danger)] rounded-[var(--radius-md)] text-sm" role="alert">
+            {error}
+          </p>
+        )}
 
-        <button type="submit" disabled={submitting}
-          style={{
-            padding: "12px 40px", fontSize: 16, background: "#0070f3", color: "#fff",
-            border: "none", borderRadius: 6, cursor: submitting ? "not-allowed" : "pointer",
-            opacity: submitting ? 0.7 : 1,
-          }}>
+        <Button type="submit" variant="primary" size={44} loading={submitting}>
           {submitting ? "Отправка..." : "Отправить КП"}
-        </button>
+        </Button>
       </form>
-    </div>
+    </>
   );
 }

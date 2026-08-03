@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { login } from "@/lib/api";
 import { IconHardHat } from "@/components/icons";
+import { Button, Field } from "@/components/ui";
+import { ThemeToggle } from "@/components/theme";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,41 +29,47 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f5f7fa] to-[#e8ecf1] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-surface-ground px-4 py-8">
+      <div className="fixed top-4 right-4">
+        <span className="[&_button]:text-[var(--label-secondary)] [&_button:hover]:bg-[var(--fill-1)]">
+          <ThemeToggle />
+        </span>
+      </div>
       <div className="max-w-md w-full">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#1e3a5f] mb-4 shadow-lg">
-            <IconHardHat className="w-8 h-8 text-[#f0a500]" />
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-[var(--radius-xl)] bg-brand-sidebar mb-4 shadow-small">
+            <IconHardHat className="w-8 h-8 text-brand" />
           </div>
-          <h1 className="text-2xl font-bold text-[#1a1a2e]">Вход в Минитендер</h1>
-          <p className="text-[#64748b] mt-1">Войдите, чтобы управлять заявками</p>
+          <h1 className="text-xl font-semibold text-label-1">Вход в Минитендер</h1>
+          <p className="text-label-3 text-sm mt-1">Войдите, чтобы управлять заявками</p>
         </div>
 
-        <div className="bg-white p-8 rounded-2xl shadow-lg border border-[#e2e8f0]">
+        <div className="surface-card p-8">
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm">{error}</div>
+            <div className="mb-4 p-3 bg-[var(--danger-soft)] border border-[var(--separator)] text-[var(--danger)] rounded-[var(--radius-md)] text-sm" role="alert">
+              {error}
+            </div>
           )}
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-semibold text-[#1a1a2e] mb-1.5">Email</label>
-              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-[#f5f7fa] border border-[#e2e8f0] rounded-xl focus:bg-white focus:border-[#1e3a5f] transition"
-                placeholder="you@company.ru" />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-[#1a1a2e] mb-1.5">Пароль</label>
-              <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-[#f5f7fa] border border-[#e2e8f0] rounded-xl focus:bg-white focus:border-[#1e3a5f] transition"
-                placeholder="••••••••" />
-            </div>
-            <button type="submit" disabled={loading}
-              className="w-full py-3.5 bg-[#1e3a5f] text-white rounded-xl font-semibold text-base hover:bg-[#2d5a8e] hover:shadow-lg transition disabled:opacity-50">
+            <Field
+              id="login-email" label="Email" type="email" required
+              autoComplete="email"
+              value={email} onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@company.ru"
+            />
+            <Field
+              id="login-password" label="Пароль" type="password" required
+              autoComplete="current-password"
+              value={password} onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+            />
+            <Button type="submit" variant="primary" size={44} loading={loading} className="w-full">
               {loading ? "Вход..." : "Войти"}
-            </button>
+            </Button>
           </form>
-          <div className="mt-6 pt-6 border-t border-[#e2e8f0] text-center">
-            <p className="text-sm text-[#64748b]">
-              Нет аккаунта? <Link href="/register" className="text-[#1e3a5f] font-semibold hover:text-[#2d5a8e]">Зарегистрироваться</Link>
+          <div className="mt-6 pt-6 border-t border-separator text-center">
+            <p className="text-sm text-label-3">
+              Нет аккаунта? <Link href="/register" className="text-[var(--accent)] font-medium hover:underline">Зарегистрироваться</Link>
             </p>
           </div>
         </div>
