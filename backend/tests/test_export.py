@@ -140,6 +140,24 @@ class TestWinnerProtocolPdf:
         )
         assert "5 дней" in text
 
+    def test_winner_protocol_includes_selected_quote(self, owner_client, request_with_quotes):
+        """Regression: a quote moved to 'selected' must still appear in the
+        winner protocol, otherwise the protocol becomes empty."""
+        from pypdf import PdfReader
+
+        req = request_with_quotes
+        # Pick a non-winning quote and mark it selected
+        selected_quote = Quote.objects.get(supplier__name="WorstSup")
+        selected_quote.status = "selected"
+        selected_quote.save(update_fields=["status"])
+
+        r = owner_client.get(f"/api/quotes/winner_protocol_pdf/?request_id={req.id}")
+        assert r.status_code == 200
+        text = "".join(
+            page.extract_text() for page in PdfReader(io.BytesIO(r.content)).pages
+        )
+        assert "WorstSup" in text
+
     def test_format_delivery_term_plural_rules(self, db):
         from apps.quotes.exporters import format_delivery_term
 

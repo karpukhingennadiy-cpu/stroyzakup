@@ -44,7 +44,7 @@ def get_competitive_rows(request_obj) -> list[dict]:
     from .models import Quote
 
     quotes = (
-        Quote.objects.filter(request=request_obj, status__in=["received", "valid"])
+        Quote.objects.filter(request=request_obj, status__in=["received", "valid", "selected"])
         .select_related("supplier")
         .prefetch_related("items__request_item")
     )
