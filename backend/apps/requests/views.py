@@ -121,8 +121,10 @@ class RequestViewSet(viewsets.ModelViewSet):
 
     @decorators.action(detail=True, methods=["post"])
     def update_item(self, request, pk=None):
+        # IDOR fix: scope the item lookup to requests owned by the caller
         item = get_object_or_404(
-            RequestItem, id=request.data.get("item_id"), request_id=pk
+            RequestItem, id=request.data.get("item_id"),
+            request_id=pk, request__customer=request.user,
         )
         serializer = ItemConfirmSerializer(item, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
