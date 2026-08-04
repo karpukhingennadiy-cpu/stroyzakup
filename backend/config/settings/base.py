@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     "apps.quotes",
     "apps.emails",
     "apps.admin_ext",
+    "apps.analytics",
 ]
 
 MIDDLEWARE = [
