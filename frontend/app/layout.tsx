@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Geist } from "next/font/google";
 import { ThemeScript } from "@/components/theme";
+import { WebVitals } from "@/components/web-vitals";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
@@ -24,7 +25,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <ThemeScript />
       </head>
-      <body className="font-sans">{children}</body>
+      <body className="font-sans">
+        {children}
+        <WebVitals />
+      </body>
     </html>
   );
 }
