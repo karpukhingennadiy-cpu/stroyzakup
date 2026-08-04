@@ -22,6 +22,7 @@ dependencies = [
     "faker>=30.0",            # demo/seed data generation
     "openpyxl>=3.1",          # XLSX export of the competitive sheet (P1)
     "reportlab>=4.0",         # PDF export of the winner-selection protocol (P1)
+    "posthog>=3.0",           # PostHog analytics SDK (KC-03)
 ]
 
 [project.optional-dependencies]

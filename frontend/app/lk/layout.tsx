@@ -1,15 +1,18 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { getMe, clearTokens } from "@/lib/api";
-import { IconList, IconPlus, IconTruck, IconHardHat, IconLogOut } from "@/components/icons";
+import { ListPlus, Truck, HardHat, LogOut, Menu, X } from "lucide-react";
 import { ThemeToggle } from "@/components/theme";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const navItems = [
-  { href: "/lk/requests", label: "Мои заявки", icon: IconList },
-  { href: "/lk/requests/new", label: "Новая заявка", icon: IconPlus },
-  { href: "/lk/suppliers", label: "Поставщики", icon: IconTruck },
+  { href: "/lk/requests", label: "Мои заявки", icon: ListPlus },
+  { href: "/lk/requests/new", label: "Новая заявка", icon: ListPlus },
+  { href: "/lk/suppliers", label: "Поставщики", icon: Truck },
 ];
 
 export default function LkLayout({ children }: { children: React.ReactNode }) {
@@ -26,10 +29,8 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
       .finally(() => setLoading(false));
   }, [router]);
 
-  // Close the mobile menu on navigation
   useEffect(() => { setMenuOpen(false); }, [pathname]);
 
-  // Escape закрывает мобильное меню (a11y: клавиатурная навигация)
   useEffect(() => {
     if (!menuOpen) return;
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setMenuOpen(false); };
@@ -41,34 +42,42 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-surface-ground">
-        <div className="text-label-3 text-base" role="status">Загрузка...</div>
+      <div className="min-h-screen flex items-center justify-center bg-[var(--bg-ground)]">
+        <div className="space-y-4 w-64">
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-8 w-3/4" />
+          <Skeleton className="h-8 w-1/2" />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex bg-surface-ground">
+    <div className="min-h-screen flex bg-[var(--bg-ground)]">
       {/* Skip-link для клавиатурной навигации */}
-      <a href="#lk-main" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-toast focus:px-3 focus:py-2 focus:rounded-md focus:bg-[var(--accent)] focus:text-white">
+      <a
+        href="#lk-main"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[1000] focus:px-3 focus:py-2 focus:rounded-md focus:bg-[var(--accent)] focus:text-white"
+      >
         К содержимому
       </a>
 
       {/* Mobile top bar */}
-      <div className="md:hidden fixed top-0 inset-x-0 z-header h-14 bg-brand-sidebar text-white flex items-center gap-2 px-3">
-        <button
-          type="button"
+      <div className="md:hidden fixed top-0 inset-x-0 z-[500] h-14 bg-[var(--sidebar-bg)] text-white flex items-center gap-2 px-3">
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label={menuOpen ? "Закрыть меню" : "Открыть меню"}
           aria-expanded={menuOpen}
           aria-controls="lk-nav"
-          className="w-10 h-10 flex items-center justify-center rounded-[var(--radius-md)] hover:bg-white/10 transition-colors text-xl leading-none"
+          className="text-white hover:bg-white/10"
         >
-          {menuOpen ? "✕" : "☰"}
-        </button>
+          {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </Button>
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-[var(--radius-sm)] bg-brand flex items-center justify-center">
-            <IconHardHat className="w-4 h-4 text-brand-ink" />
+          <div className="w-8 h-8 rounded-[var(--radius-sm)] bg-[var(--brand)] flex items-center justify-center">
+            <HardHat className="w-4 h-4 text-[var(--brand-ink)]" />
           </div>
           <span className="font-bold tracking-tight">Минитендер</span>
         </Link>
@@ -79,20 +88,24 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
 
       {/* Backdrop for mobile menu */}
       {menuOpen && (
-        <div className="md:hidden fixed inset-0 z-[calc(var(--z-header)-1)] bg-black/40" onClick={() => setMenuOpen(false)} aria-hidden="true" />
+        <div
+          className="md:hidden fixed inset-0 z-[499] bg-black/40"
+          onClick={() => setMenuOpen(false)}
+          aria-hidden="true"
+        />
       )}
 
       <aside
         id="lk-nav"
         className={
-          "w-64 bg-brand-sidebar text-white flex flex-col fixed inset-y-0 left-0 z-header transition-transform duration-200 ease-kimi-out " +
+          "w-64 bg-[var(--sidebar-bg)] text-white flex flex-col fixed inset-y-0 left-0 z-[500] transition-transform duration-200 ease-out " +
           (menuOpen ? "translate-x-0" : "-translate-x-full") + " md:translate-x-0"
         }
       >
         <div className="p-6 border-b border-white/10 flex items-center justify-between gap-2">
           <Link href="/" className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-[var(--radius-sm)] bg-brand flex items-center justify-center shrink-0">
-              <IconHardHat className="w-5 h-5 text-brand-ink" />
+            <div className="w-9 h-9 rounded-[var(--radius-sm)] bg-[var(--brand)] flex items-center justify-center shrink-0">
+              <HardHat className="w-5 h-5 text-[var(--brand-ink)]" />
             </div>
             <span className="font-bold text-lg tracking-tight truncate">Минитендер</span>
           </Link>
@@ -103,11 +116,18 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
           {navItems.map((item) => {
             const active = pathname === item.href;
             return (
-              <Link key={item.href} href={item.href}
+              <Link
+                key={item.href}
+                href={item.href}
                 aria-current={active ? "page" : undefined}
-                className={"flex items-center gap-3 px-3 py-2.5 rounded-[var(--radius-lg)] transition-colors duration-150 text-sm font-medium " +
-                  (active ? "bg-white/10 text-white" : "text-white/60 hover:text-white hover:bg-white/10")}>
-                <item.icon className="w-5 h-5" />
+                className={
+                  "flex items-center gap-3 px-3 py-2.5 rounded-[var(--radius-lg)] transition-colors duration-150 text-sm font-medium " +
+                  (active
+                    ? "bg-white/10 text-white"
+                    : "text-white/60 hover:text-white hover:bg-white/10")
+                }
+              >
+                <item.icon className="w-5 h-5" aria-hidden="true" />
                 {item.label}
               </Link>
             );
@@ -115,15 +135,26 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
         </nav>
 
         <div className="p-4 border-t border-white/10">
-          <div className="px-3 py-2 text-sm text-white/40 truncate" title={user?.email || ""}>{user?.email || ""}</div>
-          <button type="button" onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-[var(--radius-lg)] text-white/40 hover:text-white/70 hover:bg-white/5 transition-colors duration-150 text-sm mt-1">
-            <IconLogOut className="w-5 h-5" />
+          <div className="px-3 py-2 text-sm text-white/40 truncate" title={user?.email || ""}>
+            {user?.email || ""}
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleLogout}
+            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-[var(--radius-lg)] text-white/40 hover:text-white/70 hover:bg-white/5 transition-colors duration-150 text-sm mt-1 justify-start"
+          >
+            <LogOut className="w-5 h-5" aria-hidden="true" />
             Выйти
-          </button>
+          </Button>
         </div>
       </aside>
-      <main id="lk-main" className="flex-1 md:ml-64 p-4 pt-20 md:p-8 w-full min-w-0">{children}</main>
+      <main
+        id="lk-main"
+        className="flex-1 md:ml-64 p-4 pt-20 md:p-8 w-full min-w-0"
+      >
+        {children}
+      </main>
     </div>
   );
 }

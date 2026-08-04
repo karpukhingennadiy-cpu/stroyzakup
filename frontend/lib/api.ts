@@ -148,3 +148,27 @@ export async function sendRfq(id: number, supplierIds: number[]): Promise<any> {
 export async function getCompetitiveSheet(requestId: number): Promise<any> {
   return api("/quotes/competitive_sheet/?request_id=" + requestId);
 }
+
+export async function downloadCompetitiveSheetXlsx(requestId: number): Promise<Blob> {
+  const token = getToken();
+  const headers: Record<string, string> = {};
+  if (token) headers["Authorization"] = "Bearer " + token;
+  const res = await fetch(
+    API_BASE + "/quotes/competitive_sheet_xlsx/?request_id=" + requestId,
+    { headers }
+  );
+  if (!res.ok) throw new Error("Ошибка скачивания");
+  return res.blob();
+}
+
+export async function downloadWinnerProtocolPdf(requestId: number): Promise<Blob> {
+  const token = getToken();
+  const headers: Record<string, string> = {};
+  if (token) headers["Authorization"] = "Bearer " + token;
+  const res = await fetch(
+    API_BASE + "/quotes/winner_protocol_pdf/?request_id=" + requestId,
+    { headers }
+  );
+  if (!res.ok) throw new Error("Ошибка скачивания");
+  return res.blob();
+}

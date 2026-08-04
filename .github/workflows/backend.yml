@@ -1,0 +1,78 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend.yml'
+  pull_request:
+    branches: [dev, main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:16-3.4
+        env:
+          POSTGRES_DB: minitender
+          POSTGRES_USER: minitender
+          POSTGRES_PASSWORD: minitender
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings.test
+      DB_HOST: localhost
+      DB_NAME: minitender
+      DB_USER: minitender
+      DB_PASSWORD: minitender
+      REDIS_URL: redis://localhost:6379/0
+      CELERY_BROKER_URL: redis://localhost:6379/0
+      SECRET_KEY: django-insecure-test-key
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Run migrations
+        run: |
+          cd backend
+          python manage.py migrate
+
+      - name: Run tests
+        run: |
+          cd backend
+          pytest tests/ -v --tb=short
+
+      - name: Lint with black
+        run: |
+          cd backend
+          black --check .
+
+      - name: Lint with ruff
+        run: |
+          cd backend
+          ruff check .

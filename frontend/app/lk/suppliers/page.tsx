@@ -1,13 +1,26 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { getSuppliers, getMe, api } from "@/lib/api";
-import { IconTruck, IconSearch, IconPlus } from "@/components/icons";
-import { Button, Card, Badge, Field } from "@/components/ui";
+import { Truck, Search, Plus, Check, X, RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const MODERATION_LABELS: Record<string, { text: string; tone: "success" | "warning" | "danger" }> = {
-  verified: { text: "Подтверждён", tone: "success" },
-  unverified: { text: "На проверке", tone: "warning" },
-  rejected: { text: "Отклонён", tone: "danger" },
+const MODERATION_LABELS: Record<string, { text: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
+  verified: { text: "Подтверждён", variant: "default" },
+  unverified: { text: "На проверке", variant: "secondary" },
+  rejected: { text: "Отклонён", variant: "destructive" },
 };
 
 export default function SuppliersPage() {
@@ -20,7 +33,15 @@ export default function SuppliersPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCats, setSelectedCats] = useState<Set<number>>(new Set());
-  const [addForm, setAddForm] = useState({ name: "", email: "", phone: "", site: "", city: "", address: "", supplier_type: "unknown" });
+  const [addForm, setAddForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    site: "",
+    city: "",
+    address: "",
+    supplier_type: "unknown",
+  });
   const [addError, setAddError] = useState("");
   const [addLoading, setAddLoading] = useState(false);
   const [notice, setNotice] = useState("");
@@ -36,7 +57,9 @@ export default function SuppliersPage() {
   useEffect(() => {
     load();
     getMe().then((me) => setIsStaff(!!me.is_staff)).catch(() => {});
-    api("/suppliers/categories/").then((data) => setCategories(data.results || data)).catch(() => {});
+    api("/suppliers/categories/")
+      .then((data) => setCategories(data.results || data))
+      .catch(() => {});
   }, []);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -48,19 +71,30 @@ export default function SuppliersPage() {
     load(params);
   };
 
-  // B4: staff moderation
   const moderate = async (id: number, status: string) => {
     try {
-      await api("/suppliers/" + id + "/moderate/", { method: "POST", body: JSON.stringify({ status }) });
-      setSuppliers(suppliers.map((s) => (s.id === id ? { ...s, moderation_status: status } : s)));
-      setNotice(status === "verified" ? "Поставщик подтверждён" : status === "rejected" ? "Поставщик отклонён — исключён из подбора" : "Статус обновлён");
+      await api("/suppliers/" + id + "/moderate/", {
+        method: "POST",
+        body: JSON.stringify({ status }),
+      });
+      setSuppliers(
+        suppliers.map((s) =>
+          s.id === id ? { ...s, moderation_status: status } : s
+        )
+      );
+      setNotice(
+        status === "verified"
+          ? "Поставщик подтверждён"
+          : status === "rejected"
+          ? "Поставщик отклонён — исключён из подбора"
+          : "Статус обновлён"
+      );
       setTimeout(() => setNotice(""), 4000);
     } catch (e: any) {
       setNotice("Ошибка модерации: " + e.message);
     }
   };
 
-  // B5: manual supplier add
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     setAddError("");
@@ -81,7 +115,15 @@ export default function SuppliersPage() {
       setNotice("Поставщик «" + addForm.name + "» добавлен и уже участвует в подборе");
       setTimeout(() => setNotice(""), 5000);
       setShowAddForm(false);
-      setAddForm({ name: "", email: "", phone: "", site: "", city: "", address: "", supplier_type: "unknown" });
+      setAddForm({
+        name: "",
+        email: "",
+        phone: "",
+        site: "",
+        city: "",
+        address: "",
+        supplier_type: "unknown",
+      });
       setSelectedCats(new Set());
       load();
     } catch (e: any) {
@@ -95,131 +137,324 @@ export default function SuppliersPage() {
     <div>
       <div className="mb-6 flex flex-wrap gap-4 items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-label-1">Поставщики</h1>
-          <p className="text-label-3 text-sm mt-0.5">База проверенных поставщиков стройматериалов</p>
+          <h1 className="text-xl font-semibold text-[var(--label-primary)]">
+            Поставщики
+          </h1>
+          <p className="text-[var(--label-tertiary)] text-sm mt-0.5">
+            База проверенных поставщиков стройматериалов
+          </p>
         </div>
-        <Button variant="primary" size={44} onClick={() => setShowAddForm(!showAddForm)} leftIcon={<IconPlus className="w-5 h-5" />}>
+        <Button onClick={() => setShowAddForm(!showAddForm)}>
+          <Plus className="w-4 h-4 mr-2" aria-hidden="true" />
           Добавить поставщика
         </Button>
       </div>
 
       {notice && (
-        <div className="mb-4 p-3 bg-[var(--success-soft)] border border-[var(--separator)] text-[var(--success)] rounded-[var(--radius-lg)] text-sm" role="status">
+        <div
+          className="mb-4 p-3 bg-[var(--success-soft)] border border-[var(--separator)] text-[var(--success)] rounded-[var(--radius-lg)] text-sm"
+          role="status"
+          aria-live="polite"
+        >
           {notice}
         </div>
       )}
 
       {showAddForm && (
-        <form onSubmit={handleAdd} className="surface-card p-6 mb-6">
-          <h2 className="font-semibold text-label-1 mb-4">Новый поставщик</h2>
-          {addError && (
-            <div className="mb-4 p-3 bg-[var(--danger-soft)] border border-[var(--separator)] text-[var(--danger)] rounded-[var(--radius-md)] text-sm" role="alert">
-              {addError}
-            </div>
-          )}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <Field id="sup-name" label="Название *" required value={addForm.name} onChange={(e) => setAddForm({ ...addForm, name: e.target.value })} />
-            <Field id="sup-email" label="Email" type="email" value={addForm.email} onChange={(e) => setAddForm({ ...addForm, email: e.target.value })} />
-            <Field id="sup-phone" label="Телефон" value={addForm.phone} onChange={(e) => setAddForm({ ...addForm, phone: e.target.value })} />
-            <Field id="sup-site" label="Сайт" placeholder="https://..." value={addForm.site} onChange={(e) => setAddForm({ ...addForm, site: e.target.value })} />
-            <Field id="sup-address" label="Адрес" placeholder="Город, улица" value={addForm.address} onChange={(e) => setAddForm({ ...addForm, address: e.target.value })} />
-            <div>
-              <label htmlFor="sup-type" className="block text-sm font-medium text-label-1 mb-1.5">Тип</label>
-              <select id="sup-type" value={addForm.supplier_type} onChange={(e) => setAddForm({ ...addForm, supplier_type: e.target.value })} className="field-input">
-                <option value="unknown">Неизвестно</option>
-                <option value="manufacturer">Производитель</option>
-                <option value="dealer">Дилер</option>
-              </select>
-            </div>
-          </div>
-          {categories.length > 0 && (
-            <fieldset className="mt-4">
-              <legend className="text-xs text-label-3 mb-2">Категории материалов:</legend>
-              <div className="flex flex-wrap gap-2">
-                {categories.map((c: any) => {
-                  const active = selectedCats.has(c.id);
-                  return (
-                    <button type="button" key={c.id} aria-pressed={active}
-                      onClick={() => { const next = new Set(selectedCats); active ? next.delete(c.id) : next.add(c.id); setSelectedCats(next); }}
-                      className={"px-3 py-1.5 rounded-full text-xs font-medium border transition-colors duration-150 " +
-                        (active ? "bg-[var(--label-primary)] text-[var(--bg-primary)] border-transparent" : "bg-transparent text-label-2 border-separator hover:bg-[var(--fill-1)]")}>
-                      {c.name}
-                    </button>
-                  );
-                })}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-base">Новый поставщик</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {addError && (
+              <div
+                className="mb-4 p-3 bg-[var(--danger-soft)] border border-[var(--separator)] text-[var(--danger)] rounded-[var(--radius-md)] text-sm"
+                role="alert"
+              >
+                {addError}
               </div>
-            </fieldset>
-          )}
-          <div className="mt-4 flex gap-3">
-            <Button type="submit" variant="primary" size={32} loading={addLoading} disabled={!addForm.name.trim()}>
-              {addLoading ? "Сохраняем..." : "Сохранить"}
-            </Button>
-            <Button type="button" variant="outline" size={32} onClick={() => setShowAddForm(false)}>Отмена</Button>
-          </div>
-        </form>
+            )}
+            <form onSubmit={handleAdd} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <label htmlFor="sup-name" className="text-sm font-medium">
+                    Название <span className="text-[var(--danger)]">*</span>
+                  </label>
+                  <Input
+                    id="sup-name"
+                    required
+                    value={addForm.name}
+                    onChange={(e) =>
+                      setAddForm({ ...addForm, name: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="sup-email" className="text-sm font-medium">
+                    Email
+                  </label>
+                  <Input
+                    id="sup-email"
+                    type="email"
+                    value={addForm.email}
+                    onChange={(e) =>
+                      setAddForm({ ...addForm, email: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="sup-phone" className="text-sm font-medium">
+                    Телефон
+                  </label>
+                  <Input
+                    id="sup-phone"
+                    value={addForm.phone}
+                    onChange={(e) =>
+                      setAddForm({ ...addForm, phone: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="sup-site" className="text-sm font-medium">
+                    Сайт
+                  </label>
+                  <Input
+                    id="sup-site"
+                    placeholder="https://..."
+                    value={addForm.site}
+                    onChange={(e) =>
+                      setAddForm({ ...addForm, site: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="sup-address" className="text-sm font-medium">
+                    Адрес
+                  </label>
+                  <Input
+                    id="sup-address"
+                    placeholder="Город, улица"
+                    value={addForm.address}
+                    onChange={(e) =>
+                      setAddForm({ ...addForm, address: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="sup-type" className="text-sm font-medium">
+                    Тип
+                  </label>
+                  <select
+                    id="sup-type"
+                    value={addForm.supplier_type}
+                    onChange={(e) =>
+                      setAddForm({ ...addForm, supplier_type: e.target.value })
+                    }
+                    className="h-8 w-full rounded-md border border-[var(--separator)] bg-[var(--bg-primary)] px-2.5 text-sm text-[var(--label-primary)]"
+                  >
+                    <option value="unknown">Неизвестно</option>
+                    <option value="manufacturer">Производитель</option>
+                    <option value="dealer">Дилер</option>
+                  </select>
+                </div>
+              </div>
+              {categories.length > 0 && (
+                <fieldset>
+                  <legend className="text-xs text-[var(--label-tertiary)] mb-2">
+                    Категории материалов:
+                  </legend>
+                  <div className="flex flex-wrap gap-2">
+                    {categories.map((c: any) => {
+                      const active = selectedCats.has(c.id);
+                      return (
+                        <button
+                          type="button"
+                          key={c.id}
+                          aria-pressed={active}
+                          onClick={() => {
+                            const next = new Set(selectedCats);
+                            active ? next.delete(c.id) : next.add(c.id);
+                            setSelectedCats(next);
+                          }}
+                          className={
+                            "px-3 py-1.5 rounded-full text-xs font-medium border transition-colors duration-150 " +
+                            (active
+                              ? "bg-[var(--label-primary)] text-[var(--bg-primary)] border-transparent"
+                              : "bg-transparent text-[var(--label-secondary)] border-[var(--separator)] hover:bg-[var(--fill-1)]")
+                          }
+                        >
+                          {c.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </fieldset>
+              )}
+              <div className="flex gap-3">
+                <Button type="submit" disabled={!addForm.name.trim() || addLoading}>
+                  {addLoading ? "Сохраняем..." : "Сохранить"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowAddForm(false)}
+                >
+                  Отмена
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       )}
 
-      <form onSubmit={handleSearch} className="surface-card p-4 mb-6" role="search">
-        <div className="flex gap-3 flex-wrap">
-          <div className="flex-1 relative min-w-[200px]">
-            <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-label-4" />
-            <label htmlFor="supplier-search" className="sr-only">Поиск по названию</label>
-            <input id="supplier-search" value={search} onChange={(e) => setSearch(e.target.value)}
-              placeholder="Поиск по названию..." className="field-input pl-9" />
-          </div>
-          <label htmlFor="supplier-city" className="sr-only">Город</label>
-          <input id="supplier-city" value={city} onChange={(e) => setCity(e.target.value)}
-            placeholder="Город" className="field-input w-full sm:w-40" />
-          <label htmlFor="supplier-moderation" className="sr-only">Статус модерации</label>
-          <select id="supplier-moderation" value={moderationFilter} onChange={(e) => setModerationFilter(e.target.value)} className="field-input w-full sm:w-auto">
-            <option value="">Любой статус</option>
-            <option value="verified">Подтверждённые</option>
-            <option value="unverified">На проверке</option>
-            <option value="rejected">Отклонённые</option>
-          </select>
-          <Button type="submit" variant="primary" size={44}>Найти</Button>
-        </div>
+      <form onSubmit={handleSearch} className="mb-6" role="search">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex gap-3 flex-wrap items-end">
+              <div className="flex-1 min-w-[200px] space-y-2">
+                <label htmlFor="supplier-search" className="text-sm font-medium">
+                  Поиск
+                </label>
+                <div className="relative">
+                  <Search
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--label-quaternary)]"
+                    aria-hidden="true"
+                  />
+                  <Input
+                    id="supplier-search"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Поиск по названию..."
+                    className="pl-9"
+                  />
+                </div>
+              </div>
+              <div className="w-full sm:w-40 space-y-2">
+                <label htmlFor="supplier-city" className="text-sm font-medium">
+                  Город
+                </label>
+                <Input
+                  id="supplier-city"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                  placeholder="Город"
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="supplier-moderation" className="text-sm font-medium">
+                  Статус
+                </label>
+                <select
+                  id="supplier-moderation"
+                  value={moderationFilter}
+                  onChange={(e) => setModerationFilter(e.target.value)}
+                  className="h-8 w-full sm:w-auto rounded-md border border-[var(--separator)] bg-[var(--bg-primary)] px-3 text-sm text-[var(--label-primary)]"
+                >
+                  <option value="">Любой статус</option>
+                  <option value="verified">Подтверждённые</option>
+                  <option value="unverified">На проверке</option>
+                  <option value="rejected">Отклонённые</option>
+                </select>
+              </div>
+              <Button type="submit">Найти</Button>
+            </div>
+          </CardContent>
+        </Card>
       </form>
 
       {loading ? (
-        <div className="text-label-3 p-8" role="status">Загрузка...</div>
+        <div className="space-y-4">
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
+        </div>
       ) : suppliers.length === 0 ? (
-        <Card padding={false} className="p-16 text-center">
-          <div className="w-20 h-20 mx-auto mb-6 rounded-[var(--radius-xl)] bg-[var(--accent-soft)] flex items-center justify-center">
-            <IconTruck className="w-10 h-10 text-[var(--accent)]" />
-          </div>
-          <h2 className="text-xl font-semibold text-label-1 mb-2">Поставщики не найдены</h2>
-          <p className="text-label-3 text-sm">Создайте заявку — система автоматически найдёт поставщиков в радиусе объекта.</p>
+        <Card>
+          <CardContent className="p-16 text-center">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-[var(--radius-xl)] bg-[var(--accent-soft)] flex items-center justify-center">
+              <Truck className="w-10 h-10 text-[var(--accent)]" aria-hidden="true" />
+            </div>
+            <h2 className="text-xl font-semibold text-[var(--label-primary)] mb-2">
+              Поставщики не найдены
+            </h2>
+            <p className="text-[var(--label-tertiary)] text-sm">
+              Создайте заявку — система автоматически найдёт поставщиков в радиусе объекта.
+            </p>
+          </CardContent>
         </Card>
       ) : (
-        <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {suppliers.map((s: any) => {
-            const mod = MODERATION_LABELS[s.moderation_status || "unverified"];
-            return (
-              <li key={s.id} className="surface-card p-5 hover:shadow-small transition-shadow duration-150 ease-kimi-out">
-                <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-semibold text-label-1 min-w-0">{s.name}</h3>
-                  <Badge tone={mod.tone} className="shrink-0">{mod.text}</Badge>
-                </div>
-                <p className="text-sm text-label-2 mt-1">{s.city || s.email}</p>
-                <p className="text-xs text-label-4 mt-1">{s.phone} | {s.email}</p>
-                {isStaff && (
-                  <div className="mt-3 flex gap-2 flex-wrap">
-                    {s.moderation_status !== "verified" && (
-                      <Button size={26} variant="primary" onClick={() => moderate(s.id, "verified")}>Подтвердить</Button>
-                    )}
-                    {s.moderation_status !== "rejected" && (
-                      <Button size={26} variant="secondary" danger onClick={() => moderate(s.id, "rejected")}>Отклонить</Button>
-                    )}
-                    {s.moderation_status !== "unverified" && (
-                      <Button size={26} variant="outline" onClick={() => moderate(s.id, "unverified")}>На проверку</Button>
-                    )}
-                  </div>
-                )}
-              </li>
-            );
-          })}
-        </ul>
+        <Card className="overflow-hidden">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Название</TableHead>
+                  <TableHead className="hidden sm:table-cell">Город</TableHead>
+                  <TableHead className="hidden md:table-cell">Контакты</TableHead>
+                  <TableHead>Статус</TableHead>
+                  {isStaff && <TableHead className="text-right">Действия</TableHead>}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {suppliers.map((s: any) => {
+                  const mod = MODERATION_LABELS[s.moderation_status || "unverified"];
+                  return (
+                    <TableRow key={s.id}>
+                      <TableCell className="font-medium text-[var(--label-primary)]">
+                        {s.name}
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell text-[var(--label-tertiary)]">
+                        {s.city || "—"}
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell text-sm text-[var(--label-tertiary)]">
+                        {s.phone && <div>{s.phone}</div>}
+                        {s.email && <div>{s.email}</div>}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={mod.variant}>{mod.text}</Badge>
+                      </TableCell>
+                      {isStaff && (
+                        <TableCell className="text-right">
+                          <div className="flex gap-2 justify-end flex-wrap">
+                            {s.moderation_status !== "verified" && (
+                              <Button
+                                size="sm"
+                                onClick={() => moderate(s.id, "verified")}
+                              >
+                                <Check className="w-3 h-3 mr-1" aria-hidden="true" />
+                                Подтвердить
+                              </Button>
+                            )}
+                            {s.moderation_status !== "rejected" && (
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => moderate(s.id, "rejected")}
+                              >
+                                <X className="w-3 h-3 mr-1" aria-hidden="true" />
+                                Отклонить
+                              </Button>
+                            )}
+                            {s.moderation_status !== "unverified" && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => moderate(s.id, "unverified")}
+                              >
+                                <RotateCcw className="w-3 h-3 mr-1" aria-hidden="true" />
+                                На проверку
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        </Card>
       )}
     </div>
   );
