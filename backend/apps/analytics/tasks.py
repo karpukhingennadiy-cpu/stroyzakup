@@ -4,6 +4,8 @@
 import logging
 from celery import shared_task
 
+from apps.analytics.services import analytics
+
 logger = logging.getLogger(__name__)
 
 
@@ -15,8 +17,6 @@ def track_event(self, event: str, distinct_id: str, properties: dict | None = No
     При ошибке — retry с экспоненциальным backoff.
     """
     try:
-        from apps.analytics.services import analytics
-
         analytics.capture_raw(distinct_id, event, properties or {})
     except Exception as exc:
         logger.warning("PostHog track_event failed: %s", exc)
