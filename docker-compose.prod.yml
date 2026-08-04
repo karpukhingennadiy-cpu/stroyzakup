@@ -51,6 +51,8 @@ services:
       CELERY_BROKER_URL: redis://redis:6379/0
       SECURE_SSL_REDIRECT: ${SECURE_SSL_REDIRECT:-false}
       SECRET_KEY: ${SECRET_KEY}
+      # 'backend' нужен для scrape Prometheus (/metrics) внутри сети
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,backend}
     depends_on:
       db:
         condition: service_healthy
@@ -64,6 +66,14 @@ services:
     command: celery -A config worker -l info
     networks:
       - minitender-net
+    # Образ наследует HTTP-healthcheck backend Dockerfile (порт 8000),
+    # в воркере веб-сервера нет — заменяем на celery ping
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A config inspect ping -d celery@$$HOSTNAME"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.prod
       DB_HOST: db
