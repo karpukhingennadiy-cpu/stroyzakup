@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { ThemeToggle } from "@/components/theme";
 import { Hammer } from "lucide-react";
 
@@ -9,12 +10,12 @@ export function LandingHeader() {
   return (
     <header className="sticky top-0 z-header border-b border-separator bg-[var(--bg-primary)]/80 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-        <a href="/" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-sm)] bg-brand text-brand-ink">
             <Hammer className="h-5 w-5" />
           </div>
           <span className="hidden min-[380px]:inline text-xl font-semibold tracking-tight text-label-1">Минитендер</span>
-        </a>
+        </Link>
         <nav className="hidden items-center gap-8 md:flex" aria-label="Разделы лендинга">
           <a href="#how" className="text-sm font-medium text-label-2 hover:text-label-1 transition-colors">Как работает</a>
           <a href="#features" className="text-sm font-medium text-label-2 hover:text-label-1 transition-colors">Возможности</a>

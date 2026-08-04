@@ -172,6 +172,3 @@ export async function downloadWinnerProtocolPdf(requestId: number): Promise<Blob
   if (!res.ok) throw new Error("Ошибка скачивания");
   return res.blob();
 }
-
-  return api("/quotes/competitive_sheet/?request_id=" + requestId);
-}
