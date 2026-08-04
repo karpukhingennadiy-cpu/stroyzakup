@@ -15,27 +15,7 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["lucide-react", "recharts"],
   },
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.optimization.splitChunks = {
-        chunks: "all",
-        cacheGroups: {
-          vendor: {
-            test: /[\\/]node_modules[\\/]/,
-            name: "vendors",
-            chunks: "all",
-          },
-          react: {
-            test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
-            name: "react",
-            chunks: "all",
-            priority: 10,
-          },
-        },
-      };
-    }
-    return config;
-  },
+  turbopack: {},
   async headers() {
     return [
       {
