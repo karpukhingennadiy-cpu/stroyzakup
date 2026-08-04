@@ -49,7 +49,9 @@ services:
       - minitender-net
     pid: host
     volumes:
-      - /:/host:ro,rslave
+      # Без rslave: Docker Desktop (Windows/WSL2) не поддерживает shared mounts.
+      # Метрики отражают VM Docker Desktop, а не Windows-хост напрямую.
+      - /:/host:ro
     command:
       - "--path.rootfs=/host"
     ports:
@@ -65,7 +67,8 @@ services:
     restart: unless-stopped
 
   nginx-exporter:
-    image: nginxinc/nginx-prometheus-exporter:1.4.0
+    # Образ переехал: nginxinc/* не существует на Docker Hub
+    image: nginx/nginx-prometheus-exporter:1.4.2
     networks:
       - minitender-net
     command:
@@ -73,7 +76,7 @@ services:
     restart: unless-stopped
 
   celery-exporter:
-    image: danihodovic/celery-exporter:0.10.9
+    image: danihodovic/celery-exporter:0.12.2
     networks:
       - minitender-net
     environment:

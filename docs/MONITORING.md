@@ -11,8 +11,8 @@
 | grafana | `grafana/grafana:11.2.0` | 3001 | Дашборды (прологиниться: admin / `GRAFANA_ADMIN_PASSWORD`) |
 | node-exporter | `prom/node-exporter:v1.8.2` | 9100 | CPU / RAM / диск хоста |
 | postgres-exporter | `prometheuscommunity/postgres-exporter:v0.15.0` | — | Метрики PostgreSQL |
-| nginx-exporter | `nginxinc/nginx-prometheus-exporter:1.4.0` | — | Nginx stub_status → Prometheus |
-| celery-exporter | `danihodovic/celery-exporter:0.10.9` | — | Очереди Celery (broker Redis) |
+| nginx-exporter | `nginx/nginx-prometheus-exporter:1.4.2` | — | Nginx stub_status → Prometheus |
+| celery-exporter | `danihodovic/celery-exporter:0.12.2` | — | Очереди Celery (broker Redis) |
 
 Метрики backend собираются с endpoint `/metrics` (django-prometheus, порт 8000, внутри сети).
 
