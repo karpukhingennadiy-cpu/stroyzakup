@@ -1,5 +1,6 @@
 # backend/tests/test_metrics.py
 """G4: Prometheus /metrics endpoint smoke tests."""
+
 import pytest
 from django.test import Client
 

@@ -1,9 +1,10 @@
 # backend/config/urls.py
 from django.contrib import admin
 from django.http import JsonResponse
-from django.urls import path, include
-from apps.quotes.views import public_quote
+from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+
+from apps.quotes.views import public_quote
 
 
 def health(request):
@@ -21,7 +22,9 @@ urlpatterns = [
     # FIX-K3: убран двойной слеш, добавлен параметр token
     path("api/public/quote/<str:token>/", public_quote, name="public-quote"),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger"),
+    path(
+        "api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger"
+    ),
     # G4: Prometheus metrics endpoint (/metrics)
     path("", include("django_prometheus.urls")),
 ]
