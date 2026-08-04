@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Geist } from "next/font/google";
 import { ThemeScript } from "@/components/theme";
+import { WebVitals } from "@/components/web-vitals";
 import "./globals.css";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const inter = Inter({
   subsets: ["latin", "cyrillic"],
@@ -17,11 +21,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" className={inter.variable} suppressHydrationWarning>
+    <html lang="ru" className={cn("font-sans", geist.variable)} suppressHydrationWarning>
       <head>
         <ThemeScript />
       </head>
-      <body className="font-sans">{children}</body>
+      <body className="font-sans">
+        {children}
+        <WebVitals />
+      </body>
     </html>
   );
 }
