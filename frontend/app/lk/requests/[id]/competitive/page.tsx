@@ -1,9 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { getCompetitiveSheet } from "@/lib/api";
-import { IconChart } from "@/components/icons";
-import { Card, Badge } from "@/components/ui";
+import { getCompetitiveSheet, downloadCompetitiveSheetXlsx } from "@/lib/api";
+import { captureEvent } from "@/lib/analytics";
+import { IconChart, IconDownload } from "@/components/icons";
+import { Card, Badge, Button } from "@/components/ui";
 
 export default function CompetitivePage() {
   const params = useParams();
@@ -14,10 +15,34 @@ export default function CompetitivePage() {
 
   useEffect(() => {
     getCompetitiveSheet(Number(id))
-      .then(setData)
+      .then((d) => {
+        setData(d);
+        captureEvent("competitive_sheet_viewed", {
+          request_id: Number(id),
+          suppliers_count: d?.suppliers?.length ?? 0,
+        });
+      })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, [id]);
+
+  const handleDownloadXlsx = async () => {
+    try {
+      const blob = await downloadCompetitiveSheetXlsx(Number(id));
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `competitive_sheet_RFQ-${id}.xlsx`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      captureEvent("protocol_downloaded", {
+        request_id: Number(id),
+        format: "xlsx",
+      });
+    } catch (e: any) {
+      setError(e.message);
+    }
+  };
 
   if (loading) return <div className="p-8 text-label-3 text-base" role="status">Загрузка конкурентного листа...</div>;
   if (error) return <div className="p-8 text-[var(--danger)]" role="alert">Ошибка: {error}</div>;
@@ -28,9 +53,16 @@ export default function CompetitivePage() {
 
   return (
     <div className="max-w-5xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold text-label-1">Конкурентный лист</h1>
-        <p className="text-label-3 text-sm mt-0.5">Сравнение коммерческих предложений — {suppliers.length} поставщиков</p>
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-semibold text-label-1">Конкурентный лист</h1>
+          <p className="text-label-3 text-sm mt-0.5">Сравнение коммерческих предложений — {suppliers.length} поставщиков</p>
+        </div>
+        {suppliers.length > 0 && (
+          <Button variant="secondary" size={36} onClick={handleDownloadXlsx} leftIcon={<IconDownload className="w-4 h-4" />}>
+            Скачать XLSX
+          </Button>
+        )}
       </div>
 
       {suppliers.length === 0 ? (
