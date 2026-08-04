@@ -2,8 +2,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { getRequest, parseRequest, confirmRequest } from "@/lib/api";
-import { IconChart, IconSparkles } from "@/components/icons";
+import { getRequest, parseRequest, confirmRequest, downloadWinnerProtocolPdf } from "@/lib/api";
+import { captureEvent } from "@/lib/analytics";
+import { IconChart, IconSparkles, IconDownload } from "@/components/icons";
 import { Button, buttonClass, Card, Badge } from "@/components/ui";
 
 const statusLabels: Record<string, string> = {
@@ -57,6 +58,24 @@ export default function RequestDetailPage() {
       setReq(result.request || result);
     } catch (e: any) { setError(e.message); }
     finally { setActionLoading(""); }
+  };
+
+  const handleDownloadProtocol = async () => {
+    try {
+      const blob = await downloadWinnerProtocolPdf(Number(id));
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `winner_protocol_RFQ-${req.code}.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+      captureEvent("protocol_downloaded", {
+        request_id: Number(id),
+        format: "pdf",
+      });
+    } catch (e: any) {
+      setError(e.message);
+    }
   };
 
   if (loading) return <div className="p-8 text-label-3 text-base" role="status">Загрузка заявки...</div>;
@@ -167,11 +186,21 @@ export default function RequestDetailPage() {
         </Card>
       )}
 
-      <div className="flex gap-3">
+      <div className="flex gap-3 flex-wrap">
         <Link href={"/lk/requests/" + id + "/competitive"}
           className={buttonClass({ variant: "primary", size: 44 })}>
           <IconChart className="w-5 h-5" /> Конкурентный лист
         </Link>
+        {(req.status === "ready" || req.status === "completed") && (
+          <Button
+            variant="secondary"
+            size={44}
+            onClick={handleDownloadProtocol}
+            leftIcon={<IconDownload className="w-5 h-5" />}
+          >
+            Протокол PDF
+          </Button>
+        )}
       </div>
     </div>
   );

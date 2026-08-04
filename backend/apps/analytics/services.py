@@ -30,6 +30,14 @@ class AnalyticsService:
         props["$lib"] = "minitender-backend"
         self.client.capture(distinct_id, event, props)
 
+    def capture_raw(self, distinct_id: str, event: str, properties: dict[str, Any] | None = None):
+        """Отправка события с уже хешированным distinct_id (используется из Celery)."""
+        if not self.enabled or not self.client:
+            return
+        props = properties or {}
+        props["$lib"] = "minitender-backend"
+        self.client.capture(distinct_id, event, props)
+
     def identify(self, user_id: int | str, properties: dict[str, Any] | None = None):
         if not self.enabled or not self.client:
             return

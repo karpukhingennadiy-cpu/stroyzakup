@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { optIn, optOut } from "@/lib/analytics";
 
 const CONSENT_KEY = "minitender_analytics_consent";
 
@@ -13,15 +14,23 @@ export function ConsentBanner() {
   useEffect(() => {
     setMounted(true);
     const stored = localStorage.getItem(CONSENT_KEY) as ConsentValue;
-    if (stored) setConsent(stored);
+    if (stored) {
+      setConsent(stored);
+      if (stored === "granted") {
+        optIn();
+      } else {
+        optOut();
+      }
+    }
   }, []);
 
   const handleConsent = (value: ConsentValue) => {
     setConsent(value);
     localStorage.setItem(CONSENT_KEY, value ?? "denied");
-    // Сообщить PostHog о решении пользователя
-    if (typeof window !== "undefined" && (window as any).posthog) {
-      (window as any).posthog.set_config({ persistence: value === "granted" ? "localStorage+cookie" : "memory" });
+    if (value === "granted") {
+      optIn();
+    } else {
+      optOut();
     }
   };
 
