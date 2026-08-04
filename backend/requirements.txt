@@ -119,3 +119,5 @@ vine==5.1.0
     #   kombu
 wcwidth==0.8.2
     # via prompt-toolkit
+posthog>=3.0
+    # via stroyzakup-backend (pyproject.toml)
