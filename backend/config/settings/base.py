@@ -1,17 +1,24 @@
 import os
-from pathlib import Path
-from decouple import config, Csv
 from datetime import timedelta
+from pathlib import Path
+
+from decouple import Csv, config
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # Export .env secrets to os.environ for service modules that read env directly
 # (decouple.config() does NOT populate os.environ by itself)
-for _env_key in ("LLM_API_KEY", "LLM_MODEL", "LLM_BASE_URL",
-                 "DADATA_TOKEN", "YANDEX_GEOCODER_KEY", "FROM_EMAIL"):
+for _env_key in (
+    "LLM_API_KEY",
+    "LLM_MODEL",
+    "LLM_BASE_URL",
+    "DADATA_TOKEN",
+    "YANDEX_GEOCODER_KEY",
+    "FROM_EMAIL",
+):
     os.environ.setdefault(_env_key, config(_env_key, default=""))
 
-SECRET_KEY="dev-secret-key"
+SECRET_KEY = "dev-secret-key"
 DEBUG = False
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv())
 
@@ -28,6 +35,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "django_filters",
     "drf_spectacular",
+    "django_prometheus",
     "apps.accounts",
     "apps.requests",
     "apps.suppliers",
@@ -38,6 +46,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "django_prometheus.middleware.PrometheusBeforeMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -46,6 +55,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "django_prometheus.middleware.PrometheusAfterMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -75,9 +85,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-    "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.IsAuthenticated",
-    ),
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
 }
@@ -115,14 +123,20 @@ LLM_MODEL = config("LLM_MODEL", default="deepseek-chat")
 LLM_BASE_URL = config("LLM_BASE_URL", default="https://api.deepseek.com/v1")
 
 # Email (configured via .env, defaults for dev)
-EMAIL_BACKEND = config("EMAIL_BACKEND", default="apps.emails.utf8_smtp.UTF8EmailBackend")
+EMAIL_BACKEND = config(
+    "EMAIL_BACKEND", default="apps.emails.utf8_smtp.UTF8EmailBackend"
+)
 EMAIL_HOST = config("EMAIL_HOST", default="smtp.beget.com")
 EMAIL_PORT = config("EMAIL_PORT", default=465, cast=int)
 EMAIL_USE_SSL = config("EMAIL_USE_SSL", default=True, cast=bool)
 EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="rfq@минитендер.рф")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
-DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="Минитендер RFQ <rfq@xn--d1abbjawic3ap.xn--p1ai>")
-INBOUND_EMAIL_DOMAIN = config("INBOUND_EMAIL_DOMAIN", default="in.xn--d1abbjawic3ap.xn--p1ai")
+DEFAULT_FROM_EMAIL = config(
+    "DEFAULT_FROM_EMAIL", default="Минитендер RFQ <rfq@xn--d1abbjawic3ap.xn--p1ai>"
+)
+INBOUND_EMAIL_DOMAIN = config(
+    "INBOUND_EMAIL_DOMAIN", default="in.xn--d1abbjawic3ap.xn--p1ai"
+)
 
 # B1: IMAP polling for supplier replies
 INBOUND_IMAP_HOST = config("INBOUND_IMAP_HOST", default="")
@@ -132,6 +146,10 @@ INBOUND_IMAP_PASSWORD = config("INBOUND_IMAP_PASSWORD", default="")
 INBOUND_IMAP_FOLDER = config("INBOUND_IMAP_FOLDER", default="INBOX")
 
 # Whitenoise
-STORAGES={"staticfiles":{"BACKEND":"whitenoise.storage.CompressedManifestStaticFilesStorage"}}
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
+    }
+}
 # Frontend URL
-FRONTEND_URL=config("FRONTEND_URL",default="http://localhost:3000")
+FRONTEND_URL = config("FRONTEND_URL", default="http://localhost:3000")

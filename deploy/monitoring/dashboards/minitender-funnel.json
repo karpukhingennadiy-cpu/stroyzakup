@@ -1,0 +1,98 @@
+{
+  "uid": "minitender-funnel",
+  "title": "Минитендер · Воронка (PostHog)",
+  "tags": ["minitender", "posthog", "funnel"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5m",
+  "time": { "from": "now-30d", "to": "now" },
+  "description": "Закупочная воронка из PostHog-событий: rfq_created -> supplier_matched -> quote_received -> winner_selected. Каноническая воронка с конверсиями — в PostHog UI (Insights -> Funnels), см. docs/analytics-dashboard.md. Этот дашборд требует Grafana-плагин PostHog data source (provisioning: deploy/monitoring/grafana/provisioning/datasources/).",
+  "panels": [
+    {
+      "id": 1,
+      "type": "text",
+      "title": "Как читать",
+      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 0 },
+      "options": {
+        "mode": "markdown",
+        "content": "Воронка закупок: **rfq_created → supplier_matched → quote_received → winner_selected**.\n\nКаноническая воронка с конверсиями настраивается в PostHog UI (Insights → Funnels) — см. `docs/analytics-dashboard.md`.\nПанели ниже показывают объёмы событий за выбранный период (данные PostHog через Grafana data source plugin)."
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "1 · Заявки созданы (rfq_created)",
+      "gridPos": { "h": 7, "w": 6, "x": 0, "y": 4 },
+      "datasource": { "type": "grafana-posthog-datasource", "uid": "PostHog" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT count() AS value FROM events WHERE event = 'rfq_created' AND timestamp >= now() - INTERVAL 30 DAY"
+        }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [ { "color": "blue", "value": null } ] } }, "overrides": [] },
+      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "2 · Поставщики подобраны (supplier_matched)",
+      "gridPos": { "h": 7, "w": 6, "x": 6, "y": 4 },
+      "datasource": { "type": "grafana-posthog-datasource", "uid": "PostHog" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT count() AS value FROM events WHERE event = 'supplier_matched' AND timestamp >= now() - INTERVAL 30 DAY"
+        }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [ { "color": "blue", "value": null } ] } }, "overrides": [] },
+      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "3 · КП получены (quote_received)",
+      "gridPos": { "h": 7, "w": 6, "x": 12, "y": 4 },
+      "datasource": { "type": "grafana-posthog-datasource", "uid": "PostHog" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT count() AS value FROM events WHERE event = 'quote_received' AND timestamp >= now() - INTERVAL 30 DAY"
+        }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [ { "color": "blue", "value": null } ] } }, "overrides": [] },
+      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" }
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "4 · Победитель выбран (winner_selected)",
+      "gridPos": { "h": 7, "w": 6, "x": 18, "y": 4 },
+      "datasource": { "type": "grafana-posthog-datasource", "uid": "PostHog" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT count() AS value FROM events WHERE event = 'winner_selected' AND timestamp >= now() - INTERVAL 30 DAY"
+        }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null } ] } }, "overrides": [] },
+      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" }
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "События воронки по дням",
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 11 },
+      "datasource": { "type": "grafana-posthog-datasource", "uid": "PostHog" },
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT toStartOfDay(timestamp) AS time, event, count() AS value FROM events WHERE event IN ('rfq_created','supplier_matched','quote_received','winner_selected') AND timestamp >= now() - INTERVAL 30 DAY GROUP BY time, event ORDER BY time"
+        }
+      ],
+      "fieldConfig": { "defaults": { "custom": { "drawStyle": "line", "fillOpacity": 10 } }, "overrides": [] },
+      "options": { "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true }, "tooltip": { "mode": "multi", "sort": "desc" } }
+    }
+  ]
+}
