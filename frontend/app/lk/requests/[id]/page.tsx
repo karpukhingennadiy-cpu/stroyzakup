@@ -1,25 +1,89 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { getRequest, parseRequest, confirmRequest, downloadWinnerProtocolPdf } from "@/lib/api";
 import { captureEvent } from "@/lib/analytics";
-import { IconChart, IconSparkles, IconDownload } from "@/components/icons";
-import { Button, buttonClass, Card, Badge } from "@/components/ui";
+import { Sparkles, CheckCircle, AlertTriangle, BarChart3, ArrowLeft, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 const statusLabels: Record<string, string> = {
-  draft: "Черновик", parsing: "Распознавание", confirmed: "Подтверждена",
-  matched: "Поставщики подобраны", matching: "Поиск поставщиков",
-  rfq_sent: "РФК отправлены", collecting_quotes: "Сбор КП",
-  ready: "Готов к сравнению", completed: "Завершена", cancelled: "Отменена",
+  draft: "Черновик",
+  parsing: "Распознавание",
+  confirmed: "Подтверждена",
+  matched: "Поставщики подобраны",
+  matching: "Поиск поставщиков",
+  rfq_sent: "РФК отправлены",
+  collecting_quotes: "Сбор КП",
+  ready: "Готов к сравнению",
+  completed: "Завершена",
+  cancelled: "Отменена",
 };
+
+const statusOrder = [
+  "draft",
+  "parsing",
+  "confirmed",
+  "matching",
+  "matched",
+  "rfq_sent",
+  "collecting_quotes",
+  "ready",
+  "completed",
+];
 
 function ConfBadge({ confidence, needsClarification }: { confidence: number; needsClarification?: boolean }) {
   const pct = Math.round(confidence * 100);
-  let tone: "success" | "warning" | "danger" = "success";
-  if (needsClarification || pct < 60) tone = "warning";
-  if (pct < 40) tone = "danger";
-  return <Badge tone={tone}>{pct}%</Badge>;
+  let variant: "default" | "secondary" | "destructive" | "outline" = "default";
+  if (needsClarification || pct < 60) variant = "outline";
+  if (pct < 40) variant = "destructive";
+  return <Badge variant={variant}>{pct}%</Badge>;
+}
+
+function StatusTimeline({ currentStatus }: { currentStatus: string }) {
+  const currentIndex = statusOrder.indexOf(currentStatus);
+  return (
+    <div className="flex items-center gap-1 flex-wrap mb-6">
+      {statusOrder.map((status, i) => {
+        const isActive = i <= currentIndex;
+        const isCurrent = status === currentStatus;
+        return (
+          <div key={status} className="flex items-center">
+            <div
+              className={
+                "px-2 py-1 rounded-[var(--radius-sm)] text-xs font-medium transition-colors " +
+                (isCurrent
+                  ? "bg-[var(--accent)] text-white"
+                  : isActive
+                  ? "bg-[var(--success-soft)] text-[var(--success)]"
+                  : "bg-[var(--fill-1)] text-[var(--label-quaternary)]")
+              }
+            >
+              {statusLabels[status]}
+            </div>
+            {i < statusOrder.length - 1 && (
+              <div
+                className={
+                  "w-4 h-px mx-1 " + (i < currentIndex ? "bg-[var(--success)]" : "bg-[var(--separator)]")
+                }
+              />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 export default function RequestDetailPage() {
@@ -32,12 +96,18 @@ export default function RequestDetailPage() {
   const [error, setError] = useState("");
 
   const load = () => {
-    getRequest(Number(id)).then((data) => {
-      setReq(data);
-      setClarifications(data.clarifications || []);
-    }).catch((e) => setError(e.message)).finally(() => setLoading(false));
+    getRequest(Number(id))
+      .then((data) => {
+        setReq(data);
+        setClarifications(data.clarifications || []);
+      })
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
   };
-  useEffect(() => { load(); }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    load();
+  }, [id]);
 
   const handleParse = async () => {
     setActionLoading("parse");
@@ -46,8 +116,11 @@ export default function RequestDetailPage() {
       const result = await parseRequest(Number(id));
       setReq(result);
       setClarifications(result.clarifications || []);
-    } catch (e: any) { setError(e.message); }
-    finally { setActionLoading(""); }
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setActionLoading("");
+    }
   };
 
   const handleConfirm = async () => {
@@ -56,8 +129,11 @@ export default function RequestDetailPage() {
     try {
       const result = await confirmRequest(Number(id));
       setReq(result.request || result);
-    } catch (e: any) { setError(e.message); }
-    finally { setActionLoading(""); }
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setActionLoading("");
+    }
   };
 
   const handleDownloadProtocol = async () => {
@@ -78,126 +154,220 @@ export default function RequestDetailPage() {
     }
   };
 
-  if (loading) return <div className="p-8 text-label-3 text-base" role="status">Загрузка заявки...</div>;
-  if (error && !req) return <div className="p-8 text-[var(--danger)]" role="alert">Ошибка: {error}</div>;
-  if (!req) return <div className="p-8 text-label-3">Заявка не найдена</div>;
+  if (loading) {
+    return (
+      <div className="p-8 text-[var(--label-tertiary)] text-base" role="status">
+        Загрузка заявки...
+      </div>
+    );
+  }
 
-  const itemsNeedClarification = req.items?.filter((i: any) => i.needs_clarification || i.confidence < 0.6) || [];
+  if (error && !req) {
+    return (
+      <div className="p-8 text-[var(--danger)]" role="alert">
+        Ошибка: {error}
+      </div>
+    );
+  }
+
+  if (!req) {
+    return <div className="p-8 text-[var(--label-tertiary)]">Заявка не найдена</div>;
+  }
+
+  const itemsNeedClarification =
+    req.items?.filter((i: any) => i.needs_clarification || i.confidence < 0.6) || [];
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-xl font-semibold text-label-1">Заявка RFQ-{req.code}</h1>
-        <p className="text-label-3 text-sm mt-0.5">Статус: {statusLabels[req.status] || req.status}</p>
+      {/* Back link */}
+      <Link
+        href="/lk/requests"
+        className="inline-flex items-center gap-1 text-sm text-[var(--label-tertiary)] hover:text-[var(--label-primary)] mb-4 transition-colors"
+      >
+        <ArrowLeft className="w-4 h-4" aria-hidden="true" />
+        К списку заявок
+      </Link>
+
+      <div className="mb-4">
+        <h1 className="text-xl font-semibold text-[var(--label-primary)]">
+          Заявка RFQ-{req.code}
+        </h1>
+        <p className="text-[var(--label-tertiary)] text-sm mt-0.5">
+          Статус: {statusLabels[req.status] || req.status}
+        </p>
       </div>
 
+      {/* Status timeline */}
+      <StatusTimeline currentStatus={req.status} />
+
       {error && (
-        <div className="mb-6 p-4 bg-[var(--danger-soft)] border border-[var(--separator)] text-[var(--danger)] rounded-[var(--radius-lg)] text-sm" role="alert">
+        <div
+          className="mb-6 p-4 bg-[var(--danger-soft)] border border-[var(--separator)] text-[var(--danger)] rounded-[var(--radius-lg)] text-sm"
+          role="alert"
+          aria-live="assertive"
+        >
           {error}
         </div>
       )}
 
-      {/* Clarifications box */}
+      {/* Clarifications */}
       {clarifications.length > 0 && (
-        <div className="bg-[var(--warning-soft)] border border-[var(--separator)] rounded-[var(--radius-lg)] p-6 mb-6" role="alert">
-          <h2 className="font-semibold text-[var(--warning)] text-base mb-3">
-            Требуются уточнения ({clarifications.length})
-          </h2>
-          <ul className="space-y-2">
-            {clarifications.map((q: string, i: number) => (
-              <li key={i} className="flex gap-2 text-label-1 text-sm">
-                <span className="text-[var(--warning)] mt-0.5" aria-hidden="true">?</span>
-                <span>{q}</span>
-              </li>
-            ))}
-          </ul>
-          <p className="text-[var(--warning)] text-xs mt-3">
-            Уточните детали у заказчика перед подтверждением заявки
-          </p>
-        </div>
+        <Card className="mb-6 border-[var(--warning)]/30">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2 text-[var(--warning)]">
+              <AlertTriangle className="w-5 h-5" aria-hidden="true" />
+              Требуются уточнения ({clarifications.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="space-y-2">
+              {clarifications.map((q: string, i: number) => (
+                <li key={i} className="flex gap-2 text-[var(--label-primary)] text-sm">
+                  <span className="text-[var(--warning)] mt-0.5" aria-hidden="true">
+                    ?
+                  </span>
+                  <span>{q}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="text-[var(--warning)] text-xs mt-3">
+              Уточните детали у заказчика перед подтверждением заявки
+            </p>
+          </CardContent>
+        </Card>
       )}
 
       {/* Raw text */}
-      <Card title="Исходный текст" className="mb-6">
-        <div className="bg-[var(--fill-1)] rounded-[var(--radius-md)] p-4 text-sm text-label-2 whitespace-pre-wrap">
-          {req.raw_text || "(пусто)"}
-        </div>
-        <div className="mt-4 flex gap-3 flex-wrap">
-          {(req.status === "draft" || req.status === "parsing") && (
-            <Button
-              variant="primary" size={44}
-              onClick={handleParse}
-              loading={actionLoading === "parse"}
-              leftIcon={<IconSparkles className="w-5 h-5" />}
-            >
-              {actionLoading === "parse" ? "Распознаём..." : "Распознать материалы"}
-            </Button>
-          )}
-          {req.status === "parsing" && req.items?.length > 0 && (
-            <Button
-              variant="secondary" size={44}
-              onClick={handleConfirm}
-              loading={actionLoading === "confirm"}
-            >
-              {actionLoading === "confirm" ? "Подтверждаем..." : "Подтвердить позиции"}
-            </Button>
-          )}
-        </div>
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-base">Исходный текст</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="bg-[var(--fill-1)] rounded-[var(--radius-md)] p-4 text-sm text-[var(--label-secondary)] whitespace-pre-wrap">
+            {req.raw_text || "(пусто)"}
+          </div>
+          <div className="flex gap-3 flex-wrap">
+            {(req.status === "draft" || req.status === "parsing") && (
+              <Button
+                onClick={handleParse}
+                disabled={actionLoading === "parse"}
+                aria-busy={actionLoading === "parse"}
+              >
+                {actionLoading === "parse" ? (
+                  "Распознаём..."
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 mr-2" aria-hidden="true" />
+                    Распознать материалы
+                  </>
+                )}
+              </Button>
+            )}
+            {req.status === "parsing" && req.items?.length > 0 && (
+              <Button
+                variant="outline"
+                onClick={handleConfirm}
+                disabled={actionLoading === "confirm"}
+                aria-busy={actionLoading === "confirm"}
+              >
+                {actionLoading === "confirm" ? (
+                  "Подтверждаем..."
+                ) : (
+                  <>
+                    <CheckCircle className="w-4 h-4 mr-2" aria-hidden="true" />
+                    Подтвердить позиции
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
+        </CardContent>
       </Card>
 
       {/* Items table */}
       {req.items && req.items.length > 0 && (
-        <Card
-          title={"Распознанные позиции (" + req.items.length + ")"}
-          subtitle={itemsNeedClarification.length > 0 ? itemsNeedClarification.length + " требуют уточнения" : undefined}
-          className="mb-6" padding={false}
-        >
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm min-w-[560px]">
-              <thead className="border-b border-separator">
-                <tr>
-                  <th scope="col" className="px-6 py-3 font-medium text-label-3 text-xs">Материал</th>
-                  <th scope="col" className="px-3 py-3 font-medium text-label-3 text-xs">Категория</th>
-                  <th scope="col" className="px-3 py-3 font-medium text-label-3 text-xs text-right">Кол-во</th>
-                  <th scope="col" className="px-3 py-3 font-medium text-label-3 text-xs">Ед.</th>
-                  <th scope="col" className="px-3 py-3 font-medium text-label-3 text-xs">Бренд</th>
-                  <th scope="col" className="px-6 py-3 font-medium text-label-3 text-xs text-center">Точность</th>
-                </tr>
-              </thead>
-              <tbody>
-                {req.items.map((item: any) => (
-                  <tr key={item.id} className={"border-b border-[var(--fill-1)] " + (item.needs_clarification ? "bg-[var(--warning-soft)]" : "")}>
-                    <td className="px-6 py-2.5 text-label-1">
-                      {item.needs_clarification && <span className="text-[var(--warning)] mr-1" title="Требует уточнения" role="img" aria-label="Требует уточнения">⚠</span>}
-                      {item.name}
-                    </td>
-                    <td className="px-3 py-2.5 text-label-3">{item.category_name || "-"}</td>
-                    <td className="px-3 py-2.5 text-right text-label-1 tabular-nums">{item.quantity}</td>
-                    <td className="px-3 py-2.5 text-label-3">{item.unit_name || "-"}</td>
-                    <td className="px-3 py-2.5 text-label-3">{item.brand || "-"}</td>
-                    <td className="px-6 py-2.5 text-center">
-                      <ConfBadge confidence={item.confidence || 0} needsClarification={item.needs_clarification} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-base">
+              Распознанные позиции ({req.items.length})
+            </CardTitle>
+            {itemsNeedClarification.length > 0 && (
+              <CardDescription>
+                {itemsNeedClarification.length} требуют уточнения
+              </CardDescription>
+            )}
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Материал</TableHead>
+                    <TableHead className="hidden sm:table-cell">Категория</TableHead>
+                    <TableHead className="text-right">Кол-во</TableHead>
+                    <TableHead>Ед.</TableHead>
+                    <TableHead className="hidden sm:table-cell">Бренд</TableHead>
+                    <TableHead className="text-center">Точность</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {req.items.map((item: any) => (
+                    <TableRow
+                      key={item.id}
+                      className={item.needs_clarification ? "bg-[var(--warning-soft)]" : ""}
+                    >
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          {item.needs_clarification && (
+                            <AlertTriangle
+                              className="w-4 h-4 text-[var(--warning)] shrink-0"
+                              aria-label="Требует уточнения"
+                            />
+                          )}
+                          <span className="text-[var(--label-primary)]">{item.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell text-[var(--label-tertiary)]">
+                        {item.category_name || "—"}
+                      </TableCell>
+                      <TableCell className="text-right text-[var(--label-primary)] tabular-nums">
+                        {item.quantity}
+                      </TableCell>
+                      <TableCell className="text-[var(--label-tertiary)]">
+                        {item.unit_name || "—"}
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell text-[var(--label-tertiary)]">
+                        {item.brand || "—"}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <ConfBadge
+                          confidence={item.confidence || 0}
+                          needsClarification={item.needs_clarification}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
         </Card>
       )}
 
+      {/* Actions */}
       <div className="flex gap-3 flex-wrap">
-        <Link href={"/lk/requests/" + id + "/competitive"}
-          className={buttonClass({ variant: "primary", size: 44 })}>
-          <IconChart className="w-5 h-5" /> Конкурентный лист
+        <Link href={`/lk/requests/${id}/competitive`}>
+          <Button>
+            <BarChart3 className="w-4 h-4 mr-2" aria-hidden="true" />
+            Конкурентный лист
+          </Button>
         </Link>
         {(req.status === "ready" || req.status === "completed") && (
           <Button
-            variant="secondary"
-            size={44}
+            variant="outline"
             onClick={handleDownloadProtocol}
-            leftIcon={<IconDownload className="w-5 h-5" />}
           >
+            <Download className="w-4 h-4 mr-2" aria-hidden="true" />
             Протокол PDF
           </Button>
         )}
