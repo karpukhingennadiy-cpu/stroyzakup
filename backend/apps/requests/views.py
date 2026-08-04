@@ -229,3 +229,25 @@ class RequestViewSet(viewsets.ModelViewSet):
             req.status = "rfq_sent"
         req.refresh_from_db(fields=["status"])
         return Response({"status": req.status, "results": results})
+
+    @decorators.action(detail=True, methods=["post"])
+    def complete(self, request, pk=None):
+        """G2: завершение заявки — переводит Request из ready в completed."""
+        req = self.get_object()
+        if req.status != "ready":
+            return Response(
+                {"error": f"Cannot complete request in status: {req.status}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        req.status = "completed"
+        req.save(update_fields=["status"])
+        return Response({
+            "status": "completed",
+            "request": RequestSerializer(req).data,
+        })
+        results = send_rfq_to_suppliers(req, supplier_ids)
+        # Status: rfq_sent only if at least one email went out
+        if any(r.get("status") == "sent" for r in results):
+            req.status = "rfq_sent"
+        req.refresh_from_db(fields=["status"])
+        return Response({"status": req.status, "results": results})
