@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 /*
  * Дизайн-токены Kimi (tokens.json v0.2.0) → CSS-переменные.
@@ -30,11 +28,11 @@
     --accent: #1783ff;
     --accent-hover: #167ff7;
     --accent-soft: rgba(23, 131, 255, 0.1);
-    --danger: #e03131; /* скорректировано под контраст AA на белом (токен #ff3849 = 3.9:1 — gap зафиксирован) */
+    --danger: #e03131;
     --danger-soft: rgba(255, 77, 77, 0.1);
-    --success: #14954b; /* скорректировано под контраст AA (токен #16c456 = 2.3:1 — gap зафиксирован) */
+    --success: #14954b;
     --success-soft: rgba(22, 196, 86, 0.1);
-    --warning: #b8620a; /* скорректировано под контраст AA (токен #ff9500 = 2.5:1 — gap зафиксирован) */
+    --warning: #b8620a;
     --warning-soft: rgba(255, 149, 0, 0.1);
     /* Бренд продукта «Минитендер» (боковая панель, логотип) */
     --brand: #f0a500;
@@ -90,7 +88,8 @@
 
   html { scroll-behavior: smooth; }
   body {
-    @apply antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     background-color: var(--bg-ground);
     color: var(--label-primary);
   }
