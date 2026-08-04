@@ -4,6 +4,24 @@ import { getCompetitiveSheet, getSuppliers, api } from "@/lib/api";
 import { IconList, IconChart, IconMapPin, IconTruck } from "@/components/icons";
 
 /* ------------------------------------------------------------------ */
+/* Helpers                                                            */
+/* ------------------------------------------------------------------ */
+
+async function promiseAllSettledBatched<T>(
+  items: T[],
+  fn: (item: T) => Promise<any>,
+  batchSize = 5
+): Promise<PromiseSettledResult<any>[]> {
+  const results: PromiseSettledResult<any>[] = [];
+  for (let i = 0; i < items.length; i += batchSize) {
+    const batch = items.slice(i, i + batchSize);
+    const batchResults = await Promise.allSettled(batch.map(fn));
+    results.push(...batchResults);
+  }
+  return results;
+}
+
+/* ------------------------------------------------------------------ */
 /* Виджет «Статусы заявок»: всего / в работе / завершено / ожидание    */
 /* ------------------------------------------------------------------ */
 
@@ -67,8 +85,11 @@ export function SuppliersMapWidget({ lat, lon }: { lat: number; lon: number }) {
       .then(async (data) => {
         const list = (data.results || data || []).slice(0, 25);
         setTotal((data.results || data || []).length);
-        const details = await Promise.allSettled(
-          list.map((s: any) => api("/suppliers/" + s.id + "/"))
+        // Batched fetch: max 5 concurrent requests to avoid N+1 overload
+        const details = await promiseAllSettledBatched(
+          list,
+          (s: any) => api("/suppliers/" + s.id + "/"),
+          5
         );
         const pts: GeoPoint[] = [];
         for (const d of details) {

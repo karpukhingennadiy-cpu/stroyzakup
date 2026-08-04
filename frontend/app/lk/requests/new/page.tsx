@@ -3,11 +3,17 @@ import { useState, useEffect, Fragment } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { createRequest, matchSuppliers, sendRfq, api, geocodeAddress } from "@/lib/api";
-const SupplierMap = dynamic(() => import("./SupplierMap"), { ssr: false });
+const SupplierMap = dynamic(() => import("./SupplierMap"), {
+  ssr: false,
+  loading: () => <div className="w-full h-full bg-[var(--fill-1)] animate-pulse rounded-[var(--radius-lg)]" />,
+});
 import { IconPlus, IconMapPin, IconHardHat, IconTruck } from "@/components/icons";
 import { Button, Card, Badge } from "@/components/ui";
 
-const DeliveryMap = dynamic(() => import("./DeliveryMap"), { ssr: false });
+const DeliveryMap = dynamic(() => import("./DeliveryMap"), {
+  ssr: false,
+  loading: () => <div className="w-full h-full bg-[var(--fill-1)] animate-pulse rounded-[var(--radius-lg)]" />,
+});
 
 interface MaterialRow {
   id: number;

@@ -59,7 +59,7 @@ export default function CompetitivePage() {
           <p className="text-label-3 text-sm mt-0.5">Сравнение коммерческих предложений — {suppliers.length} поставщиков</p>
         </div>
         {suppliers.length > 0 && (
-          <Button variant="secondary" size={36} onClick={handleDownloadXlsx} leftIcon={<IconDownload className="w-4 h-4" />}>
+          <Button variant="outline" size={32} leftIcon={<IconDownload className="w-4 h-4" aria-hidden="true" />} onClick={handleDownloadXlsx}>
             Скачать XLSX
           </Button>
         )}
