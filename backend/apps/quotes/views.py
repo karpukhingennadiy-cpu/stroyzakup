@@ -58,6 +58,43 @@ class QuoteViewSet(viewsets.ModelViewSet):
         return Response({'suppliers': sorted(items, key=lambda x: x['grand_total']),
                         'best': best, 'total_quotes': len(items)})
 
+    @decorators.action(detail=False, methods=['post'])
+    def select_winner(self, request):
+        """G2: выбор победителя — переводит Quote в selected, Request в ready."""
+        quote_id = request.data.get("quote_id")
+        if not quote_id:
+            return Response({"error": "quote_id required"}, status=400)
+
+        # IDOR fix: scope quote to the authenticated customer's requests
+        try:
+            quote = Quote.objects.select_related("request").get(
+                id=quote_id, request__customer=request.user,
+            )
+        except (Quote.DoesNotExist, ValueError):
+            return Response({"error": "Quote not found"}, status=404)
+
+        req = quote.request
+        if req.status not in ("collecting_quotes", "matched", "rfq_sent", "ready"):
+            return Response(
+                {"error": f"Cannot select winner in current request status: {req.status}"},
+                status=400,
+            )
+
+        # Mark selected quote
+        Quote.objects.filter(request=req).update(status="rejected")
+        quote.status = "selected"
+        quote.save(update_fields=["status"])
+
+        # Move request to ready
+        req.status = "ready"
+        req.save(update_fields=["status"])
+
+        return Response({
+            "status": "ready",
+            "request": {"id": req.id, "code": req.code, "status": req.status},
+            "selected_quote": QuoteSerializer(quote).data,
+        })
+
     def _get_owned_request(self, request):
         """Fetch the request scoped to the caller or return (None, Response)."""
         from apps.requests.models import Request as ReqModel
