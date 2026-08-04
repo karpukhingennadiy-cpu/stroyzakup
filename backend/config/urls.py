@@ -22,4 +22,6 @@ urlpatterns = [
     path("api/public/quote/<str:token>/", public_quote, name="public-quote"),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger"),
+    # G4: Prometheus metrics endpoint (/metrics)
+    path("", include("django_prometheus.urls")),
 ]

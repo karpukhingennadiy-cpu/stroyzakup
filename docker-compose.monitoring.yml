@@ -1,0 +1,87 @@
+version: "3.9"
+
+# G4: Контур мониторинга — Prometheus + Grafana + экспортеры.
+# Запускается ПОСЛЕ prod-контура:
+#   docker compose -f docker-compose.prod.yml up -d --build
+#   docker compose -f docker-compose.monitoring.yml up -d
+# Требует существующей внешней сети minitender-net (создаётся prod-контуром).
+
+networks:
+  minitender-net:
+    external: true
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    networks:
+      - minitender-net
+    volumes:
+      - ./deploy/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=30d"
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    networks:
+      - minitender-net
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?set GRAFANA_ADMIN_PASSWORD in .env.production}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./deploy/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./deploy/monitoring/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+  node-exporter:
+    image: prom/node-exporter:v1.8.2
+    networks:
+      - minitender-net
+    pid: host
+    volumes:
+      - /:/host:ro,rslave
+    command:
+      - "--path.rootfs=/host"
+    ports:
+      - "9100:9100"
+    restart: unless-stopped
+
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    networks:
+      - minitender-net
+    environment:
+      DATA_SOURCE_NAME: postgresql://${DB_USER:-minitender}:${DB_PASSWORD:-minitender}@db:5432/${DB_NAME:-minitender}?sslmode=disable
+    restart: unless-stopped
+
+  nginx-exporter:
+    image: nginxinc/nginx-prometheus-exporter:1.4.0
+    networks:
+      - minitender-net
+    command:
+      - "--nginx.scrape-uri=http://nginx:8080/stub_status"
+    restart: unless-stopped
+
+  celery-exporter:
+    image: danihodovic/celery-exporter:0.10.9
+    networks:
+      - minitender-net
+    environment:
+      CE_BROKER_URL: redis://redis:6379/0
+    command:
+      - "--broker-url=redis://redis:6379/0"
+    restart: unless-stopped
+
+volumes:
+  prometheus_data:
+  grafana_data:

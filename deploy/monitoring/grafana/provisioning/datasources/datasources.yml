@@ -1,0 +1,23 @@
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false
+
+  # Воронка (PostHog): требуется Grafana-плагин PostHog data source.
+  # Установка: GF_INSTALL_PLUGINS или админка Grafana -> Plugins -> "PostHog".
+  # События и шаги воронки описаны в docs/analytics-dashboard.md.
+  - name: PostHog
+    type: grafana-posthog-datasource
+    access: proxy
+    editable: true
+    jsonData:
+      url: ${POSTHOG_HOST}
+    secureJsonData:
+      apiKey: ${POSTHOG_PERSONAL_API_KEY}
+    # Плагин не входит в поставку: источник активируется после установки плагина.
+    # До установки панели дашборда "Минитендер · Воронка" покажут ошибку datasource.

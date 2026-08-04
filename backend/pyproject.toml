@@ -23,6 +23,7 @@ dependencies = [
     "openpyxl>=3.1",          # XLSX export of the competitive sheet (P1)
     "reportlab>=4.0",         # PDF export of the winner-selection protocol (P1)
     "posthog>=3.0",           # PostHog analytics SDK (KC-03)
+    "django-prometheus>=2.3", # Prometheus /metrics endpoint (G4)
 ]
 
 [project.optional-dependencies]
