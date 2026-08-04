@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { onCLS, onFCP, onFID, onLCP, onTTFB, type Metric } from "web-vitals";
+import { onCLS, onFCP, onINP, onLCP, onTTFB, type Metric } from "web-vitals";
 
 function sendToAnalytics(metric: Metric) {
   // В production отправлять на analytics endpoint
@@ -16,7 +16,7 @@ export function WebVitals() {
   useEffect(() => {
     onCLS(sendToAnalytics);
     onFCP(sendToAnalytics);
-    onFID(sendToAnalytics);
+    onINP(sendToAnalytics);
     onLCP(sendToAnalytics);
     onTTFB(sendToAnalytics);
   }, []);

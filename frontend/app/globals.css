@@ -215,8 +215,6 @@
     animation: slide-up 0.6s ease-out forwards;
   }
 }
-  .text-balance { text-wrap: balance; }
-}
 
 /* Tailwind 4 @theme inline — shadcn/ui theme mapping */
 @theme inline {
