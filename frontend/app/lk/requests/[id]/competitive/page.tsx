@@ -137,15 +137,6 @@ export default function CompetitivePage() {
             Скачать XLSX
           </Button>
         )}
-<<<<<<< HEAD
-          <Button variant="outline" size={32} leftIcon={<IconDownload className="w-4 h-4" aria-hidden="true" />} onClick={handleDownloadXlsx}>
-=======
-          <Button variant="outline" onClick={handleDownloadXlsx}>
-            <Download className="w-4 h-4 mr-2" aria-hidden="true" />
->>>>>>> 2be20d3 (feat(frontend): redesign competitive sheet and suppliers list with shadcn/ui Table, sorting, and filters)
-            Скачать XLSX
-          </Button>
-        )}
       </div>
 
       {suppliers.length === 0 ? (
