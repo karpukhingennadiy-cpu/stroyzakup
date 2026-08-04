@@ -5,6 +5,9 @@ os.environ["CELERY_BROKER_URL"] = "memory://"
 
 from .base import *
 
+# Remove django.contrib.gis for tests (no GDAL needed on CI runner / locally)
+INSTALLED_APPS = [app for app in INSTALLED_APPS if app != "django.contrib.gis"]
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
