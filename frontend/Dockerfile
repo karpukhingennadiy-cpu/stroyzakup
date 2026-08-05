@@ -2,6 +2,10 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 ARG NEXT_PUBLIC_API_URL=/api
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+# Rewrites из next.config.ts запекаются в routes-manifest на этапе build —
+# BACKEND_URL должен быть известен при сборке (в prod: http://backend:8000)
+ARG BACKEND_URL=http://localhost:8000
+ENV BACKEND_URL=$BACKEND_URL
 COPY package*.json ./
 RUN npm ci
 COPY . .

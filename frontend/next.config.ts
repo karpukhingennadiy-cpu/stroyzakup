@@ -16,6 +16,8 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ["lucide-react", "recharts"],
   },
   turbopack: {},
+  // Иначе /api/x/ (со слэшем) → Next 308 → Django APPEND_SLASH 301 → петля редиректов
+  skipTrailingSlashRedirect: true,
   // Server-side proxy: the client bundle calls relative "/api/*"
   // (NEXT_PUBLIC_API_URL=/api), so Next must forward those calls to Django.
   // In docker: BACKEND_URL=http://backend:8000; local dev default: localhost:8000.

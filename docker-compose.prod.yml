@@ -99,6 +99,9 @@ services:
   frontend:
     build:
       context: ./frontend
+      args:
+        # Запекается в routes-manifest (rewrites в next.config.ts)
+        BACKEND_URL: http://backend:8000
     networks:
       - minitender-net
     environment:
