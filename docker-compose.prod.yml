@@ -49,6 +49,9 @@ services:
       YANDEX_GEOCODER_KEY: ${YANDEX_GEOCODER_KEY:-}
       REDIS_URL: redis://redis:6379/0
       CELERY_BROKER_URL: redis://redis:6379/0
+      # FIX: без этого config/celery.py шлёт result backend на
+      # redis://localhost:6379/1 (внутри контейнера пуст) → 500 при .delay()
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
       SECURE_SSL_REDIRECT: ${SECURE_SSL_REDIRECT:-false}
       SECRET_KEY: ${SECRET_KEY}
       # 'backend' нужен для scrape Prometheus (/metrics) внутри сети
@@ -86,6 +89,7 @@ services:
       YANDEX_GEOCODER_KEY: ${YANDEX_GEOCODER_KEY:-}
       REDIS_URL: redis://redis:6379/0
       CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
       SECRET_KEY: ${SECRET_KEY}
     depends_on:
       - db
@@ -99,6 +103,8 @@ services:
       - minitender-net
     environment:
       NEXT_PUBLIC_API_URL: /api
+      # Server-side rewrite target for /api/* (see next.config.ts rewrites)
+      BACKEND_URL: http://backend:8000
     depends_on:
       - backend
     restart: unless-stopped
