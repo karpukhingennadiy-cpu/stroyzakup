@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import { getMe, clearTokens } from "@/lib/api";
-import { ListPlus, Truck, HardHat, LogOut, Menu, X } from "lucide-react";
-import { ThemeToggle } from "@/components/theme";
+import { usePathname, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { HardHat, ListPlus, Truck, LogOut, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ThemeToggle } from "@/components/theme";
+import { getMe, logout } from "@/lib/api";
 
 const navItems = [
   { href: "/lk/requests", label: "Мои заявки", icon: ListPlus },
@@ -16,45 +15,22 @@ const navItems = [
 ];
 
 export default function LkLayout({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    getMe()
-      .then(setUser)
-      .catch(() => { clearTokens(); router.push("/login"); })
-      .finally(() => setLoading(false));
-  }, [router]);
+    getMe().then(setUser).catch(() => {});
+  }, []);
 
-  useEffect(() => { setMenuOpen(false); }, [pathname]);
-
-  useEffect(() => {
-    if (!menuOpen) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setMenuOpen(false); };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [menuOpen]);
-
-  const handleLogout = () => { clearTokens(); router.push("/"); };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--bg-ground)]">
-        <div className="space-y-4 w-64">
-          <Skeleton className="h-8 w-full" />
-          <Skeleton className="h-8 w-3/4" />
-          <Skeleton className="h-8 w-1/2" />
-        </div>
-      </div>
-    );
-  }
+  const handleLogout = async () => {
+    await logout();
+    router.push("/login");
+  };
 
   return (
     <div className="min-h-screen flex bg-[var(--bg-ground)]">
-      {/* Skip-link для клавиатурной навигации */}
       <a
         href="#lk-main"
         className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[1000] focus:px-3 focus:py-2 focus:rounded-md focus:bg-[var(--accent)] focus:text-white"
@@ -63,7 +39,7 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
       </a>
 
       {/* Mobile top bar */}
-      <div className="md:hidden fixed top-0 inset-x-0 z-[500] h-14 bg-[var(--sidebar-bg)] text-white flex items-center gap-2 px-3">
+      <div className="md:hidden fixed top-0 inset-x-0 z-[500] h-14 glass border-b border-[var(--separator)] flex items-center gap-2 px-3">
         <Button
           variant="ghost"
           size="icon"
@@ -71,25 +47,23 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
           aria-label={menuOpen ? "Закрыть меню" : "Открыть меню"}
           aria-expanded={menuOpen}
           aria-controls="lk-nav"
-          className="text-white hover:bg-white/10"
         >
           {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </Button>
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-[var(--radius-sm)] bg-[var(--brand)] flex items-center justify-center">
-            <HardHat className="w-4 h-4 text-[var(--brand-ink)]" />
+          <div className="w-8 h-8 rounded-[var(--radius-sm)] gradient-bg flex items-center justify-center">
+            <HardHat className="w-4 h-4 text-white" />
           </div>
-          <span className="font-bold tracking-tight">Минитендер</span>
+          <span className="font-bold tracking-tight text-[var(--label-primary)]">Минитендер</span>
         </Link>
         <div className="ml-auto">
           <ThemeToggle />
         </div>
       </div>
 
-      {/* Backdrop for mobile menu */}
       {menuOpen && (
         <div
-          className="md:hidden fixed inset-0 z-[499] bg-black/40"
+          className="md:hidden fixed inset-0 z-[499] bg-black/40 backdrop-blur-sm"
           onClick={() => setMenuOpen(false)}
           aria-hidden="true"
         />
@@ -104,8 +78,8 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
       >
         <div className="p-6 border-b border-white/10 flex items-center justify-between gap-2">
           <Link href="/" className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-[var(--radius-sm)] bg-[var(--brand)] flex items-center justify-center shrink-0">
-              <HardHat className="w-5 h-5 text-[var(--brand-ink)]" />
+            <div className="w-9 h-9 rounded-[var(--radius-sm)] gradient-bg flex items-center justify-center shrink-0">
+              <HardHat className="w-5 h-5 text-white" />
             </div>
             <span className="font-bold text-lg tracking-tight truncate">Минитендер</span>
           </Link>
@@ -121,10 +95,10 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={
-                  "flex items-center gap-3 px-3 py-2.5 rounded-[var(--radius-lg)] transition-colors duration-150 text-sm font-medium " +
+                  "flex items-center gap-3 px-3 py-2.5 rounded-[var(--radius-md)] transition-all duration-200 text-sm font-medium " +
                   (active
-                    ? "bg-white/10 text-white"
-                    : "text-white/60 hover:text-white hover:bg-white/10")
+                    ? "bg-white/12 text-white shadow-sm"
+                    : "text-white/50 hover:text-white hover:bg-white/[0.08]")
                 }
               >
                 <item.icon className="w-5 h-5" aria-hidden="true" />
@@ -135,20 +109,21 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
         </nav>
 
         <div className="p-4 border-t border-white/10">
-          <div className="px-3 py-2 text-sm text-white/40 truncate" title={user?.email || ""}>
+          <div className="px-3 py-2 text-sm text-white/35 truncate" title={user?.email || ""}>
             {user?.email || ""}
           </div>
           <Button
             variant="ghost"
             size="sm"
             onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-[var(--radius-lg)] text-white/40 hover:text-white/70 hover:bg-white/5 transition-colors duration-150 text-sm mt-1 justify-start"
+            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-[var(--radius-md)] text-white/35 hover:text-white/60 hover:bg-white/5 transition-all duration-200 text-sm mt-1 justify-start"
           >
             <LogOut className="w-5 h-5" aria-hidden="true" />
             Выйти
           </Button>
         </div>
       </aside>
+
       <main
         id="lk-main"
         className="flex-1 md:ml-64 p-4 pt-20 md:p-8 w-full min-w-0"
