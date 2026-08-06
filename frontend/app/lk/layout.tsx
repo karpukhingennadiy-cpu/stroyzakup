@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { HardHat, ListPlus, Truck, LogOut, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme";
-import { getMe, logout } from "@/lib/api";
+import { getMe } from "@/lib/api";
 
 const navItems = [
   { href: "/lk/requests", label: "Мои заявки", icon: ListPlus },
@@ -25,7 +25,7 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
   }, []);
 
   const handleLogout = async () => {
-    await logout();
+    
     router.push("/login");
   };
 
