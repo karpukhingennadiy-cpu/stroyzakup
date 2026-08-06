@@ -10,10 +10,9 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-inter)", "PingFang SC", "system-ui", "sans-serif"],
+        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
       },
       colors: {
-        // Семантические токены Kimi → CSS-переменные из globals.css
         surface: {
           primary: "var(--bg-primary)",
           secondary: "var(--bg-secondary)",
@@ -53,9 +52,14 @@ const config: Config = {
         md: "var(--radius-md)",
         lg: "var(--radius-lg)",
         xl: "var(--radius-xl)",
+        full: "var(--radius-full)",
       },
       boxShadow: {
+        xs: "var(--shadow-xs)",
         small: "var(--shadow-small)",
+        medium: "var(--shadow-medium)",
+        large: "var(--shadow-large)",
+        glow: "var(--shadow-glow)",
         input: "var(--shadow-input)",
       },
       zIndex: {
@@ -66,11 +70,11 @@ const config: Config = {
         toast: "var(--z-toast)",
       },
       transitionTimingFunction: {
-        // animation.md §3.2 — кастомные кривые Kimi
-        "kimi-out": "cubic-bezier(0.23, 1, 0.32, 1)",
+        smooth: "cubic-bezier(0.23, 1, 0.32, 1)",
       },
     },
   },
   plugins: [],
 };
+
 export default config;
