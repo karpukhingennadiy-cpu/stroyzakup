@@ -41,6 +41,11 @@ class RequestCreateSerializer(serializers.ModelSerializer):
     longitude = serializers.FloatField(write_only=True, required=False)
     city = serializers.CharField(write_only=True, required=False)
 
+    # SEC: address is read-only here — clients must pass delivery_address
+    # (+ optional lat/lon/city); attaching an arbitrary Address id would
+    # leak/rewrite another customer's address (IDOR-lite).
+    address = serializers.PrimaryKeyRelatedField(read_only=True)
+
     class Meta:
         model = Request
         fields = ['raw_text', 'address', 'delivery_address',

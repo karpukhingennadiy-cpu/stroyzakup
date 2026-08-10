@@ -11,6 +11,7 @@ from rest_framework.test import APIClient
 from apps.requests.models import Request, RequestItem, Category, Unit
 from apps.suppliers.models import Supplier, SupplierCategory
 from apps.quotes.models import Quote, QuoteItem, RfqInvitation
+from rest_framework.throttling import AnonRateThrottle
 
 User = get_user_model()
 
@@ -331,3 +332,125 @@ class TestPublicQuoteForeignItem:
         quote = Quote.objects.get(request=owned_request, supplier=sup)
         assert QuoteItem.objects.filter(quote=quote, request_item=foreign_item).count() == 0
         assert QuoteItem.objects.filter(quote=quote, request_item=own_item).count() == 1
+
+
+# --- SEC-7: login brute-force throttle ---------------------------------------
+
+@pytest.mark.django_db
+class _LoginThrottleProbe(AnonRateThrottle):
+    """Fixed-rate throttle for the login brute-force test. A class-level
+     avoids DRF's frozen class attributes (api_settings is read once
+    at import time, so override_settings has no effect once any request
+    has been served)."""
+    rate = "5/min"
+
+
+@pytest.mark.django_db
+class TestLoginThrottle:
+    def test_login_throttled_after_30(self):
+        from django.core.cache import cache
+        from rest_framework_simplejwt.views import TokenObtainPairView
+        cache.clear()
+        old = TokenObtainPairView.throttle_classes
+        TokenObtainPairView.throttle_classes = [_LoginThrottleProbe]
+        try:
+            client = APIClient()
+            last = None
+            for i in range(6):
+                last = client.post("/api/auth/login/",
+                                   {"email": "nobody@t.ru", "password": "wrong"})
+            assert last.status_code == 429
+        finally:
+            TokenObtainPairView.throttle_classes = old
+            cache.clear()
+
+
+# --- Quote link deadline (+3 days) -------------------------------------------
+
+@pytest.mark.django_db
+class TestQuoteLinkDeadline:
+    def test_expired_link_410(self, owner, owned_request):
+        from datetime import timedelta
+        from django.utils import timezone
+        from apps.emails.services import create_rfq_invitation
+        sup = Supplier.objects.create(name="ExpSup", email="exp@t.ru")
+        inv = create_rfq_invitation(owned_request, sup)
+        # Age the invitation past the 3-day window
+        RfqInvitation.objects.filter(id=inv.id).update(
+            created_at=timezone.now() - timedelta(days=4))
+        client = APIClient()
+        r = client.get(f"/api/public/quote/{inv.quote_token}/")
+        assert r.status_code == 410
+
+    def test_expired_link_post_410(self, owner, owned_request):
+        from datetime import timedelta
+        from django.utils import timezone
+        from apps.emails.services import create_rfq_invitation
+        sup = Supplier.objects.create(name="ExpSup2", email="exp2@t.ru")
+        inv = create_rfq_invitation(owned_request, sup)
+        RfqInvitation.objects.filter(id=inv.id).update(
+            created_at=timezone.now() - timedelta(days=4))
+        client = APIClient()
+        r = client.post(f"/api/public/quote/{inv.quote_token}/",
+                        {"items": [{"request_item_id": 1, "price": 100}]},
+                        format="json")
+        assert r.status_code == 410
+
+    def test_fresh_link_ok(self, owner, owned_request):
+        from apps.emails.services import create_rfq_invitation
+        sup = Supplier.objects.create(name="FreshSup", email="fr@t.ru")
+        inv = create_rfq_invitation(owned_request, sup)
+        client = APIClient()
+        r = client.get(f"/api/public/quote/{inv.quote_token}/")
+        assert r.status_code == 200
+
+
+# --- RequestCreateSerializer: address must not be writable (IDOR-lite) -------
+
+@pytest.mark.django_db
+class TestAddressIdorLite:
+    def test_create_with_foreign_address_ignored(self, owner, other, catalog):
+        """Passing another user's Address id in  must not attach it."""
+        from apps.requests.models import Address
+        owner_user = User.objects.get(email="a2-owner@test.com")
+        other_user = User.objects.get(email="a2-other@test.com")
+        foreign_addr = Address.objects.create(
+            customer=other_user, address="Чужой адрес", city="Moscow",
+            latitude=55.75, longitude=37.62)
+        r = owner.post("/api/requests/", {
+            "raw_text": "Цемент М500 - 50 меш",
+            "address": foreign_addr.id,
+        }, format="json")
+        assert r.status_code == 201
+        req = Request.objects.get(id=r.data["id"])
+        assert req.address is None  # foreign address must NOT be attached
+        assert req.raw_text == "Цемент М500 - 50 меш"
+
+    def test_create_with_own_address_id_ignored(self, owner):
+        """Even own Address id is ignored on create — use delivery_address."""
+        from apps.requests.models import Address
+        owner_user = User.objects.get(email="a2-owner@test.com")
+        own_addr = Address.objects.create(
+            customer=owner_user, address="Свой адрес", city="Moscow",
+            latitude=55.75, longitude=37.62)
+        r = owner.post("/api/requests/", {
+            "raw_text": "Кирпич - 100 шт",
+            "address": own_addr.id,
+        }, format="json")
+        assert r.status_code == 201
+        req = Request.objects.get(id=r.data["id"])
+        assert req.address is None
+
+    def test_create_with_delivery_address_still_works(self, owner):
+        """The supported path (delivery_address text) keeps working."""
+        from apps.requests.models import Address
+        r = owner.post("/api/requests/", {
+            "raw_text": "Песок - 3 куб",
+            "delivery_address": "Москва, Тверская 1",
+            "latitude": 55.7558, "longitude": 37.6173,
+            "city": "Москва",
+        }, format="json")
+        assert r.status_code == 201
+        req = Request.objects.get(id=r.data["id"])
+        assert req.address is not None
+        assert req.address.customer.email == "a2-owner@test.com"

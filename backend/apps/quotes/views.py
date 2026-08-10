@@ -1,6 +1,8 @@
 from rest_framework.decorators import throttle_classes
 from rest_framework import viewsets, permissions, decorators
 from rest_framework.response import Response
+from datetime import timedelta
+from django.utils import timezone
 from .models import Quote, QuoteItem, CompetitiveSheet
 from .serializers import QuoteSerializer, CompetitiveSheetSerializer
 
@@ -170,6 +172,10 @@ def public_quote(request, token):
         invitation = RfqInvitation.objects.select_related("request", "supplier").get(quote_token=token)
     except RfqInvitation.DoesNotExist:
         return Response({"error": "Invalid or expired link"}, status=http_status.HTTP_404_NOT_FOUND)
+
+    # SEC: quote link deadline (+3 days from invitation creation)
+    if invitation.created_at and timezone.now() > invitation.created_at + timedelta(days=3):
+        return Response({"error": "Link expired"}, status=http_status.HTTP_410_GONE)
 
     req = invitation.request
 

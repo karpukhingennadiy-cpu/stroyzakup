@@ -59,7 +59,9 @@ secrets/
 # Hermes
 .hermes/
 .github/workflows/
-db.sqlite3\n*.sqlite3\n*.sqlite3-journal
+db.sqlite3
+*.sqlite3
+*.sqlite3-journal
 
 # --- Release cleanup: dev/test junk ---
 .next/
