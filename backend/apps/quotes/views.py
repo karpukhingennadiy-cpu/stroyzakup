@@ -8,6 +8,16 @@ class QuoteViewSet(viewsets.ModelViewSet):
     serializer_class = QuoteSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def perform_create(self, serializer):
+        # IDOR fix: a quote may only be attached to a request owned by the caller
+        from rest_framework.exceptions import NotFound
+        from apps.requests.models import Request as ReqModel
+        req = serializer.validated_data.get("request")
+        if req is not None and not ReqModel.objects.filter(
+                id=req.id, customer=self.request.user).exists():
+            raise NotFound({"error": "Request not found"})
+        serializer.save()
+
     def get_queryset(self):
         # IDOR fix: always scope to the authenticated customer's requests
         qs = Quote.objects.filter(request__customer=self.request.user)
