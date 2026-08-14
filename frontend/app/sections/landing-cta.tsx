@@ -1,52 +1,44 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ArrowRight, Mail } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 export function LandingCTA() {
   const router = useRouter();
 
   return (
-    <section className="relative overflow-hidden py-24 sm:py-32">
-      <div
-        className="absolute inset-0 opacity-50"
-        aria-hidden="true"
-        style={{
-          background: "radial-gradient(ellipse at center, var(--accent-soft) 0%, transparent 70%)",
-        }}
-      />
-
-      <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6">
-        <div className="mb-10 mx-auto max-w-md rounded-[var(--radius-2xl)] overflow-hidden border border-separator shadow-medium">
-          <img src="/images/rfq-email.jpg" alt="Автоматическая рассылка запросов КП" className="w-full object-cover" loading="lazy" />
+    <section className="border-t border-neutral-200 bg-neutral-50">
+      <div className="mx-auto max-w-6xl px-6 lg:px-8 py-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-neutral-900">
+              Готовы сэкономить на закупках?
+            </h2>
+            <p className="mt-4 text-lg text-neutral-500 leading-relaxed">
+              Первые 50 заявок обрабатываются бесплатно. Никаких подписок — только результат.
+            </p>
+            <div className="mt-8 flex flex-col sm:flex-row items-start gap-3">
+              <button
+                onClick={() => router.push("/lk/requests/new")}
+                className="inline-flex items-center gap-2 rounded-lg bg-neutral-900 px-6 py-3 text-sm font-medium text-white hover:bg-neutral-700"
+              >
+                Начать бесплатно
+                <ArrowRight className="h-4 w-4" />
+              </button>
+              <a
+                href="mailto:info@minitender.ru"
+                className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-white px-6 py-3 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+              >
+                Связаться с нами
+              </a>
+            </div>
+          </div>
+          <img
+            src="/images/rfq-email.jpg"
+            alt="Автоматическая рассылка запросов КП"
+            className="w-full rounded-2xl border border-neutral-200 shadow-sm object-cover"
+          />
         </div>
-        <h2 className="text-3xl font-bold tracking-tight text-[var(--label-primary)] sm:text-5xl">
-          Готовы <span className="gradient-text">сэкономить</span> на закупках?
-        </h2>
-        <p className="mt-4 text-lg text-[var(--label-secondary)] leading-relaxed">
-          Первые 50 заявок обрабатываются бесплатно. Никаких подписок — только результат.
-        </p>
-
-        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <button
-            onClick={() => router.push("/lk/requests/new")}
-            className="relative overflow-hidden inline-flex items-center gap-2 rounded-[var(--radius-full)] gradient-bg px-8 py-4 text-base font-semibold text-white shadow-medium hover:shadow-glow active:scale-[0.97] transition-all duration-200 btn-shimmer"
-          >
-            Начать бесплатно
-            <ArrowRight className="h-5 w-5" />
-          </button>
-          <a
-            href="mailto:info@minitender.ru"
-            className="inline-flex items-center gap-2 rounded-[var(--radius-full)] border border-[var(--separator)] bg-[var(--bg-tertiary)] px-8 py-4 text-base font-semibold text-[var(--label-primary)] shadow-xs hover:shadow-small hover:border-[var(--accent)]/20 transition-all duration-200"
-          >
-            <Mail className="h-4 w-4" />
-            Связаться с нами
-          </a>
-        </div>
-
-        <p className="mt-6 text-xs text-[var(--label-quaternary)]">
-          Корпоративный доступ: info@minitender.ru
-        </p>
       </div>
     </section>
   );

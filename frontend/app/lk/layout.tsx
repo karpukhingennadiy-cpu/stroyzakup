@@ -51,7 +51,7 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
           {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </Button>
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-[var(--radius-sm)] gradient-bg flex items-center justify-center">
+          <div className="w-8 h-8 rounded-[var(--radius-sm)] bg-neutral-900 flex items-center justify-center">
             <HardHat className="w-4 h-4 text-white" />
           </div>
           <span className="font-bold tracking-tight text-[var(--label-primary)]">Минитендер</span>
@@ -78,7 +78,7 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
       >
         <div className="p-6 border-b border-white/10 flex items-center justify-between gap-2">
           <Link href="/" className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-[var(--radius-sm)] gradient-bg flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 rounded-[var(--radius-sm)] bg-neutral-900 flex items-center justify-center shrink-0">
               <HardHat className="w-5 h-5 text-white" />
             </div>
             <span className="font-bold text-lg tracking-tight truncate">Минитендер</span>
@@ -95,7 +95,7 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={
-                  "flex items-center gap-3 px-3 py-2.5 rounded-[var(--radius-md)] transition-all duration-200 text-sm font-medium " +
+                  "flex items-center gap-3 px-3 py-2.5 rounded-[var(--radius-md)] transition-colors text-sm font-medium " +
                   (active
                     ? "bg-white/12 text-white shadow-sm"
                     : "text-white/50 hover:text-white hover:bg-white/[0.08]")
@@ -116,7 +116,7 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
             variant="ghost"
             size="sm"
             onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-[var(--radius-md)] text-white/35 hover:text-white/60 hover:bg-white/5 transition-all duration-200 text-sm mt-1 justify-start"
+            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-[var(--radius-md)] text-white/35 hover:text-white/60 hover:bg-white/5 transition-colors text-sm mt-1 justify-start"
           >
             <LogOut className="w-5 h-5" aria-hidden="true" />
             Выйти

@@ -248,7 +248,7 @@ export default function CompetitivePage() {
                             aria-label={`${s.supplier_name}: ${(s.grand_total || 0).toLocaleString("ru-RU")} рублей`}
                           >
                             <div
-                              className="h-full rounded-full transition-all duration-500"
+                              className="h-full rounded-full"
                               style={{
                                 width: `${widthPct}%`,
                                 backgroundColor: isBest
