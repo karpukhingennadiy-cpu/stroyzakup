@@ -39,6 +39,7 @@ services:
       CELERY_BROKER_URL: redis://redis:6379/0
       SECURE_SSL_REDIRECT: ${SECURE_SSL_REDIRECT:-false}
       SECRET_KEY: ${SECRET_KEY}
+      USE_CELERY: ${USE_CELERY:-true}
     depends_on:
       db:
         condition: service_healthy
@@ -63,6 +64,7 @@ services:
       REDIS_URL: redis://redis:6379/0
       CELERY_BROKER_URL: redis://redis:6379/0
       SECRET_KEY: ${SECRET_KEY}
+      USE_CELERY: ${USE_CELERY:-true}
     depends_on:
       - db
       - redis
@@ -71,6 +73,9 @@ services:
   frontend:
     build:
       context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: /api
+        NEXT_PUBLIC_2GIS_KEY: 
     environment:
       NEXT_PUBLIC_API_URL: /api
     depends_on:

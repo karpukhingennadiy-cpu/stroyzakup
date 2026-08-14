@@ -2,6 +2,11 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 ARG NEXT_PUBLIC_API_URL=/api
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_2GIS_KEY=
+ENV NEXT_PUBLIC_2GIS_KEY=$NEXT_PUBLIC_2GIS_KEY
+# BACKEND_URL запекается в rewrites на этапе build (prod: http://backend:8000)
+ARG BACKEND_URL=http://localhost:8000
+ENV BACKEND_URL=$BACKEND_URL
 COPY package*.json ./
 RUN npm ci
 COPY . .
