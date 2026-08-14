@@ -7,7 +7,7 @@ const SupplierMap = dynamic(() => import("./SupplierMap"), {
   ssr: false,
   loading: () => <div className="w-full h-full bg-[var(--fill-1)] animate-pulse rounded-[var(--radius-lg)]" />,
 });
-import { IconPlus, IconMapPin, IconHardHat, IconTruck } from "@/components/icons";
+import { IconPlus, IconMapPin, IconTile, IconTruck } from "@/components/icons";
 import { Button, Card, Badge } from "@/components/ui";
 
 const DeliveryMap = dynamic(() => import("./DeliveryMap"), {
@@ -340,7 +340,7 @@ export default function NewRequestPage() {
         <Card
           title="Шаг 1: Список материалов"
           subtitle="Заполните таблицу — каждый товар отдельной строкой"
-          icon={<IconHardHat className="w-5 h-5" />}
+          icon={<IconTile className="w-5 h-5" />}
         >
           {/* Desktop: таблица */}
           <div className="hidden md:block overflow-x-auto">

@@ -1,13 +1,13 @@
-import { IconHardHat } from "@/components/icons";
+import { IconHardHat, IconList, IconSearch, IconTruck, IconChart, IconMapPin, IconShield } from "@/components/icons";
 import { LandingHeader } from "./sections/landing-header";
 import { LandingHero } from "./sections/landing-hero";
 import { LandingCTA } from "./sections/landing-cta";
 
 const steps = [
-  { title: "Загрузите смету", desc: "Вставьте список материалов текстом или Excel. AI распознаёт позиции, категории и объёмы." },
-  { title: "AI найдёт поставщиков", desc: "Алгоритм сканирует базу производителей и дилеров в радиусе до 300 км от объекта." },
-  { title: "Авторассылка RFQ", desc: "Поставщики получают персонализированные запросы КП с вашим списком позиций." },
-  { title: "Сравните предложения", desc: "Все цены собираются в единую таблицу. Выбирайте по цене, срокам и рейтингу." },
+  { icon: IconList, title: "Загрузите смету", desc: "Вставьте список материалов текстом или Excel. AI распознаёт позиции, категории и объёмы." },
+  { icon: IconSearch, title: "AI найдёт поставщиков", desc: "Алгоритм сканирует базу производителей и дилеров в радиусе до 300 км от объекта." },
+  { icon: IconTruck, title: "Авторассылка RFQ", desc: "Поставщики получают персонализированные запросы КП с вашим списком позиций." },
+  { icon: IconChart, title: "Сравните предложения", desc: "Все цены собираются в единую таблицу. Выбирайте по цене, срокам и рейтингу." },
 ];
 
 function HowItWorks() {
@@ -21,8 +21,13 @@ function HowItWorks() {
         <div className="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((step, idx) => (
             <div key={idx} className="rounded-[var(--radius-lg)] border border-[var(--separator)] bg-[var(--bg-tertiary)] p-5 shadow-[var(--shadow-xs)]">
-              <div className="inline-flex items-center justify-center size-7 rounded-full bg-[var(--accent-soft)] text-xs font-semibold text-[var(--accent)] tabular-nums">
-                {idx + 1}
+              <div className="flex items-center gap-2">
+                <div className="inline-flex items-center justify-center size-8 rounded-[var(--radius-md)] bg-[var(--accent-soft)] text-[var(--accent)]">
+                  <step.icon className="w-4 h-4" />
+                </div>
+                <div className="inline-flex items-center justify-center size-7 rounded-full bg-[var(--accent-soft)] text-xs font-semibold text-[var(--accent)] tabular-nums">
+                  {idx + 1}
+                </div>
               </div>
               <h3 className="mt-3 text-base font-semibold tracking-tight text-[var(--label-primary)]">{step.title}</h3>
               <p className="mt-2 text-sm leading-relaxed text-[var(--label-secondary)]">{step.desc}</p>
@@ -35,12 +40,12 @@ function HowItWorks() {
 }
 
 const features = [
-  { title: "Универсальный парсинг", desc: "Понимает любые формулировки: от «сотка арматуры» до ГОСТ-описаний. Оценивает полноту данных." },
-  { title: "Гибридный поиск", desc: "LLM генерирует первичный список, DaData верифицирует юрлица. Защита от фейковых контактов." },
-  { title: "Гео-скоринг", desc: "Реальные координаты поставщиков через 2GIS. Сортировка по расстоянию до объекта." },
-  { title: "Inbox-интеграция", desc: "Поставщик отвечает на письмо — КП создаётся автоматически. Не нужен личный кабинет у поставщика." },
-  { title: "Публичная страница КП", desc: "Отправьте ссылку /quote/TOKEN заказчику. Он увидит сравнение цен без регистрации." },
-  { title: "Производители в приоритете", desc: "AI-классификация «производитель / дилер». Производители получают бонус +10 к релевантности." },
+  { icon: IconList, title: "Универсальный парсинг", desc: "Плитка, ламинат, краска, штукатурка, гипсокартон, обои — любые формулировки сметы на отделку." },
+  { icon: IconSearch, title: "Гибридный поиск", desc: "Производители плитки, красок и материалов для благоустройства. DaData верифицирует юрлица." },
+  { icon: IconMapPin, title: "Гео-скоринг", desc: "Поиск поставщиков отделки и благоустройства в радиусе до 300 км от вашего объекта." },
+  { icon: IconShield, title: "Inbox-интеграция", desc: "КП от поставщиков плитки, красок и покрытий собираются автоматически из ответов на письма." },
+  { icon: IconChart, title: "Публичная страница КП", desc: "Сравнение цен на отделочные материалы и благоустройство в одной таблице — без регистрации." },
+  { icon: IconHardHat, title: "Производители в приоритете", desc: "Производители отделочных материалов и благоустройства получают приоритет в выдаче." },
 ];
 
 function Features() {
@@ -60,7 +65,10 @@ function Features() {
           <div className="grid gap-x-10 gap-y-8 sm:grid-cols-2">
             {features.map((f, idx) => (
               <div key={idx}>
-                <h3 className="text-base font-semibold tracking-tight text-[var(--label-primary)]">{f.title}</h3>
+                <div className="inline-flex items-center justify-center size-10 rounded-[var(--radius-lg)] bg-[var(--accent-soft)] text-[var(--accent)]">
+                  <f.icon className="w-5 h-5" />
+                </div>
+                <h3 className="mt-3 text-base font-semibold tracking-tight text-[var(--label-primary)]">{f.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-[var(--label-secondary)]">{f.desc}</p>
               </div>
             ))}
