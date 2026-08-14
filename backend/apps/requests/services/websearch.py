@@ -100,6 +100,56 @@ def _yandex_search(query: str, max_results: int = 10) -> list[dict]:
     return results
 
 
+
+
+# ===== 2GIS CATALOG API (real companies, same key as frontend maps) =====
+GEOCODER_API_KEY = os.environ.get("GEOCODER_API_KEY", "")
+CATALOG_URL = "https://catalog.api.2gis.ru/3.0/items"
+
+def _2gis_search(query: str, city: str = "", max_results: int = 5) -> list[dict]:
+    """Search real companies via 2GIS Catalog API."""
+    if not GEOCODER_API_KEY:
+        logger.warning("  GEOCODER_API_KEY not set — 2GIS search skipped")
+        return []
+    q = (city + " " + query) if city else query
+    params = urllib.parse.urlencode({
+        "q": q,
+        "key": GEOCODER_API_KEY,
+        "fields": "items.point,items.address,items.contact_groups",
+        "page_size": max_results,
+    })
+    url = f"{CATALOG_URL}?{params}"
+    req = urllib.request.Request(url, headers={"User-Agent": "MinitenderRF/1.0"})
+    try:
+        with urllib.request.urlopen(req, timeout=12) as resp:
+            data = json.loads(resp.read())
+    except Exception as e:
+        logger.error(f"  2GIS search error: {e}")
+        return []
+    items = data.get("result", {}).get("items", [])
+    result = []
+    for it in items:
+        point = it.get("point") or {}
+        phones = []
+        emails = []
+        for cg in it.get("contact_groups", []):
+            for c in cg.get("contacts", []):
+                v = c.get("value", {})
+                if c.get("type") == "phone":
+                    phones.append(v.get("formatted", "") or v.get("value", ""))
+                elif c.get("type") == "email":
+                    emails.append(v.get("value", ""))
+        result.append({
+            "name": it.get("name", ""),
+            "source": "2gis",
+            "email": emails[0] if emails else "",
+            "phone": phones[0] if phones else "",
+            "latitude": point.get("lat"),
+            "longitude": point.get("lon"),
+            "city": city or (it.get("address", {}) or {}).get("city", ""),
+        })
+    return result
+
 # ===== LLM EXTRACTION =====
 def _llm_extract_suppliers(search_results: list[dict], material: str, city: str) -> list[dict]:
     """Extract supplier names and contacts from search results using LLM."""
@@ -161,7 +211,14 @@ def search_suppliers_for_material(material_name: str, city: str, category: str =
         all_suppliers.extend(dadata)
         logger.info(f"    Found {len(dadata)}")
 
-    # 2. Yandex search — find websites
+    # 2. 2GIS Catalog — real local companies with contacts
+    logger.info(f"  2GIS: {material_name} in {city}")
+    gis = _2gis_search(material_name, city)
+    if gis:
+        all_suppliers.extend(gis)
+        logger.info(f"    Found {len(gis)} real companies")
+
+    # 3. Yandex search — find websites
     if len(all_suppliers) < 5:
         query = f"kupit {material_name} {city} stroitelnye_materialy"
         logger.info(f"  Yandex: {query}")
@@ -173,7 +230,7 @@ def search_suppliers_for_material(material_name: str, city: str, category: str =
                 all_suppliers.extend(extracted)
                 logger.info(f"    Extracted {len(extracted)} suppliers")
 
-    # 3. LLM knowledge as final fallback
+    # 4. LLM knowledge as final fallback
     if len(all_suppliers) < 3:
         logger.info(f"  LLM knowledge: {material_name} in {city}")
         llm_results = _llm_knowledge(material_name, city)
@@ -240,7 +297,7 @@ def discover_suppliers_for_request(request_obj) -> int:
             stype = sup_data.get("supplier_type", "unknown")
             src = sup_data.get("source", "llm")
             email = sup_data.get("email") or ""
-            if not email and site and "://" in site:
+            if not email and site and "://" in site and src != "2gis":
                 try:
                     email = f"info@{site.split('://')[1].split('/')[0]}"
                 except:
@@ -249,7 +306,7 @@ def discover_suppliers_for_request(request_obj) -> int:
             supplier, created = Supplier.objects.get_or_create(
                 name=name[:500],
                 defaults={
-                    "email": email[:254] if email else f"supplier{new_count}@unknown.ru",
+                    "email": email[:254] if email else ("" if src in ("2gis", "dadata", "web") else f"supplier{new_count}@unknown.ru"),
                     "phone": (sup_data.get("phone") or "")[:50],
                     "site": site[:200] if site else "",
                     "is_active": True,
@@ -262,15 +319,23 @@ def discover_suppliers_for_request(request_obj) -> int:
                 sup_city = sup_data.get("city") or city
                 if sup_city:
                     addr_defaults = {"address": sup_city, "city": sup_city}
+                    # Prefer exact coordinates from 2GIS point, else geocode city
+                    if sup_data.get("latitude") and sup_data.get("longitude"):
+                        addr_defaults.update({
+                            "latitude": sup_data["latitude"],
+                            "longitude": sup_data["longitude"],
+                            "city": sup_city,
+                        })
                     # Geocode city so the supplier participates in distance scoring
                     try:
                         from .geocoder import geocode
-                        geo = geocode(sup_city)
-                        if geo:
-                            addr_defaults.update({
-                                "latitude": geo[0], "longitude": geo[1],
-                                "city": geo[2] or sup_city,
-                            })
+                        if "latitude" not in addr_defaults:
+                            geo = geocode(sup_city)
+                            if geo:
+                                addr_defaults.update({
+                                    "latitude": geo[0], "longitude": geo[1],
+                                    "city": geo[2] or sup_city,
+                                })
                     except Exception:
                         pass
                     SupplierAddress.objects.get_or_create(

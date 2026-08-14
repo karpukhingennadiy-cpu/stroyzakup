@@ -167,9 +167,10 @@ class RequestViewSet(viewsets.ModelViewSet):
         from .services.matcher import match_suppliers
         matches = match_suppliers(req, limit)
 
-        # Auto-discovery: too few suppliers -> search new ones online, then re-match
+        # Auto-discovery: search fresh real suppliers online (2GIS+DaData) when
+        # the current match set has no 2GIS-sourced companies yet, then re-match
         discovered = 0
-        if len(matches) < 5:
+        if not any(m.get("source") == "2gis" for m in matches):
             from .services.websearch import discover_suppliers_for_request
             try:
                 discovered = discover_suppliers_for_request(req)
