@@ -28,11 +28,14 @@ async function refreshAccessToken(): Promise<string | null> {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refresh }),
     });
-    if (!res.ok) throw new Error("Refresh failed");
+    if (!res.ok) {
+      clearTokens();
+      return null;
+    }
     const data = await res.json();
     localStorage.setItem("access_token", data.access);
     return data.access;
-  } catch (e: any) {
+  } catch {
     clearTokens();
     return null;
   }

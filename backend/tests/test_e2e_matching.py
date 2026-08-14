@@ -9,8 +9,8 @@ User = get_user_model()
 @pytest.mark.django_db
 class TestE2EMatching:
 
-    @pytest.mark.skip(reason="Requires synchronous execution — Celery async mode returns 202")
-    def test_full_flow(self):
+    def test_full_flow(self, settings):
+        settings.EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
         client = APIClient()
 
         # 1. Register + login
@@ -82,7 +82,7 @@ class TestE2EMatching:
         status = r.json()["status"]
         assert status in ("confirmed", "matched", "matching"), f"Expected confirmed/matched, got {status}"
 
-        # 8. GET MATCH RESULTS (may already be done by confirm)
+        # 8. GET MATCH RESULTS (eager mode returns suppliers synchronously)
         if status == "matched":
             # Confirm auto-matched - get results from confirm response
             data = r.json()
@@ -90,23 +90,25 @@ class TestE2EMatching:
             r = client.post("/api/requests/{}/match_suppliers/".format(req_id), {"limit": 20}, format="json")
             data = r.json()
         assert r.status_code in (200, 202)
-        data = r.json()
-        assert data.get("count", 0) >= 0  # async may return 202 without count
+        suppliers = data.get("suppliers") or []
+        assert data.get("status") == "matched", "Eager mode must finish matching synchronously"
+        assert len(suppliers) > 0, "Eager mode must return matched suppliers"
 
         # 9. Verify Universal Stroy is #1
-        top = (data.get("suppliers") or [None])[0]
-        if top:  # async may not return supplier data
-            assert top["name"] == "Universal Stroy", "Got: {}".format(top["name"])
-            assert top.get("matched_count", 0) == 2
-            assert top.get("total_score", 0) > 85
+        top = suppliers[0]
+        assert top["name"] == "Universal Stroy", "Got: {}".format(top["name"])
+        assert top.get("matched_count", 0) == 2
+        assert top.get("total_score", 0) > 85
 
         # 10. Status -> matched
         req.refresh_from_db()
         assert req.status in ("matched", "matching")
 
         # 11. Scores add up
-        for s in data.get("suppliers", []):
-            calc = s.get("category_score", 0) + s.get("distance_score", 0) + s.get("rating_score", 0) + s.get("completeness_score", 0)
+        for s in suppliers:
+            calc = (s.get("category_score", 0) + s.get("distance_score", 0)
+                    + s.get("rating_score", 0) + s.get("completeness_score", 0)
+                    + s.get("manufacturer_bonus", 0))
             assert abs(calc - s.get("total_score", 0)) < 0.2
 
         # 12. send_rfq without supplier_ids = 400
@@ -114,7 +116,9 @@ class TestE2EMatching:
         assert r.status_code == 400
         assert "supplier_ids" in r.json()["error"]
 
-        # 13. send_rfq with supplier_ids = 200
+        # 13. send_rfq with supplier_ids from matched suppliers
+        supplier_ids = [s["supplier_id"] for s in suppliers]
+        assert supplier_ids, "Matched suppliers must provide supplier_ids"
         r = client.post("/api/requests/{}/send_rfq/".format(req_id),
-            {"supplier_ids": [top["supplier_id"] if top else 1]}, format="json")
+            {"supplier_ids": supplier_ids}, format="json")
         assert r.status_code in (200, 202)
