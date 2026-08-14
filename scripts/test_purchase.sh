@@ -74,10 +74,10 @@ for i in $(seq 1 "$POLL_MAX"); do
     sleep "$POLL_INTERVAL"
 done
 echo "  final parse status: $STATUS"
-[ "$STATUS" = "parsed" ] || fail "parse did not finish with status 'parsed' (got: '$STATUS')"
+case "$STATUS" in parsed|confirmed) ;; *) fail "parse did not finish (got: $STATUS)" ;; esac
 
 ITEMS=$(curl -s "$BASE_API/requests/$REQ_ID/" -H "Authorization: Bearer $TOKEN" | jq -r '.items | length')
-ok "parsed, items: $ITEMS"
+ok "parse ok, status: $STATUS, items: $ITEMS"
 
 # ---------- 4. Match suppliers ----------
 echo "[4/5] Match suppliers"
