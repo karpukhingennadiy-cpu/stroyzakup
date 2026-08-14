@@ -4,6 +4,8 @@ from .models import Quote, QuoteItem, CompetitiveSheet, RfqInvitation, EmailMess
 class QuoteItemSerializer(serializers.ModelSerializer):
     material_name = serializers.CharField(source='request_item.name', read_only=True)
 
+    price = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=0)
+
     class Meta:
         model = QuoteItem
         fields = ['id', 'request_item', 'material_name', 'price', 'vat_included',
@@ -20,6 +22,8 @@ class QuoteSerializer(serializers.ModelSerializer):
                   'delivery_cost', 'delivery_time', 'payment_terms',
                   'valid_until', 'comment', 'items', 'created_at']
         read_only_fields = ['id', 'created_at']
+
+    delivery_cost = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=0, required=False, allow_null=True)
 
 class CompetitiveSheetSerializer(serializers.ModelSerializer):
     class Meta:

@@ -55,6 +55,7 @@ interface SupplierMatch {
   moderation_status?: string;
   source?: string;
   manufacturer_bonus?: number;
+  has_email?: boolean;
   score_breakdown?: ScoreBreakdown;
 }
 
@@ -272,6 +273,11 @@ export default function NewRequestPage() {
   };
 
   const toggleSupplier = (id: number) => {
+    const s = suppliers.find((x) => x.supplier_id === id);
+    if (s && !s.has_email) {
+      setError("У этого поставщика нет email — запрос КП отправить нельзя");
+      return;
+    }
     const next = new Set(selectedSuppliers);
     next.has(id) ? next.delete(id) : next.add(id);
     setSelectedSuppliers(next);
@@ -592,7 +598,9 @@ export default function NewRequestPage() {
                               onClick={() => toggleSupplier(s.supplier_id)}>
                               <td className="py-2">
                                 <input type="checkbox" aria-label={"Выбрать " + s.name}
-                                  checked={selectedSuppliers.has(s.supplier_id)} onChange={() => toggleSupplier(s.supplier_id)}
+                                  checked={selectedSuppliers.has(s.supplier_id) && s.has_email}
+                              disabled={!s.has_email}
+                              onChange={() => toggleSupplier(s.supplier_id)}
                                   onClick={e => e.stopPropagation()}
                                   className="w-4 h-4 accent-[var(--accent)]" />
                               </td>

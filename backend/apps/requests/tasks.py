@@ -94,15 +94,16 @@ def send_rfq_task(self, request_id, supplier_ids):
 def geocode_address_task(self, address_id):
     """Geocode address asynchronously."""
     from apps.requests.models import Address
-    from apps.requests.services.geocoder import geocode_address
+    from apps.requests.services.geocoder import geocode
 
     try:
         addr = Address.objects.get(id=address_id)
-        result = geocode_address(addr.address)
-        if result and result.get("latitude"):
-            addr.latitude = result["latitude"]
-            addr.longitude = result["longitude"]
-            addr.city = result.get("city", addr.city)
+        result = geocode(addr.address)
+        if result:
+            glat, glon, gcity, _full = result
+            addr.latitude = glat
+            addr.longitude = glon
+            addr.city = gcity or addr.city
             addr.save(update_fields=["latitude", "longitude", "city"])
         return {"status": "ok"}
     except Exception as exc:
@@ -114,12 +115,12 @@ def geocode_address_task(self, address_id):
 def discover_suppliers_task(self, request_id):
     """Discover new suppliers via web search asynchronously."""
     from apps.requests.models import Request
-    from apps.requests.services.websearch import search_suppliers_for_request
+    from apps.requests.services.websearch import discover_suppliers_for_request
 
     try:
         req = Request.objects.get(id=request_id)
-        results = search_suppliers_for_request(req)
-        return {"status": "ok", "found": len(results) if results else 0}
+        found = discover_suppliers_for_request(req)
+        return {"status": "ok", "found": found or 0}
     except Exception as exc:
         logger.exception("Discover task failed for request %s", request_id)
         raise self.retry(exc=exc)

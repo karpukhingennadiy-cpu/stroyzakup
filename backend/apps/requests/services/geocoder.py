@@ -39,7 +39,7 @@ def _geocode_raw(query: str) -> Optional[tuple[float, float, str, str]]:
 
     params = urllib.parse.urlencode({
         "q": query,
-        "key": os.environ.get("YANDEX_API_KEY", "") or os.environ.get("GEOCODER_API_KEY", ""),
+        "key": os.environ.get("GEOCODER_API_KEY", "") or os.environ.get("YANDEX_API_KEY", ""),
         "fields": "items.point,items.address",
         "page_size": 1,
     })

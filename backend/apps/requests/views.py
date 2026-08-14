@@ -246,9 +246,3 @@ class RequestViewSet(viewsets.ModelViewSet):
             "status": "completed",
             "request": RequestSerializer(req).data,
         })
-        results = send_rfq_to_suppliers(req, supplier_ids)
-        # Status: rfq_sent only if at least one email went out
-        if any(r.get("status") == "sent" for r in results):
-            req.status = "rfq_sent"
-        req.refresh_from_db(fields=["status"])
-        return Response({"status": req.status, "results": results})

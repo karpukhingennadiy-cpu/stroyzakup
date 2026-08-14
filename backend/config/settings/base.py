@@ -8,11 +8,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # Export .env secrets to os.environ for service modules that read env directly
 # (decouple.config() does NOT populate os.environ by itself)
 for _env_key in ("LLM_API_KEY", "LLM_MODEL", "LLM_BASE_URL",
-                 "DADATA_TOKEN", "YANDEX_GEOCODER_KEY", "GEOCODER_API_KEY", "FROM_EMAIL"):
+                 "DADATA_TOKEN", "GEOCODER_API_KEY", "FROM_EMAIL"):
     os.environ.setdefault(_env_key, config(_env_key, default=""))
 
-SECRET_KEY="dev-secret-key"
-DEBUG = False
+SECRET_KEY = config("SECRET_KEY", default="dev-insecure-key-for-local-only")
+DEBUG = config("DEBUG", default=False, cast=bool)
+if not DEBUG and SECRET_KEY in ("dev-insecure-key-for-local-only", "dev-secret-key", "change-me"):
+    raise RuntimeError("SECRET_KEY must be set via env in production (DEBUG=False)")
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv())
 
 INSTALLED_APPS = [
@@ -39,6 +41,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
+    "apps.requests.middleware.rate_limit.RateLimitMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -80,6 +83,12 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 20,
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "60/min",
+        "user": "300/min",
+        "auth": "10/min",
+        "assistant": "20/min",
+    },
 }
 
 SIMPLE_JWT = {

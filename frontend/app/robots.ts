@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/lk/", "/api/", "/admin/"],
     },
-    sitemap: "https://минитендер.рф/sitemap.xml",
+    sitemap: "https://xn--d1abbjawic3ap.xn--p1ai/sitemap.xml",
   };
 }

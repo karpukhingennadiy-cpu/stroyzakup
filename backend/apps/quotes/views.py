@@ -209,6 +209,14 @@ def public_quote(request, token):
                 return Response({"error": "price must be a number"}, status=http_status.HTTP_400_BAD_REQUEST)
             if price <= 0:
                 return Response({"error": "price must be positive"}, status=http_status.HTTP_400_BAD_REQUEST)
+        # Validate delivery_cost: optional, must be non-negative number
+        if "delivery_cost" in data and data.get("delivery_cost") not in (None, ""):
+            try:
+                dc = float(data.get("delivery_cost"))
+            except (TypeError, ValueError):
+                return Response({"error": "delivery_cost must be a number"}, status=http_status.HTTP_400_BAD_REQUEST)
+            if dc < 0:
+                return Response({"error": "delivery_cost must be non-negative"}, status=http_status.HTTP_400_BAD_REQUEST)
         quote, created = Quote.objects.update_or_create(
             request=req, supplier=invitation.supplier, invitation=invitation,
             defaults={

@@ -226,7 +226,7 @@ def _send_customer_email(customer, subject, body_text, request_obj=None, supplie
         from apps.quotes.models import EmailMessage
         EmailMessage.objects.create(
             direction="outbound",
-            from_email="rfq@xn--d1abbjawic3ap.xn--p1ai",
+            from_email=settings.DEFAULT_FROM_EMAIL,
             to_email=customer.email, subject=subject, body_text=body_text,
             request=request_obj, supplier=supplier,
         )

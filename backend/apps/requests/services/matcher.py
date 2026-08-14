@@ -32,6 +32,7 @@ class SupplierMatch:
     supplier_type: str
     total_score: float
     moderation_status: str = "unverified"
+    has_email: bool = False
 
     matched_categories: list[str] = field(default_factory=list)
     total_categories: int = 0
@@ -60,6 +61,7 @@ class SupplierMatch:
             "product_match_score": round(self.product_match_score, 1),
             "supplier_type": getattr(self, 'supplier_type', 'unknown'),
             "moderation_status": getattr(self, 'moderation_status', 'unverified'),
+            "has_email": getattr(self, 'has_email', False),
             "source": getattr(self, 'source', 'seed'),
             "matched_categories": self.matched_categories,
             "matched_count": len(self.matched_categories),
@@ -251,6 +253,7 @@ def match_suppliers(request_obj, limit=20):
             supplier_id=s.id,
             supplier_type=s.supplier_type,
             moderation_status=getattr(s, "moderation_status", "unverified"),
+            has_email=bool(s.email),
             source=getattr(s, "source", "seed"),
             name=s.name,
             email=s.email,

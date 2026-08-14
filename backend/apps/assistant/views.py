@@ -5,6 +5,7 @@ import logging
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+from rest_framework.throttling import ScopedRateThrottle
 from rest_framework import status
 
 logger = logging.getLogger(__name__)
@@ -28,16 +29,19 @@ SYSTEM_PROMPT = """Ты — АИ-ассистент платформы Мини�
 - Не выдумывай функции, которых нет в описании выше.
 """
 
+
 class AssistantChatView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "assistant"
 
     def post(self, request):
         message = (request.data.get("message") or "").strip()
         history = request.data.get("history") or []
         if not message:
-            return Response({"error": "Пустое сообщение"}, status=400)
+            return Response({"error": "Пустое сообщение"}, status=status.HTTP_400_BAD_REQUEST)
         if len(message) > 4000:
-            return Response({"error": "Сообщение слишком длинное"}, status=400)
+            return Response({"error": "Сообщение слишком длинное"}, status=status.HTTP_400_BAD_REQUEST)
 
         messages = [{"role": "system", "content": SYSTEM_PROMPT}]
         for h in history[-8:]:
@@ -52,9 +56,9 @@ class AssistantChatView(APIView):
             data = llm.chat(messages, timeout=90)
             reply = data["choices"][0]["message"]["content"].strip()
             return Response({"reply": reply})
-        except Exception as e:
+        except Exception:
             logger.exception("Assistant chat failed")
             return Response(
                 {"error": "Не удалось получить ответ ассистента. Попробуйте ещё раз."},
-                status=502,
+                status=status.HTTP_502_BAD_GATEWAY,
             )

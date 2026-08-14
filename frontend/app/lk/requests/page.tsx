@@ -22,10 +22,12 @@ import { StatusCards, SuppliersMapWidget, PriceChartWidget } from "@/components/
 const statusLabels: Record<string, string> = {
   draft: "Черновик",
   parsing: "Распознавание",
+  parsed: "Распознана",
   confirmed: "Подтверждена",
   matched: "Поставщики подобраны",
   matching: "Поиск поставщиков",
   rfq_sent: "РФК отправлены",
+  rfq_failed: "Ошибка отправки РФК",
   collecting_quotes: "Сбор КП",
   ready: "Готов к сравнению",
   completed: "Завершена",
