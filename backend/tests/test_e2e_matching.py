@@ -108,7 +108,10 @@ class TestE2EMatching:
         for s in suppliers:
             calc = (s.get("category_score", 0) + s.get("distance_score", 0)
                     + s.get("rating_score", 0) + s.get("completeness_score", 0)
-                    + s.get("manufacturer_bonus", 0))
+                    + s.get("manufacturer_bonus", 0)
+                    + s.get("material_type_score", 0) + s.get("product_match_score", 0))
+            if s.get("moderation_status") == "unverified":
+                calc *= 0.9
             assert abs(calc - s.get("total_score", 0)) < 0.2
 
         # 12. send_rfq without supplier_ids = 400
