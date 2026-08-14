@@ -144,7 +144,7 @@ MIT © Минитендер.рф
 `scripts/check.sh`       — healthcheck всех сервисов
 `scripts/stop_dev.sh`    — остановка
 
-Для парсинга/LLM в dev используйте mock: `LLM_BASE_URL=http://localhost:8765/v1`
+Для парсинга используется DeepSeek API (LLM_API_KEY в backend/.env). Для offline-тестов можно поднять mock: `LLM_BASE_URL=http://localhost:8765/v1`
 Для писем: `EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend`
 
 ## Демо-доступ
