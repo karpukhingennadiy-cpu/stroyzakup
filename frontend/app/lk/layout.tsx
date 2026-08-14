@@ -24,8 +24,11 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
     getMe().then(setUser).catch(() => {});
   }, []);
 
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
   const handleLogout = async () => {
-    
     router.push("/login");
   };
 
@@ -33,7 +36,7 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen flex bg-[var(--bg-ground)]">
       <a
         href="#lk-main"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[1000] focus:px-3 focus:py-2 focus:rounded-md focus:bg-[var(--accent)] focus:text-white"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[1000] focus:px-3 focus:py-2 focus:rounded-[var(--radius-md)] focus:bg-[var(--accent)] focus:text-white"
       >
         К содержимому
       </a>
@@ -51,19 +54,19 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
           {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </Button>
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-[var(--radius-sm)] bg-neutral-900 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-[var(--radius-md)] bg-[var(--accent)] flex items-center justify-center">
             <HardHat className="w-4 h-4 text-white" />
           </div>
           <span className="font-bold tracking-tight text-[var(--label-primary)]">Минитендер</span>
         </Link>
         <div className="ml-auto">
-          <ThemeToggle />
+          <ThemeToggle variant="sidebar" />
         </div>
       </div>
 
       {menuOpen && (
         <div
-          className="md:hidden fixed inset-0 z-[499] bg-black/40 backdrop-blur-sm"
+          className="md:hidden fixed inset-0 z-[499] bg-black/40"
           onClick={() => setMenuOpen(false)}
           aria-hidden="true"
         />
@@ -76,17 +79,17 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
           (menuOpen ? "translate-x-0" : "-translate-x-full") + " md:translate-x-0"
         }
       >
-        <div className="p-6 border-b border-white/10 flex items-center justify-between gap-2">
+        <div className="p-5 border-b border-white/10 flex items-center justify-between gap-2">
           <Link href="/" className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-[var(--radius-sm)] bg-neutral-900 flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 rounded-[var(--radius-md)] bg-[var(--accent)] flex items-center justify-center shrink-0 shadow-[var(--shadow-glow)]">
               <HardHat className="w-5 h-5 text-white" />
             </div>
-            <span className="font-bold text-lg tracking-tight truncate">Минитендер</span>
+            <span className="font-bold text-base tracking-tight truncate">Минитендер</span>
           </Link>
-          <ThemeToggle className="hidden md:inline-flex" />
+          <ThemeToggle variant="sidebar" className="hidden md:inline-flex" />
         </div>
 
-        <nav className="flex-1 p-4 space-y-1" aria-label="Основная навигация">
+        <nav className="flex-1 p-3 space-y-1" aria-label="Основная навигация">
           {navItems.map((item) => {
             const active = pathname === item.href;
             return (
@@ -97,7 +100,7 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
                 className={
                   "flex items-center gap-3 px-3 py-2.5 rounded-[var(--radius-md)] transition-colors text-sm font-medium " +
                   (active
-                    ? "bg-white/12 text-white shadow-sm"
+                    ? "bg-[var(--accent)] text-white shadow-[var(--shadow-glow)]"
                     : "text-white/50 hover:text-white hover:bg-white/[0.08]")
                 }
               >
@@ -108,7 +111,7 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        <div className="p-4 border-t border-white/10">
+        <div className="p-3 border-t border-white/10">
           <div className="px-3 py-2 text-sm text-white/35 truncate" title={user?.email || ""}>
             {user?.email || ""}
           </div>

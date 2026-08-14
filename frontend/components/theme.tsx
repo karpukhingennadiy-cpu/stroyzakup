@@ -73,12 +73,22 @@ export function IconMoon({ className = "w-5 h-5" }: { className?: string }) {
 }
 
 /** Переключатель тёмной/светлой темы (Toggle, доступен с клавиатуры). */
-export function ThemeToggle({ className = "" }: { className?: string }) {
+export function ThemeToggle({
+  className = "",
+  variant = "auto",
+}: {
+  className?: string;
+  variant?: "auto" | "sidebar";
+}) {
   const [theme, toggle] = useTheme();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
   const isDark = mounted && theme === "dark";
+  const tone =
+    variant === "sidebar"
+      ? "text-white/70 hover:text-white hover:bg-white/10"
+      : "text-[var(--label-secondary)] hover:text-[var(--label-primary)] hover:bg-[var(--fill-1)]";
   return (
     <button
       type="button"
@@ -87,7 +97,9 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
       aria-label={isDark ? "Включить светлую тему" : "Включить тёмную тему"}
       onClick={toggle}
       className={
-        "inline-flex items-center justify-center w-10 h-10 rounded-[var(--radius-md)] text-white/70 hover:text-white hover:bg-white/10 transition-colors duration-150 " +
+        "inline-flex items-center justify-center w-10 h-10 rounded-[var(--radius-md)] transition-colors duration-150 " +
+        tone +
+        " " +
         className
       }
     >

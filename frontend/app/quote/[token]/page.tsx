@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { HardHat, Send, CheckCircle, AlertTriangle, Loader2 } from "lucide-react";
+import { Send, CheckCircle, AlertTriangle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ThemeToggle } from "@/components/theme";
+import { IconHardHat } from "@/components/icons";
 
 interface QuoteItem {
   id: number;
@@ -56,6 +57,9 @@ interface FormItem {
   is_analog: boolean;
   brand: string;
 }
+
+const inputClass =
+  "w-full min-h-[60px] resize-y rounded-[var(--radius-md)] border border-[var(--separator)] bg-[var(--bg-tertiary)] px-3 py-2 text-sm text-[var(--label-primary)] shadow-[var(--shadow-input)] outline-none focus-visible:border-[var(--accent)] focus-visible:ring-2 focus-visible:ring-[var(--accent)]/30";
 
 export default function QuotePage() {
   const params = useParams();
@@ -166,10 +170,10 @@ export default function QuotePage() {
     <div className="min-h-screen bg-[var(--bg-ground)] py-6 sm:py-10 px-4">
       <div className="max-w-3xl mx-auto">
         <header className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-[var(--radius-md)] bg-[var(--sidebar-bg)] flex items-center justify-center shrink-0">
-            <HardHat className="w-5 h-5 text-[var(--brand)]" aria-hidden="true" />
+          <div className="w-10 h-10 rounded-[var(--radius-md)] bg-[var(--sidebar-bg)] flex items-center justify-center shrink-0 shadow-[var(--shadow-small)]">
+            <IconHardHat className="w-5 h-5 text-[var(--accent)]" aria-hidden="true" />
           </div>
-          <span className="font-semibold text-[var(--label-primary)]">
+          <span className="font-semibold tracking-tight text-[var(--label-primary)]">
             Минитендер
           </span>
           <div className="ml-auto">
@@ -191,11 +195,11 @@ export default function QuotePage() {
 
   if (error && !data) {
     return shell(
-      <Card>
+      <Card className="shadow-[var(--shadow-medium)]">
         <CardContent className="p-6">
           <div className="flex items-center gap-3 mb-2">
             <AlertTriangle className="w-6 h-6 text-[var(--danger)]" aria-hidden="true" />
-            <h1 className="text-xl font-semibold text-[var(--label-primary)]">
+            <h1 className="text-xl font-semibold tracking-tight text-[var(--label-primary)]">
               Ошибка
             </h1>
           </div>
@@ -212,12 +216,12 @@ export default function QuotePage() {
 
   if (success) {
     return shell(
-      <Card>
+      <Card className="shadow-[var(--shadow-medium)]">
         <CardContent className="p-10 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--success-soft)] flex items-center justify-center">
             <CheckCircle className="w-8 h-8 text-[var(--success)]" aria-hidden="true" />
           </div>
-          <h1 className="text-xl font-semibold text-[var(--label-primary)] mb-2">
+          <h1 className="text-xl font-semibold tracking-tight text-[var(--label-primary)] mb-2">
             Коммерческое предложение отправлено!
           </h1>
           <p className="text-[var(--label-secondary)]">
@@ -238,7 +242,7 @@ export default function QuotePage() {
   return shell(
     <>
       <div className="mb-6">
-        <h1 className="text-xl font-semibold text-[var(--label-primary)]">
+        <h1 className="text-2xl font-semibold tracking-tight text-[var(--label-primary)]">
           Запрос КП: RFQ-{data?.request_code}
         </h1>
         <p className="text-[var(--label-tertiary)] text-sm mt-1">
@@ -323,7 +327,7 @@ export default function QuotePage() {
                           onChange={(e) =>
                             updateItem(idx, "is_analog", e.target.checked)
                           }
-                          className="w-4 h-4 accent-[var(--accent)]"
+                          className="w-4 h-4 rounded border-[var(--separator)] accent-[var(--accent)]"
                         />
                       </TableCell>
                       <TableCell>
@@ -393,7 +397,7 @@ export default function QuotePage() {
                   id="quote-comment"
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
-                  className="w-full min-h-[60px] resize-y rounded-md border border-[var(--separator)] bg-[var(--bg-primary)] px-2.5 py-1 text-sm text-[var(--label-primary)] outline-none focus-visible:border-[var(--accent)] focus-visible:ring-1 focus-visible:ring-[var(--accent)]/50"
+                  className={inputClass}
                 />
               </div>
             </div>
@@ -412,6 +416,7 @@ export default function QuotePage() {
 
         <Button
           type="submit"
+          size="lg"
           disabled={submitting}
           aria-busy={submitting}
           className="w-full sm:w-auto"

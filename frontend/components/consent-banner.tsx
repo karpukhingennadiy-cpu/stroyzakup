@@ -40,26 +40,26 @@ export function ConsentBanner() {
     <div
       role="dialog"
       aria-label="Согласие на использование cookies"
-      className="fixed bottom-4 left-4 right-4 z-[1000] mx-auto max-w-2xl rounded-[var(--radius-xl)] border border-separator bg-surface-primary p-4 shadow-small sm:bottom-6 sm:left-6 sm:right-6"
+      className="fixed bottom-4 left-4 right-4 z-[1000] mx-auto max-w-2xl rounded-[var(--radius-xl)] border border-[var(--separator)] bg-[var(--bg-tertiary)] p-4 shadow-[var(--shadow-medium)] sm:bottom-6 sm:left-6 sm:right-6"
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm text-label-2">
+        <p className="text-sm text-[var(--label-secondary)]">
           Мы используем cookies для аналитики и улучшения работы сервиса.
           Продолжая использовать сайт, вы соглашаетесь с{" "}
-          <a href="/privacy" className="underline text-accent hover:text-accent-hover">
+          <a href="/privacy" className="underline text-[var(--accent)] hover:text-[var(--accent-hover)]">
             политикой конфиденциальности
           </a>.
         </p>
         <div className="flex shrink-0 gap-2">
           <button
             onClick={() => handleConsent("denied")}
-            className="rounded-[var(--radius-md)] px-4 py-2 text-sm font-medium text-label-2 ring-1 ring-separator hover:bg-fill-1 transition-colors"
+            className="rounded-[var(--radius-md)] px-4 py-2 text-sm font-medium text-[var(--label-secondary)] ring-1 ring-[var(--separator)] hover:bg-[var(--fill-1)] transition-colors"
           >
             Отклонить
           </button>
           <button
             onClick={() => handleConsent("granted")}
-            className="rounded-[var(--radius-md)] bg-brand px-4 py-2 text-sm font-semibold text-brand-ink hover:bg-brand-hover transition-colors"
+            className="rounded-[var(--radius-md)] bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-white hover:bg-[var(--accent-hover)] transition-colors"
           >
             Принять
           </button>

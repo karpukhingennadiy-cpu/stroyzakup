@@ -1,60 +1,82 @@
 @import "tailwindcss";
 
 /*
- * Минитендер.рф — Modern Design System v3.0
- * Style: Modern B2B SaaS (Linear/Vercel aesthetic)
+ * Минитендер.рф — Modern Design System v4.0
+ * Style: Modern B2B SaaS (Linear/Vercel/Stripe aesthetic)
+ * All component tokens share the --bg-*, --label-*, --accent, --separator,
+ * --radius-*, --shadow-* API. Do not rename tokens — components depend on them.
  */
 
 @layer base {
   :root {
+    /* Surfaces */
     --bg-primary: #fafafa;
     --bg-secondary: #f4f4f5;
     --bg-tertiary: #ffffff;
-    --bg-ground: #f8f9fb;
-    --label-primary: rgba(9, 9, 11, 0.92);
-    --label-secondary: rgba(9, 9, 11, 0.6);
-    --label-tertiary: rgba(9, 9, 11, 0.4);
-    --label-quaternary: rgba(9, 9, 11, 0.25);
+    --bg-ground: #f7f7fb;
+
+    /* Text hierarchy */
+    --label-primary: rgba(9, 9, 11, 0.94);
+    --label-secondary: rgba(9, 9, 11, 0.62);
+    --label-tertiary: rgba(9, 9, 11, 0.45);
+    --label-quaternary: rgba(9, 9, 11, 0.28);
+
+    /* Fills & separators */
     --fill-1: rgba(9, 9, 11, 0.03);
     --fill-2: rgba(9, 9, 11, 0.06);
     --fill-3: rgba(9, 9, 11, 0.1);
     --separator: rgba(9, 9, 11, 0.08);
+
+    /* Brand — modern indigo */
     --accent: #6366f1;
     --accent-hover: #4f46e5;
-    --accent-soft: rgba(99, 102, 241, 0.08);
+    --accent-soft: rgba(99, 102, 241, 0.09);
     --gradient-accent: #6366f1;
     --gradient-accent-hover: #4f46e5;
     --gradient-text: #6366f1;
+
+    /* Semantic */
     --danger: #ef4444;
-    --danger-soft: rgba(239, 68, 68, 0.08);
+    --danger-soft: rgba(239, 68, 68, 0.09);
     --success: #22c55e;
-    --success-soft: rgba(34, 197, 94, 0.08);
+    --success-soft: rgba(34, 197, 94, 0.09);
     --warning: #f59e0b;
-    --warning-soft: rgba(245, 158, 11, 0.08);
+    --warning-soft: rgba(245, 158, 11, 0.11);
+
     --brand: #6366f1;
     --brand-hover: #4f46e5;
     --brand-ink: #ffffff;
     --sidebar-bg: #09090b;
+
+    /* Glass */
     --glass-bg: rgba(255, 255, 255, 0.72);
-    --glass-border: rgba(255, 255, 255, 0.3);
+    --glass-border: rgba(9, 9, 11, 0.06);
     --glass-blur: 16px;
-    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
-    --shadow-small: 0 2px 8px -2px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
-    --shadow-medium: 0 8px 24px -8px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(0, 0, 0, 0.04);
-    --shadow-large: 0 16px 48px -12px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.04);
-    --shadow-glow: 0 0 24px rgba(99, 102, 241, 0.15);
-    --shadow-input: 0 1px 3px rgba(0, 0, 0, 0.06);
+
+    /* Layered, soft shadows */
+    --shadow-xs: 0 1px 2px rgba(9, 9, 11, 0.04);
+    --shadow-small: 0 1px 2px rgba(9, 9, 11, 0.04), 0 4px 12px -2px rgba(9, 9, 11, 0.06);
+    --shadow-medium: 0 2px 4px rgba(9, 9, 11, 0.04), 0 12px 28px -8px rgba(9, 9, 11, 0.12);
+    --shadow-large: 0 4px 8px rgba(9, 9, 11, 0.04), 0 24px 48px -12px rgba(9, 9, 11, 0.18);
+    --shadow-glow: 0 0 24px rgba(99, 102, 241, 0.18);
+    --shadow-input: 0 1px 2px rgba(9, 9, 11, 0.05);
+
+    /* Radii */
     --radius-xs: 6px;
-    --radius-sm: 10px;
-    --radius-md: 14px;
-    --radius-lg: 18px;
-    --radius-xl: 24px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
     --radius-full: 9999px;
+
+    /* Layers */
     --z-header: 500;
     --z-modal-backdrop: 800;
     --z-modal: 810;
     --z-tooltip: 900;
     --z-toast: 1000;
+
+    /* shadcn-compatible aliases */
     --background: var(--bg-primary);
     --foreground: var(--label-primary);
     --card: var(--bg-tertiary);
@@ -77,42 +99,50 @@
   }
 
   html.dark {
-    --bg-primary: #09090b;
-    --bg-secondary: #18181b;
-    --bg-tertiary: #1c1c20;
-    --bg-ground: #0c0c0e;
-    --label-primary: rgba(255, 255, 255, 0.92);
-    --label-secondary: rgba(255, 255, 255, 0.6);
-    --label-tertiary: rgba(255, 255, 255, 0.4);
-    --label-quaternary: rgba(255, 255, 255, 0.2);
-    --fill-1: rgba(255, 255, 255, 0.04);
-    --fill-2: rgba(255, 255, 255, 0.08);
-    --fill-3: rgba(255, 255, 255, 0.14);
-    --separator: rgba(255, 255, 255, 0.08);
+    --bg-primary: #0a0a0b;
+    --bg-secondary: #131316;
+    --bg-tertiary: #1a1a1f;
+    --bg-ground: #0d0d0f;
+
+    --label-primary: rgba(255, 255, 255, 0.94);
+    --label-secondary: rgba(255, 255, 255, 0.64);
+    --label-tertiary: rgba(255, 255, 255, 0.45);
+    --label-quaternary: rgba(255, 255, 255, 0.26);
+
+    --fill-1: rgba(255, 255, 255, 0.05);
+    --fill-2: rgba(255, 255, 255, 0.09);
+    --fill-3: rgba(255, 255, 255, 0.15);
+    --separator: rgba(255, 255, 255, 0.09);
+
     --accent: #818cf8;
     --accent-hover: #6366f1;
-    --accent-soft: rgba(129, 140, 248, 0.1);
+    --accent-soft: rgba(129, 140, 248, 0.12);
     --gradient-accent: #818cf8;
     --gradient-accent-hover: #6366f1;
     --gradient-text: #818cf8;
+
     --danger: #f87171;
     --danger-soft: rgba(248, 113, 113, 0.1);
     --success: #4ade80;
     --success-soft: rgba(74, 222, 128, 0.1);
     --warning: #fbbf24;
-    --warning-soft: rgba(251, 191, 36, 0.1);
+    --warning-soft: rgba(251, 191, 36, 0.12);
+
     --brand: #818cf8;
     --brand-hover: #6366f1;
     --brand-ink: #ffffff;
-    --sidebar-bg: #09090b;
-    --glass-bg: rgba(9, 9, 11, 0.72);
+    --sidebar-bg: #0b0b0e;
+
+    --glass-bg: rgba(10, 10, 11, 0.72);
     --glass-border: rgba(255, 255, 255, 0.06);
-    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
-    --shadow-small: 0 2px 8px -2px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
-    --shadow-medium: 0 8px 24px -8px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2);
-    --shadow-large: 0 16px 48px -12px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.2);
-    --shadow-glow: 0 0 24px rgba(129, 140, 248, 0.15);
-    --shadow-input: 0 1px 3px rgba(0, 0, 0, 0.3);
+
+    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-small: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 12px -2px rgba(0, 0, 0, 0.4);
+    --shadow-medium: 0 2px 4px rgba(0, 0, 0, 0.4), 0 12px 28px -8px rgba(0, 0, 0, 0.55);
+    --shadow-large: 0 4px 8px rgba(0, 0, 0, 0.4), 0 24px 48px -12px rgba(0, 0, 0, 0.65);
+    --shadow-glow: 0 0 24px rgba(129, 140, 248, 0.18);
+    --shadow-input: 0 1px 2px rgba(0, 0, 0, 0.4);
+
     --background: var(--bg-primary);
     --foreground: var(--label-primary);
     --card: var(--bg-tertiary);

@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { getRequest, parseRequest, confirmRequest, downloadWinnerProtocolPdf } from "@/lib/api";
 import { captureEvent } from "@/lib/analytics";
-import { Sparkles, CheckCircle, AlertTriangle, BarChart3, ArrowLeft, Download } from "lucide-react";
+import { Sparkles, CheckCircle, AlertTriangle, BarChart3, ArrowLeft, Download, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -51,38 +51,54 @@ function ConfBadge({ confidence, needsClarification }: { confidence: number; nee
   return <Badge variant={variant}>{pct}%</Badge>;
 }
 
-function StatusTimeline({ currentStatus }: { currentStatus: string }) {
+function StatusStepper({ currentStatus }: { currentStatus: string }) {
   const currentIndex = statusOrder.indexOf(currentStatus);
   return (
-    <div className="flex items-center gap-1 flex-wrap mb-6">
+    <ol className="flex items-start mb-6 overflow-x-auto pb-1" aria-label="Статус заявки">
       {statusOrder.map((status, i) => {
-        const isActive = i <= currentIndex;
-        const isCurrent = status === currentStatus;
+        const done = i < currentIndex;
+        const active = status === currentStatus;
         return (
-          <div key={status} className="flex items-center">
-            <div
-              className={
-                "px-2 py-1 rounded-[var(--radius-sm)] text-xs font-medium transition-colors " +
-                (isCurrent
-                  ? "bg-[var(--accent)] text-white"
-                  : isActive
-                  ? "bg-[var(--success-soft)] text-[var(--success)]"
-                  : "bg-[var(--fill-1)] text-[var(--label-quaternary)]")
-              }
-            >
-              {statusLabels[status]}
+          <li key={status} className="flex items-center flex-1 min-w-[90px] last:flex-none">
+            <div className="flex flex-col items-center w-full">
+              <div
+                className={
+                  "flex items-center justify-center size-7 rounded-full border text-xs font-semibold shrink-0 " +
+                  (active
+                    ? "bg-[var(--accent)] border-[var(--accent)] text-white"
+                    : done
+                    ? "bg-[var(--success)] border-[var(--success)] text-white"
+                    : "bg-[var(--fill-1)] border-[var(--separator)] text-[var(--label-quaternary)]")
+                }
+              >
+                {done ? <Check className="size-3.5" aria-hidden="true" /> : i + 1}
+              </div>
+              <span
+                className={
+                  "mt-1.5 text-[11px] leading-tight text-center " +
+                  (active
+                    ? "text-[var(--label-primary)] font-medium"
+                    : done
+                    ? "text-[var(--label-secondary)]"
+                    : "text-[var(--label-tertiary)]")
+                }
+              >
+                {statusLabels[status]}
+              </span>
             </div>
             {i < statusOrder.length - 1 && (
               <div
                 className={
-                  "w-4 h-px mx-1 " + (i < currentIndex ? "bg-[var(--success)]" : "bg-[var(--separator)]")
+                  "h-px flex-1 -mt-3.5 mx-1 " +
+                  (i < currentIndex ? "bg-[var(--success)]" : "bg-[var(--separator)]")
                 }
+                aria-hidden="true"
               />
             )}
-          </div>
+          </li>
         );
       })}
-    </div>
+    </ol>
   );
 }
 
@@ -188,17 +204,25 @@ export default function RequestDetailPage() {
         К списку заявок
       </Link>
 
-      <div className="mb-4">
-        <h1 className="text-xl font-semibold text-[var(--label-primary)]">
-          Заявка RFQ-{req.code}
-        </h1>
-        <p className="text-[var(--label-tertiary)] text-sm mt-0.5">
-          Статус: {statusLabels[req.status] || req.status}
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--label-primary)]">
+            Заявка RFQ-{req.code}
+          </h1>
+          <p className="text-[var(--label-tertiary)] text-sm mt-1">
+            Статус: {statusLabels[req.status] || req.status}
+          </p>
+        </div>
+        <Link href={`/lk/requests/${id}/competitive`}>
+          <Button variant="outline">
+            <BarChart3 className="w-4 h-4 mr-2" aria-hidden="true" />
+            Конкурентный лист
+          </Button>
+        </Link>
       </div>
 
-      {/* Status timeline */}
-      <StatusTimeline currentStatus={req.status} />
+      {/* Status stepper */}
+      <StatusStepper currentStatus={req.status} />
 
       {error && (
         <div
@@ -212,7 +236,7 @@ export default function RequestDetailPage() {
 
       {/* Clarifications */}
       {clarifications.length > 0 && (
-        <Card className="mb-6 border-[var(--warning)]/30">
+        <Card className="mb-6 border-[var(--warning)]">
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2 text-[var(--warning)]">
               <AlertTriangle className="w-5 h-5" aria-hidden="true" />
@@ -356,12 +380,6 @@ export default function RequestDetailPage() {
 
       {/* Actions */}
       <div className="flex gap-3 flex-wrap">
-        <Link href={`/lk/requests/${id}/competitive`}>
-          <Button>
-            <BarChart3 className="w-4 h-4 mr-2" aria-hidden="true" />
-            Конкурентный лист
-          </Button>
-        </Link>
         {(req.status === "ready" || req.status === "completed") && (
           <Button
             variant="outline"

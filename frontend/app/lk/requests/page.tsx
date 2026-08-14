@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { getRequests } from "@/lib/api";
-import { Plus, List, Search, Filter } from "lucide-react";
+import { Plus, Search, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -82,7 +82,11 @@ export default function RequestsPage() {
     return (
       <div className="space-y-6">
         <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-32 w-full" />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[0, 1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-24 w-full" />
+          ))}
+        </div>
         <Skeleton className="h-64 w-full" />
       </div>
     );
@@ -109,17 +113,17 @@ export default function RequestsPage() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-xl font-semibold text-[var(--label-primary)]">
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--label-primary)]">
             Мои заявки
           </h1>
-          <p className="text-[var(--label-tertiary)] text-sm mt-0.5">
+          <p className="text-[var(--label-tertiary)] text-sm mt-1">
             {requests.length > 0
               ? `${requests.length} заявок`
               : "Управляйте закупками стройматериалов"}
           </p>
         </div>
         <Link href="/lk/requests/new">
-          <Button>
+          <Button size="lg">
             <Plus className="w-4 h-4 mr-2" aria-hidden="true" />
             Новая заявка
           </Button>
@@ -133,10 +137,10 @@ export default function RequestsPage() {
           <SuppliersMapWidget lat={mapLat} lon={mapLon} />
           <PriceChartWidget requestId={priceReq?.id ?? null} />
         </div>
-        <div className="relative rounded-[var(--radius-xl)] overflow-hidden border border-separator shadow-xs">
+        <div className="relative rounded-[var(--radius-lg)] overflow-hidden border border-[var(--separator)] shadow-[var(--shadow-xs)]">
           <img src="/images/suppliers-network.jpg" alt="Сеть поставщиков" className="w-full h-40 object-cover" loading="lazy" />
           <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-primary)]/80 to-transparent flex items-center px-6">
-            <p className="text-sm font-medium text-label-1">База поставщиков пополняется автоматически — 2GIS, DaData, веб-поиск</p>
+            <p className="text-sm font-medium text-[var(--label-primary)]">База поставщиков пополняется автоматически — 2GIS, DaData, веб-поиск</p>
           </div>
         </div>
       </div>
@@ -154,22 +158,19 @@ export default function RequestsPage() {
               aria-label="Поиск заявок"
             />
           </div>
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-[var(--label-tertiary)]" aria-hidden="true" />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="h-8 rounded-md border border-[var(--separator)] bg-[var(--bg-primary)] px-3 text-sm text-[var(--label-primary)]"
-              aria-label="Фильтр по статусу"
-            >
-              <option value="">Все статусы</option>
-              {Object.entries(statusLabels).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="h-9 rounded-[var(--radius-md)] border border-[var(--separator)] bg-[var(--bg-tertiary)] px-3 text-sm text-[var(--label-primary)] shadow-[var(--shadow-input)] outline-none focus-visible:border-[var(--accent)] focus-visible:ring-2 focus-visible:ring-[var(--accent)]/30"
+            aria-label="Фильтр по статусу"
+          >
+            <option value="">Все статусы</option>
+            {Object.entries(statusLabels).map(([key, label]) => (
+              <option key={key} value={key}>
+                {label}
+              </option>
+            ))}
+          </select>
         </div>
       )}
 
@@ -180,7 +181,7 @@ export default function RequestsPage() {
             <div className="w-20 h-20 mx-auto mb-6 rounded-[var(--radius-xl)] bg-[var(--accent-soft)] flex items-center justify-center">
               <List className="w-10 h-10 text-[var(--accent)]" aria-hidden="true" />
             </div>
-            <h2 className="text-xl font-semibold text-[var(--label-primary)] mb-2">
+            <h2 className="text-xl font-semibold tracking-tight text-[var(--label-primary)] mb-2">
               Нет заявок
             </h2>
             <p className="text-[var(--label-tertiary)] mb-6 max-w-md mx-auto text-sm">
@@ -213,7 +214,7 @@ export default function RequestsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="rounded-[var(--radius-lg)] border border-[var(--separator)] bg-[var(--bg-primary)] overflow-hidden">
+        <div className="rounded-[var(--radius-lg)] border border-[var(--separator)] bg-[var(--bg-tertiary)] shadow-[var(--shadow-xs)] overflow-hidden">
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>

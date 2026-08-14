@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -22,6 +23,9 @@ const MODERATION_LABELS: Record<string, { text: string; variant: "default" | "se
   unverified: { text: "На проверке", variant: "secondary" },
   rejected: { text: "Отклонён", variant: "destructive" },
 };
+
+const selectClass =
+  "h-9 rounded-[var(--radius-md)] border border-[var(--separator)] bg-[var(--bg-tertiary)] px-3 text-sm text-[var(--label-primary)] shadow-[var(--shadow-input)] outline-none focus-visible:border-[var(--accent)] focus-visible:ring-2 focus-visible:ring-[var(--accent)]/30";
 
 export default function SuppliersPage() {
   const [suppliers, setSuppliers] = useState<any[]>([]);
@@ -137,10 +141,10 @@ export default function SuppliersPage() {
     <div>
       <div className="mb-6 flex flex-wrap gap-4 items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-[var(--label-primary)]">
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--label-primary)]">
             Поставщики
           </h1>
-          <p className="text-[var(--label-tertiary)] text-sm mt-0.5">
+          <p className="text-[var(--label-tertiary)] text-sm mt-1">
             База проверенных поставщиков стройматериалов
           </p>
         </div>
@@ -175,11 +179,11 @@ export default function SuppliersPage() {
               </div>
             )}
             <form onSubmit={handleAdd} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label htmlFor="sup-name" className="text-sm font-medium">
+                  <Label htmlFor="sup-name">
                     Название <span className="text-[var(--danger)]">*</span>
-                  </label>
+                  </Label>
                   <Input
                     id="sup-name"
                     required
@@ -190,9 +194,7 @@ export default function SuppliersPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label htmlFor="sup-email" className="text-sm font-medium">
-                    Email
-                  </label>
+                  <Label htmlFor="sup-email">Email</Label>
                   <Input
                     id="sup-email"
                     type="email"
@@ -203,9 +205,7 @@ export default function SuppliersPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label htmlFor="sup-phone" className="text-sm font-medium">
-                    Телефон
-                  </label>
+                  <Label htmlFor="sup-phone">Телефон</Label>
                   <Input
                     id="sup-phone"
                     value={addForm.phone}
@@ -215,9 +215,7 @@ export default function SuppliersPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label htmlFor="sup-site" className="text-sm font-medium">
-                    Сайт
-                  </label>
+                  <Label htmlFor="sup-site">Сайт</Label>
                   <Input
                     id="sup-site"
                     placeholder="https://..."
@@ -228,9 +226,7 @@ export default function SuppliersPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label htmlFor="sup-address" className="text-sm font-medium">
-                    Адрес
-                  </label>
+                  <Label htmlFor="sup-address">Адрес</Label>
                   <Input
                     id="sup-address"
                     placeholder="Город, улица"
@@ -241,16 +237,14 @@ export default function SuppliersPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label htmlFor="sup-type" className="text-sm font-medium">
-                    Тип
-                  </label>
+                  <Label htmlFor="sup-type">Тип</Label>
                   <select
                     id="sup-type"
                     value={addForm.supplier_type}
                     onChange={(e) =>
                       setAddForm({ ...addForm, supplier_type: e.target.value })
                     }
-                    className="h-8 w-full rounded-md border border-[var(--separator)] bg-[var(--bg-primary)] px-2.5 text-sm text-[var(--label-primary)]"
+                    className={selectClass + " w-full"}
                   >
                     <option value="unknown">Неизвестно</option>
                     <option value="manufacturer">Производитель</option>
@@ -277,7 +271,7 @@ export default function SuppliersPage() {
                             setSelectedCats(next);
                           }}
                           className={
-                            "px-3 py-1.5 rounded-full text-xs font-medium border transition-colors duration-150 " +
+                            "px-3 py-1.5 rounded-full text-xs font-medium border transition-colors " +
                             (active
                               ? "bg-[var(--label-primary)] text-[var(--bg-primary)] border-transparent"
                               : "bg-transparent text-[var(--label-secondary)] border-[var(--separator)] hover:bg-[var(--fill-1)]")
@@ -312,9 +306,7 @@ export default function SuppliersPage() {
           <CardContent className="p-4">
             <div className="flex gap-3 flex-wrap items-end">
               <div className="flex-1 min-w-[200px] space-y-2">
-                <label htmlFor="supplier-search" className="text-sm font-medium">
-                  Поиск
-                </label>
+                <Label htmlFor="supplier-search">Поиск</Label>
                 <div className="relative">
                   <Search
                     className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--label-quaternary)]"
@@ -330,9 +322,7 @@ export default function SuppliersPage() {
                 </div>
               </div>
               <div className="w-full sm:w-40 space-y-2">
-                <label htmlFor="supplier-city" className="text-sm font-medium">
-                  Город
-                </label>
+                <Label htmlFor="supplier-city">Город</Label>
                 <Input
                   id="supplier-city"
                   value={city}
@@ -341,14 +331,12 @@ export default function SuppliersPage() {
                 />
               </div>
               <div className="space-y-2">
-                <label htmlFor="supplier-moderation" className="text-sm font-medium">
-                  Статус
-                </label>
+                <Label htmlFor="supplier-moderation">Статус</Label>
                 <select
                   id="supplier-moderation"
                   value={moderationFilter}
                   onChange={(e) => setModerationFilter(e.target.value)}
-                  className="h-8 w-full sm:w-auto rounded-md border border-[var(--separator)] bg-[var(--bg-primary)] px-3 text-sm text-[var(--label-primary)]"
+                  className={selectClass + " w-full sm:w-auto"}
                 >
                   <option value="">Любой статус</option>
                   <option value="verified">Подтверждённые</option>
@@ -374,7 +362,7 @@ export default function SuppliersPage() {
             <div className="w-20 h-20 mx-auto mb-6 rounded-[var(--radius-xl)] bg-[var(--accent-soft)] flex items-center justify-center">
               <Truck className="w-10 h-10 text-[var(--accent)]" aria-hidden="true" />
             </div>
-            <h2 className="text-xl font-semibold text-[var(--label-primary)] mb-2">
+            <h2 className="text-xl font-semibold tracking-tight text-[var(--label-primary)] mb-2">
               Поставщики не найдены
             </h2>
             <p className="text-[var(--label-tertiary)] text-sm">
@@ -383,7 +371,7 @@ export default function SuppliersPage() {
           </CardContent>
         </Card>
       ) : (
-        <Card className="overflow-hidden">
+        <Card className="overflow-hidden shadow-[var(--shadow-xs)]">
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>

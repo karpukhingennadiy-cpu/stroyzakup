@@ -1,4 +1,4 @@
-import { Hammer } from "lucide-react";
+import { IconHardHat } from "@/components/icons";
 import { LandingHeader } from "./sections/landing-header";
 import { LandingHero } from "./sections/landing-hero";
 import { LandingCTA } from "./sections/landing-cta";
@@ -12,18 +12,20 @@ const steps = [
 
 function HowItWorks() {
   return (
-    <section id="how" className="border-b border-neutral-200">
+    <section id="how" className="border-b border-[var(--separator)]">
       <div className="mx-auto max-w-6xl px-6 lg:px-8 py-24">
         <div className="max-w-2xl">
-          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-neutral-900">Как это работает</h2>
-          <p className="mt-4 text-lg text-neutral-500">Пять шагов от заявки до выбора поставщика — без телефона, без посредников.</p>
+          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-[var(--label-primary)]">Как это работает</h2>
+          <p className="mt-4 text-lg text-[var(--label-secondary)]">Пять шагов от заявки до выбора поставщика — без телефона, без посредников.</p>
         </div>
         <div className="mt-14 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((step, idx) => (
-            <div key={idx}>
-              <div className="text-sm font-medium text-neutral-400 tabular-nums">0{idx + 1}</div>
-              <h3 className="mt-3 text-base font-semibold text-neutral-900">{step.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-neutral-500">{step.desc}</p>
+            <div key={idx} className="rounded-[var(--radius-lg)] border border-[var(--separator)] bg-[var(--bg-tertiary)] p-5 shadow-[var(--shadow-xs)]">
+              <div className="inline-flex items-center justify-center size-7 rounded-full bg-[var(--accent-soft)] text-xs font-semibold text-[var(--accent)] tabular-nums">
+                {idx + 1}
+              </div>
+              <h3 className="mt-3 text-base font-semibold tracking-tight text-[var(--label-primary)]">{step.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-[var(--label-secondary)]">{step.desc}</p>
             </div>
           ))}
         </div>
@@ -46,20 +48,20 @@ function Features() {
     <section id="features">
       <div className="mx-auto max-w-6xl px-6 lg:px-8 py-24">
         <div className="max-w-2xl">
-          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-neutral-900">Возможности платформы</h2>
-          <p className="mt-4 text-lg text-neutral-500">Всё, что нужно для профессиональных закупок в строительстве.</p>
+          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-[var(--label-primary)]">Возможности платформы</h2>
+          <p className="mt-4 text-lg text-[var(--label-secondary)]">Всё, что нужно для профессиональных закупок в строительстве.</p>
         </div>
         <div className="mt-14 grid gap-8 lg:grid-cols-2 items-center">
           <img
             src="/images/dashboard-preview.jpg"
             alt="Панель управления закупками"
-            className="w-full rounded-2xl border border-neutral-200 shadow-sm object-cover"
+            className="w-full rounded-[var(--radius-xl)] border border-[var(--separator)] shadow-[var(--shadow-medium)] object-cover"
           />
           <div className="grid gap-x-10 gap-y-8 sm:grid-cols-2">
             {features.map((f, idx) => (
               <div key={idx}>
-                <h3 className="text-base font-semibold text-neutral-900">{f.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-neutral-500">{f.desc}</p>
+                <h3 className="text-base font-semibold tracking-tight text-[var(--label-primary)]">{f.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[var(--label-secondary)]">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -77,13 +79,13 @@ function Stats() {
     { value: "0", label: "руб. за первые 50 заявок" },
   ];
   return (
-    <section id="pricing" className="border-y border-neutral-200 bg-neutral-50">
+    <section id="pricing" className="border-y border-[var(--separator)] bg-[var(--bg-secondary)]">
       <div className="mx-auto max-w-6xl px-6 lg:px-8 py-16">
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           {stats.map((s, i) => (
             <div key={i}>
-              <div className="text-3xl sm:text-4xl font-semibold text-neutral-900 tabular-nums">{s.value}</div>
-              <div className="mt-1 text-sm text-neutral-500">{s.label}</div>
+              <div className="text-3xl sm:text-4xl font-semibold tracking-tight text-[var(--label-primary)] tabular-nums">{s.value}</div>
+              <div className="mt-1 text-sm text-[var(--label-secondary)]">{s.label}</div>
             </div>
           ))}
         </div>
@@ -94,19 +96,19 @@ function Stats() {
 
 function Footer() {
   return (
-    <footer className="border-t border-neutral-200 bg-white py-12">
+    <footer className="border-t border-[var(--separator)] bg-[var(--bg-tertiary)] py-12">
       <div className="mx-auto max-w-6xl px-6 lg:px-8">
         <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-neutral-900 text-white">
-              <Hammer className="h-4 w-4" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-[var(--radius-md)] bg-[var(--accent)] text-white">
+              <IconHardHat className="h-4 w-4" />
             </div>
-            <span className="text-base font-semibold text-neutral-900">Минитендер</span>
+            <span className="text-base font-semibold tracking-tight text-[var(--label-primary)]">Минитендер</span>
           </div>
-          <p className="text-sm text-neutral-400">© 2025 Минитендер.рф — платформа строительных закупок</p>
+          <p className="text-sm text-[var(--label-tertiary)]">© 2025 Минитендер.рф — платформа строительных закупок</p>
           <div className="flex gap-6">
-            <a href="#" className="text-sm text-neutral-500 hover:text-neutral-900">Политика</a>
-            <a href="#" className="text-sm text-neutral-500 hover:text-neutral-900">API</a>
+            <a href="#" className="text-sm text-[var(--label-secondary)] hover:text-[var(--label-primary)]">Политика</a>
+            <a href="#" className="text-sm text-[var(--label-secondary)] hover:text-[var(--label-primary)]">API</a>
           </div>
         </div>
       </div>
@@ -116,7 +118,7 @@ function Footer() {
 
 export default function HomePage() {
   return (
-    <main className="flex min-h-screen flex-col bg-white">
+    <main className="flex min-h-screen flex-col bg-[var(--bg-primary)]">
       <LandingHeader />
       <LandingHero />
       <HowItWorks />

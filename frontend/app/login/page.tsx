@@ -6,7 +6,7 @@ import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { HardHat, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 import { login } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ThemeToggle } from "@/components/theme";
+import { IconHardHat } from "@/components/icons";
 
 const loginSchema = z.object({
   email: z
@@ -55,19 +56,17 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--bg-ground)] px-4 py-8 relative overflow-hidden">
-      <div className="absolute inset-0 opacity-[0.04] pointer-events-none" aria-hidden="true"
-        style={{ backgroundImage: "url(/images/hero-construction.jpg)", backgroundSize: "cover", backgroundPosition: "center" }} />
+    <div className="min-h-screen flex items-center justify-center bg-[var(--bg-ground)] px-4 py-8 relative">
       <div className="fixed top-4 right-4 z-50">
         <ThemeToggle />
       </div>
 
-      <div className="max-w-md w-full space-y-6">
-        <div className="text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-[var(--radius-xl)] bg-[var(--sidebar-bg)] mb-4 shadow-[var(--shadow-small)]">
-            <HardHat className="w-8 h-8 text-[var(--brand)]" aria-hidden="true" />
+      <div className="max-w-md w-full">
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-[var(--radius-lg)] bg-[var(--sidebar-bg)] mb-4 shadow-[var(--shadow-medium)]">
+            <IconHardHat className="w-7 h-7 text-[var(--accent)]" />
           </div>
-          <h1 className="text-2xl font-semibold text-[var(--label-primary)]">
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--label-primary)]">
             Вход в Минитендер
           </h1>
           <p className="text-[var(--label-tertiary)] text-sm mt-1">
@@ -75,8 +74,8 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <Card>
-          <CardHeader className="space-y-1">
+        <Card className="shadow-[var(--shadow-medium)]">
+          <CardHeader className="text-center">
             <CardTitle className="text-lg">Авторизация</CardTitle>
             <CardDescription>
               Введите email и пароль от вашего аккаунта
@@ -113,7 +112,15 @@ export default function LoginPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="login-password">Пароль</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="login-password">Пароль</Label>
+                  <a
+                    href="#"
+                    className="text-xs text-[var(--label-tertiary)] hover:text-[var(--accent)]"
+                  >
+                    Забыли пароль?
+                  </a>
+                </div>
                 <Input
                   id="login-password"
                   type="password"
@@ -132,6 +139,7 @@ export default function LoginPage() {
 
               <Button
                 type="submit"
+                size="lg"
                 className="w-full"
                 disabled={isSubmitting}
                 aria-busy={isSubmitting}
