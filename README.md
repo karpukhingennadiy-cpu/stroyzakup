@@ -129,21 +129,25 @@ MIT © Минитендер.рф
 
 ## Тестовая закупка (E2E)
 
-Скрипт  прогоняет полный цикл через API:
+Скрипт `scripts/test_purchase.sh` прогоняет полный цикл через API:
 логин → создание заявки → парсинг → подбор поставщиков → отправка RFQ.
 
+```bash
+`scripts/test_purchase.sh
+```
 
-
-Ожидаемый результат: заявка со статусом , 20+ поставщиков с баллами.
+Ожидаемый результат: заявка со статусом `rfq_sent`, 20+ поставщиков с баллами.
 
 ## Управление dev-окружением
 
+`scripts/start_dev.sh`  — запуск redis + backend + frontend
+`scripts/check.sh`       — healthcheck всех сервисов
+`scripts/stop_dev.sh`    — остановка
 
-
-Для парсинга/LLM в dev используйте mock: 
-Для писем: 
+Для парсинга/LLM в dev используйте mock: `LLM_BASE_URL=http://localhost:8765/v1`
+Для писем: `EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend`
 
 ## Демо-доступ
 
-- Логин: 
-- Пароль: 
+- Логин: `demo@minitender.ru`
+- Пароль: `demo1234`
