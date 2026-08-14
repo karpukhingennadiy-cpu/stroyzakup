@@ -5,7 +5,8 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { getCompetitiveSheet, downloadCompetitiveSheetXlsx } from "@/lib/api";
 import { captureEvent } from "@/lib/analytics";
-import { BarChart3, Trophy, ArrowLeft, ArrowUpDown, Download } from "lucide-react";
+import { Trophy, ArrowLeft, ArrowUpDown } from "lucide-react";
+import { IconChart, IconDownload } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -133,7 +134,7 @@ export default function CompetitivePage() {
         </div>
         {suppliers.length > 0 && (
           <Button variant="outline" onClick={handleDownloadXlsx}>
-            <Download className="w-4 h-4 mr-2" aria-hidden="true" />
+            <IconDownload className="w-4 h-4 mr-2" aria-hidden="true" />
             Скачать XLSX
           </Button>
         )}
@@ -143,7 +144,7 @@ export default function CompetitivePage() {
         <Card>
           <CardContent className="p-16 text-center">
             <div className="w-20 h-20 mx-auto mb-6 rounded-[var(--radius-xl)] bg-[var(--accent-soft)] flex items-center justify-center">
-              <BarChart3 className="w-10 h-10 text-[var(--accent)]" aria-hidden="true" />
+              <IconChart className="w-10 h-10 text-[var(--accent)]" aria-hidden="true" />
             </div>
             <h2 className="text-xl font-semibold text-[var(--label-primary)] mb-2">
               Ожидайте предложения

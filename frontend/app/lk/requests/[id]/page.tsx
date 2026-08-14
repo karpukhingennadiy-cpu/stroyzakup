@@ -5,7 +5,8 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { getRequest, parseRequest, confirmRequest, downloadWinnerProtocolPdf } from "@/lib/api";
 import { captureEvent } from "@/lib/analytics";
-import { Sparkles, CheckCircle, AlertTriangle, BarChart3, ArrowLeft, Download, Check } from "lucide-react";
+import { CheckCircle2, AlertTriangle, ArrowLeft, Check } from "lucide-react";
+import { IconSparkles, IconChart, IconDownload } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -215,7 +216,7 @@ export default function RequestDetailPage() {
         </div>
         <Link href={`/lk/requests/${id}/competitive`}>
           <Button variant="outline">
-            <BarChart3 className="w-4 h-4 mr-2" aria-hidden="true" />
+            <IconChart className="w-4 h-4 mr-2" aria-hidden="true" />
             Конкурентный лист
           </Button>
         </Link>
@@ -281,7 +282,7 @@ export default function RequestDetailPage() {
                   "Распознаём..."
                 ) : (
                   <>
-                    <Sparkles className="w-4 h-4 mr-2" aria-hidden="true" />
+                    <IconSparkles className="w-4 h-4 mr-2" aria-hidden="true" />
                     Распознать материалы
                   </>
                 )}
@@ -298,7 +299,7 @@ export default function RequestDetailPage() {
                   "Подтверждаем..."
                 ) : (
                   <>
-                    <CheckCircle className="w-4 h-4 mr-2" aria-hidden="true" />
+                    <CheckCircle2 className="w-4 h-4 mr-2" aria-hidden="true" />
                     Подтвердить позиции
                   </>
                 )}
@@ -385,7 +386,7 @@ export default function RequestDetailPage() {
             variant="outline"
             onClick={handleDownloadProtocol}
           >
-            <Download className="w-4 h-4 mr-2" aria-hidden="true" />
+            <IconDownload className="w-4 h-4 mr-2" aria-hidden="true" />
             Протокол PDF
           </Button>
         )}

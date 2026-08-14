@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { getRequests } from "@/lib/api";
-import { Plus, Search, List } from "lucide-react";
+import { IconPlus, IconSearch, IconList } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -124,7 +124,7 @@ export default function RequestsPage() {
         </div>
         <Link href="/lk/requests/new">
           <Button size="lg">
-            <Plus className="w-4 h-4 mr-2" aria-hidden="true" />
+            <IconPlus className="w-4 h-4 mr-2" aria-hidden="true" />
             Новая заявка
           </Button>
         </Link>
@@ -149,7 +149,7 @@ export default function RequestsPage() {
       {requests.length > 0 && (
         <div className="flex flex-wrap gap-3 mb-4">
           <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--label-quaternary)]" aria-hidden="true" />
+            <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--label-quaternary)]" aria-hidden="true" />
             <Input
               placeholder="Поиск по коду или содержимому..."
               value={search}
@@ -179,7 +179,7 @@ export default function RequestsPage() {
         <Card>
           <CardContent className="p-16 text-center">
             <div className="w-20 h-20 mx-auto mb-6 rounded-[var(--radius-xl)] bg-[var(--accent-soft)] flex items-center justify-center">
-              <List className="w-10 h-10 text-[var(--accent)]" aria-hidden="true" />
+              <IconList className="w-10 h-10 text-[var(--accent)]" aria-hidden="true" />
             </div>
             <h2 className="text-xl font-semibold tracking-tight text-[var(--label-primary)] mb-2">
               Нет заявок
@@ -189,7 +189,7 @@ export default function RequestsPage() {
             </p>
             <Link href="/lk/requests/new">
               <Button>
-                <Plus className="w-4 h-4 mr-2" aria-hidden="true" />
+<IconPlus className="w-4 h-4 mr-2" aria-hidden="true" />
                 Создать заявку
               </Button>
             </Link>

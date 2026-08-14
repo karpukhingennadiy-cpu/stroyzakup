@@ -612,7 +612,7 @@ export default function NewRequestPage() {
                                   aria-label={"Детализация баллов: " + s.name}
                                   className="inline-flex items-center gap-1 px-2 py-0.5 bg-[var(--fill-2)] text-label-1 rounded-full text-xs font-semibold hover:bg-[var(--fill-3)] transition-colors tabular-nums">
                                   {s.total_score.toFixed(0)}
-                                  <span className="text-[8px]" aria-hidden="true">{expandedSupplier === s.supplier_id ? "▲" : "▼"}</span>
+                                  <span className={"inline-block " + (expandedSupplier === s.supplier_id ? "rotate-180" : "")} aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><path d="m6 9 6 6 6-6"/></svg></span>
                                 </button>
                               </td>
                               <td className="py-2 text-center text-xs text-label-3 tabular-nums">{s.matched_count}/{s.total_categories}</td>

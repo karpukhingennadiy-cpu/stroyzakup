@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { getSuppliers, getMe, api } from "@/lib/api";
-import { Truck, Search, Plus, Check, X, RotateCcw } from "lucide-react";
+import { CheckCircle2, X, RotateCcw } from "lucide-react";
+import { IconTruck, IconSearch, IconPlus } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -149,7 +150,7 @@ export default function SuppliersPage() {
           </p>
         </div>
         <Button onClick={() => setShowAddForm(!showAddForm)}>
-          <Plus className="w-4 h-4 mr-2" aria-hidden="true" />
+          <IconPlus className="w-4 h-4 mr-2" aria-hidden="true" />
           Добавить поставщика
         </Button>
       </div>
@@ -308,7 +309,7 @@ export default function SuppliersPage() {
               <div className="flex-1 min-w-[200px] space-y-2">
                 <Label htmlFor="supplier-search">Поиск</Label>
                 <div className="relative">
-                  <Search
+                  <IconSearch
                     className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--label-quaternary)]"
                     aria-hidden="true"
                   />
@@ -360,7 +361,7 @@ export default function SuppliersPage() {
         <Card>
           <CardContent className="p-16 text-center">
             <div className="w-20 h-20 mx-auto mb-6 rounded-[var(--radius-xl)] bg-[var(--accent-soft)] flex items-center justify-center">
-              <Truck className="w-10 h-10 text-[var(--accent)]" aria-hidden="true" />
+              <IconTruck className="w-10 h-10 text-[var(--accent)]" aria-hidden="true" />
             </div>
             <h2 className="text-xl font-semibold tracking-tight text-[var(--label-primary)] mb-2">
               Поставщики не найдены
@@ -409,7 +410,7 @@ export default function SuppliersPage() {
                                 size="sm"
                                 onClick={() => moderate(s.id, "verified")}
                               >
-                                <Check className="w-3 h-3 mr-1" aria-hidden="true" />
+                                <CheckCircle2 className="w-3 h-3 mr-1" aria-hidden="true" />
                                 Подтвердить
                               </Button>
                             )}

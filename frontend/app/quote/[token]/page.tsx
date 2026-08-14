@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Send, CheckCircle, AlertTriangle, Loader2 } from "lucide-react";
+import { Send, CheckCircle2, AlertTriangle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -219,7 +219,7 @@ export default function QuotePage() {
       <Card className="shadow-[var(--shadow-medium)]">
         <CardContent className="p-10 text-center">
           <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--success-soft)] flex items-center justify-center">
-            <CheckCircle className="w-8 h-8 text-[var(--success)]" aria-hidden="true" />
+            <CheckCircle2 className="w-8 h-8 text-[var(--success)]" aria-hidden="true" />
           </div>
           <h1 className="text-xl font-semibold tracking-tight text-[var(--label-primary)] mb-2">
             Коммерческое предложение отправлено!

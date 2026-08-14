@@ -1,9 +1,9 @@
 export function IconHardHat({ className = "w-6 h-6" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M2 18a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v2z"/>
-      <path d="M10 14V5a3 3 0 0 1 3-3v0a3 3 0 0 1 3 3v9"/>
-      <path d="M6 11V8a6 6 0 0 1 12 0v3"/>
+      <path d="M2 17.5a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-1.5a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1.5z"/>
+      <path d="M6.5 15V9.5a5.5 5.5 0 0 1 11 0V15"/>
+      <path d="M12 15V6"/>
     </svg>
   );
 }
@@ -19,7 +19,10 @@ export function IconSearch({ className = "w-6 h-6" }: { className?: string }) {
 export function IconChart({ className = "w-6 h-6" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/>
+      <path d="M3 3v18h18"/>
+      <path d="M7.5 17v-4"/>
+      <path d="M12 17V8"/>
+      <path d="M16.5 17v-6"/>
     </svg>
   );
 }
@@ -35,7 +38,10 @@ export function IconPlus({ className = "w-6 h-6" }: { className?: string }) {
 export function IconList({ className = "w-6 h-6" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/>
+      <path d="M16 4h2a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h2"/>
+      <path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/>
+      <path d="m9 13 1.8 1.8L15 11"/>
+      <path d="M9 17h6"/>
     </svg>
   );
 }
@@ -43,7 +49,10 @@ export function IconList({ className = "w-6 h-6" }: { className?: string }) {
 export function IconTruck({ className = "w-6 h-6" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+      <path d="M1 3h15v13H1z"/>
+      <path d="M16 8h4l3 3v5h-7V8z"/>
+      <circle cx="5.5" cy="18.5" r="2.5"/>
+      <circle cx="18.5" cy="18.5" r="2.5"/>
     </svg>
   );
 }
@@ -68,6 +77,7 @@ export function IconShield({ className = "w-6 h-6" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+      <path d="m9 11.5 2 2 4-4.5"/>
     </svg>
   );
 }

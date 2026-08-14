@@ -3,15 +3,16 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { HardHat, ListPlus, Truck, LogOut, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import { IconHardHat, IconList, IconPlus, IconTruck, IconLogOut } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme";
 import { getMe } from "@/lib/api";
 
 const navItems = [
-  { href: "/lk/requests", label: "Мои заявки", icon: ListPlus },
-  { href: "/lk/requests/new", label: "Новая заявка", icon: ListPlus },
-  { href: "/lk/suppliers", label: "Поставщики", icon: Truck },
+  { href: "/lk/requests", label: "Мои заявки", icon: IconList },
+  { href: "/lk/requests/new", label: "Новая заявка", icon: IconPlus },
+  { href: "/lk/suppliers", label: "Поставщики", icon: IconTruck },
 ];
 
 export default function LkLayout({ children }: { children: React.ReactNode }) {
@@ -55,7 +56,7 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
         </Button>
         <Link href="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-[var(--radius-md)] bg-[var(--accent)] flex items-center justify-center">
-            <HardHat className="w-4 h-4 text-white" />
+            <IconHardHat className="w-4 h-4 text-white" />
           </div>
           <span className="font-bold tracking-tight text-[var(--label-primary)]">Минитендер</span>
         </Link>
@@ -82,7 +83,7 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
         <div className="p-5 border-b border-white/10 flex items-center justify-between gap-2">
           <Link href="/" className="flex items-center gap-3 min-w-0">
             <div className="w-9 h-9 rounded-[var(--radius-md)] bg-[var(--accent)] flex items-center justify-center shrink-0 shadow-[var(--shadow-glow)]">
-              <HardHat className="w-5 h-5 text-white" />
+              <IconHardHat className="w-5 h-5 text-white" />
             </div>
             <span className="font-bold text-base tracking-tight truncate">Минитендер</span>
           </Link>
@@ -121,7 +122,7 @@ export default function LkLayout({ children }: { children: React.ReactNode }) {
             onClick={handleLogout}
             className="flex items-center gap-3 w-full px-3 py-2.5 rounded-[var(--radius-md)] text-white/35 hover:text-white/60 hover:bg-white/5 transition-colors text-sm mt-1 justify-start"
           >
-            <LogOut className="w-5 h-5" aria-hidden="true" />
+            <IconLogOut className="w-5 h-5" aria-hidden="true" />
             Выйти
           </Button>
         </div>

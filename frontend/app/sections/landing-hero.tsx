@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { IconSparkles } from "@/components/icons";
 
 export function LandingHero() {
   const router = useRouter();
@@ -14,7 +15,7 @@ export function LandingHero() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-[var(--separator)] bg-[var(--bg-tertiary)] px-3 py-1 text-xs font-medium text-[var(--label-secondary)]">
-              <Sparkles className="h-3 w-3 text-[var(--accent)]" />
+              <IconSparkles className="h-3 w-3 text-[var(--accent)]" />
               Платформа строительных закупок
             </div>
 
