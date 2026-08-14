@@ -56,9 +56,21 @@ def match_suppliers_task(self, request_id, limit=20):
         req.save(update_fields=["status"])
 
         matches = match_suppliers(req, limit)  # FIX: limit was silently dropped
+
+        # Auto-discovery: same as sync path — find fresh real suppliers when no 2GIS sources yet
+        discovered = 0
+        if not any(m.get("source") == "2gis" for m in matches):
+            try:
+                from .services.websearch import discover_suppliers_for_request
+                discovered = discover_suppliers_for_request(req) or 0
+                if discovered:
+                    matches = match_suppliers(req, limit)
+            except Exception:
+                logger.exception("Auto-discovery failed in match task")
+
         req.refresh_from_db()
         req.status = "matched"
-        req.match_results = {"suppliers": matches, "count": len(matches), "discovered": 0}
+        req.match_results = {"suppliers": matches, "count": len(matches), "discovered": discovered}
         req.save(update_fields=["status", "match_results"])
 
         return {"status": "ok", "count": len(matches)}
