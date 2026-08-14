@@ -55,7 +55,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--bg-ground)] px-4 py-8">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--bg-ground)] px-4 py-8 relative overflow-hidden">
+      <div className="absolute inset-0 opacity-[0.04] pointer-events-none" aria-hidden="true"
+        style={{ backgroundImage: "url(/images/hero-construction.jpg)", backgroundSize: "cover", backgroundPosition: "center" }} />
       <div className="fixed top-4 right-4 z-50">
         <ThemeToggle />
       </div>

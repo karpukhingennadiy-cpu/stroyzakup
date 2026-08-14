@@ -17,6 +17,9 @@ export function LandingCTA() {
       />
 
       <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6">
+        <div className="mb-10 mx-auto max-w-md rounded-[var(--radius-2xl)] overflow-hidden border border-separator shadow-medium">
+          <img src="/images/rfq-email.jpg" alt="Автоматическая рассылка запросов КП" className="w-full object-cover" loading="lazy" />
+        </div>
         <h2 className="text-3xl font-bold tracking-tight text-[var(--label-primary)] sm:text-5xl">
           Готовы <span className="gradient-text">сэкономить</span> на закупках?
         </h2>

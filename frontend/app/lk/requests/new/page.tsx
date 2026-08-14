@@ -104,7 +104,7 @@ function Stepper({ step }: { step: number }) {
               {n}
             </span>
             <span className="text-sm font-medium">{label}</span>
-            {n < 3 && <span className="text-label-4 ml-2" aria-hidden="true">→</span>}
+            {n < 3 && <span className="text-label-4 ml-2" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5"><path d="m9 18 6-6-6-6"/></svg></span>}
           </li>
         );
       })}
@@ -374,7 +374,7 @@ export default function NewRequestPage() {
                     <td className="py-1.5 text-center">
                       {rows.length > 1 && (
                         <button type="button" onClick={() => removeRow(row.id)} aria-label="Удалить строку"
-                          className="w-8 h-8 inline-flex items-center justify-center rounded-[var(--radius-sm)] text-label-4 hover:text-[var(--danger)] hover:bg-[var(--danger-soft)] transition-colors">✕</button>
+                          className="w-8 h-8 inline-flex items-center justify-center rounded-[var(--radius-sm)] text-label-4 hover:text-[var(--danger)] hover:bg-[var(--danger-soft)] transition-colors"><IconPlus className="w-3.5 h-3.5 rotate-45" /></button>
                       )}
                     </td>
                   </tr>
@@ -408,7 +408,7 @@ export default function NewRequestPage() {
                   {rows.length > 1 && (
                     <div className="flex items-end">
                       <button type="button" onClick={() => removeRow(row.id)} aria-label={"Удалить позицию " + (i + 1)}
-                        className="w-10 h-10 inline-flex items-center justify-center rounded-[var(--radius-sm)] text-label-4 hover:text-[var(--danger)] hover:bg-[var(--danger-soft)] transition-colors">✕</button>
+                        className="w-10 h-10 inline-flex items-center justify-center rounded-[var(--radius-sm)] text-label-4 hover:text-[var(--danger)] hover:bg-[var(--danger-soft)] transition-colors"><IconPlus className="w-3.5 h-3.5 rotate-45" /></button>
                     </div>
                   )}
                 </div>
@@ -429,7 +429,7 @@ export default function NewRequestPage() {
             loading={loading}
             disabled={!rows.some(r => r.name.trim())}
           >
-            {loading ? "Создаём..." : "Далее: точка доставки →"}
+            {loading ? "Создаём..." : "Далее: точка доставки"}
           </Button>
         </Card>
       )}
@@ -502,14 +502,14 @@ export default function NewRequestPage() {
               </div>
             )}
             <div className="p-6 flex flex-col sm:flex-row gap-3">
-              <Button variant="outline" size={44} onClick={() => setStep(1)}>← Назад к материалам</Button>
+              <Button variant="outline" size={44} onClick={() => setStep(1)}>Назад к материалам</Button>
               <Button
                 variant="primary" size={44} className="flex-1"
                 onClick={handleStep2Next}
                 loading={loading}
                 disabled={!deliveryLat}
               >
-                {loading ? "Подбираем поставщиков..." : "Подобрать поставщиков →"}
+                {loading ? "Подбираем поставщиков..." : "Подобрать поставщиков"}
               </Button>
             </div>
           </Card>
@@ -642,7 +642,7 @@ export default function NewRequestPage() {
                   </div>
                 )}
                 <div className="mt-6 flex flex-col sm:flex-row gap-3">
-                  <Button variant="outline" size={44} onClick={() => setStep(2)}>← Назад к карте</Button>
+                  <Button variant="outline" size={44} onClick={() => setStep(2)}>Назад к карте</Button>
                   <Button
                     variant="primary" size={44} className="flex-1"
                     onClick={handleSendRfq}

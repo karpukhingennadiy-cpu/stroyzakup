@@ -78,15 +78,26 @@ function Features() {
           <h2 className="text-3xl font-semibold tracking-tight text-label-1 sm:text-4xl">Возможности платформы</h2>
           <p className="mt-4 text-lg text-label-2">Всё, что нужно для профессиональных закупок в строительстве.</p>
         </div>
-        <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((f, idx) => (
-            <Card key={idx} className="hover:shadow-small transition-shadow duration-150 ease-kimi-out">
-              <CardContent className="pt-6">
-                <h3 className="text-base font-semibold text-label-1">{f.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-label-2">{f.desc}</p>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="mt-16 grid gap-8 lg:grid-cols-2 items-center">
+          <div className="relative">
+            <div className="absolute -inset-3 rounded-[var(--radius-2xl)] bg-gradient-to-tr from-[var(--accent)]/10 via-transparent to-transparent blur-xl" aria-hidden="true" />
+            <img
+              src="/images/dashboard-preview.jpg"
+              alt="Панель управления закупками"
+              className="relative w-full rounded-[var(--radius-2xl)] border border-separator shadow-medium object-cover"
+              loading="lazy"
+            />
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2">
+            {features.map((f, idx) => (
+              <Card key={idx} className="hover:shadow-small transition-shadow duration-150 ease-kimi-out">
+                <CardContent className="pt-6">
+                  <h3 className="text-base font-semibold text-label-1">{f.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-label-2">{f.desc}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       </div>
     </section>

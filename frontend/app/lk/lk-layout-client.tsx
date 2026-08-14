@@ -1,5 +1,6 @@
 "use client";
 
+import { Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
@@ -65,7 +66,7 @@ export function LkLayoutClient({ children }: { children: React.ReactNode }) {
           aria-controls="lk-nav"
           className="w-10 h-10 flex items-center justify-center rounded-[var(--radius-md)] hover:bg-white/10 transition-colors text-xl leading-none"
         >
-          {menuOpen ? "✕" : "☰"}
+          {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
         <Link href="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-[var(--radius-sm)] bg-brand flex items-center justify-center">

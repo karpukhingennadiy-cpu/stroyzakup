@@ -22,7 +22,7 @@ export default function DeliveryMap({ onSelect, initialLat, initialLon }: Props)
     if (!mapRef.current) return;
     markerRef.current = new window.mapgl.Marker(mapRef.current, {
       coordinates: [lon, lat],
-      label: { text: "📍 Доставка", fontSize: 14, color: "#e03131" },
+      label: { text: " Доставка", fontSize: 14, color: "#e03131" },
     });
     setAddress(lat.toFixed(6) + ", " + lon.toFixed(6));
     onSelect(lat, lon, lat.toFixed(6) + ", " + lon.toFixed(6));
@@ -65,7 +65,7 @@ export default function DeliveryMap({ onSelect, initialLat, initialLon }: Props)
   return (
     <div className="h-full">
       <div ref={containerRef} className="w-full h-full min-h-[280px] rounded-[var(--radius-md)]" />
-      {address && <p className="text-xs text-label-3 mt-1">📍 {address}</p>}
+      {address && <p className="text-xs text-label-3 mt-1"> {address}</p>}
     </div>
   );
 }

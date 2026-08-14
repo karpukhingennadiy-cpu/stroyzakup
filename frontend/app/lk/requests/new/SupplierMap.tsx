@@ -43,7 +43,7 @@ export default function SupplierMap({ suppliers, centerLat, centerLon }: Props) 
       // Delivery point marker (red)
       new window.mapgl.Marker(map, {
         coordinates: [centerLon, centerLat],
-        label: { text: "📍 Доставка", fontSize: 14, color: "#e03131" },
+        label: { text: " Доставка", fontSize: 14, color: "#e03131" },
       });
 
       // Supplier markers at REAL coordinates

@@ -133,6 +133,12 @@ export default function RequestsPage() {
           <SuppliersMapWidget lat={mapLat} lon={mapLon} />
           <PriceChartWidget requestId={priceReq?.id ?? null} />
         </div>
+        <div className="relative rounded-[var(--radius-xl)] overflow-hidden border border-separator shadow-xs">
+          <img src="/images/suppliers-network.jpg" alt="Сеть поставщиков" className="w-full h-40 object-cover" loading="lazy" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-primary)]/80 to-transparent flex items-center px-6">
+            <p className="text-sm font-medium text-label-1">База поставщиков пополняется автоматически — 2GIS, DaData, веб-поиск</p>
+          </div>
+        </div>
       </div>
 
       {/* Filters */}

@@ -70,6 +70,17 @@ export function LandingHero() {
         <p className="mt-6 text-xs text-[var(--label-quaternary)] animate-reveal delay-400">
           Первые 50 заявок бесплатно · Не нужна регистрация для демо · Данные обрабатывает AI
         </p>
+
+        <div className="mt-14 relative mx-auto max-w-5xl animate-reveal delay-500">
+          <div className="absolute -inset-4 rounded-[var(--radius-2xl)] bg-gradient-to-b from-[var(--accent)]/15 via-transparent to-transparent blur-2xl" aria-hidden="true" />
+          <img
+            src="/images/hero-construction.jpg"
+            alt="Строительные материалы — визуализация платформы"
+            className="relative w-full rounded-[var(--radius-2xl)] border border-[var(--separator)] shadow-glow object-cover"
+            loading="eager"
+          />
+          <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[var(--bg-primary)] to-transparent rounded-b-[var(--radius-2xl)]" aria-hidden="true" />
+        </div>
       </div>
     </section>
   );
