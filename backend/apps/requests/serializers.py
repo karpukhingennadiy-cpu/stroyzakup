@@ -26,20 +26,6 @@ class RequestSerializer(serializers.ModelSerializer):
     customer_email = serializers.CharField(source='customer.email', read_only=True)
     address_detail = AddressSerializer(source='address', read_only=True)
     delivery_address = serializers.CharField(write_only=True, required=False)
-
-    class Meta:
-        model = Request
-        fields = ['id', 'code', 'status', 'raw_text', 'address', 'address_detail',
-                  'delivery_address', 'source', 'comment', 'items',
-                  'match_results', 'customer_email', 'created_at', 'updated_at']
-        read_only_fields = ['id', 'code', 'status', 'created_at', 'updated_at',
-                            'customer_email', 'match_results']
-
-class RequestSerializer(serializers.ModelSerializer):
-    items = RequestItemSerializer(many=True, read_only=True)
-    customer_email = serializers.CharField(source='customer.email', read_only=True)
-    address_detail = AddressSerializer(source='address', read_only=True)
-    delivery_address = serializers.CharField(write_only=True, required=False)
     latitude = serializers.FloatField(write_only=True, required=False)
     longitude = serializers.FloatField(write_only=True, required=False)
     city = serializers.CharField(write_only=True, required=False)
@@ -62,7 +48,6 @@ class RequestSerializer(serializers.ModelSerializer):
             setattr(instance, attr, value)
         instance.save()
 
-        # Update delivery point (P0 fix: wizard step 2 now persists address)
         if lat and lon:
             from .models import Address
             addr = instance.address
@@ -82,7 +67,7 @@ class RequestSerializer(serializers.ModelSerializer):
             result = geocode(delivery_address)
             addr = instance.address
             if result:
-                glat, glon, gcity, full = result
+                glat, glon, gcity, _full = result
                 if addr is None:
                     addr = Address.objects.create(customer=instance.customer, address=delivery_address, city=gcity, latitude=glat, longitude=glon)
                 else:
