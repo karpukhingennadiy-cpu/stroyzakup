@@ -33,7 +33,7 @@ python start.py          # backend :8000 + frontend :3000
 | Слой | Технология |
 |------|-----------|
 | Бэкенд | Django 5 + DRF + Celery |
-| Фронтенд | Next.js 15 + TypeScript + Tailwind |
+| Фронтенд | Next.js 16 + TypeScript + Tailwind 4 |
 | База данных | PostgreSQL 16 + PostGIS (dev: SQLite) |
 | Кэш/очереди | Redis (опционально, sync fallback в dev) |
 | ИИ | DeepSeek API (парсинг, материал-интеллект, переписка) |
@@ -84,7 +84,7 @@ cd backend && uv run --extra dev python -m pytest tests/ -q   # 78 тестов
 cd frontend && node node_modules/next/dist/bin/next build     # чистая сборка
 ```
 
-- 78 автотестов: позитивные сценарии + 27 негативных (A2) + 21 eval LLM-писем; внешние API в тестах не вызываются
+- 119 автотестов: парсер, матчинг (скоринг), геокодинг, email/RFQ, публичное КП, экспорт XLSX/PDF, E2E-флоу закупки; внешние API в тестах не вызываются
 - `docs/QA_SECURITY.md` — аудит безопасности (IDOR/XSS закрыты кодом)
 - `docs/QA_LOAD.md` — нагрузочный sanity (p95 создания 0.75с, подбора 0.47с)
 - `docs/QA_PARSE_MATRIX.md` — матрица парсинга граничных формулировок
@@ -102,7 +102,7 @@ backend/
     quotes/       # КП, приглашения, конкурентный лист, публичный API
     emails/       # шаблоны, llm_writer, inbound, напоминания
   scripts/        # seed, parse_matrix, load_sanity, dedupe_suppliers
-  tests/          # 78 автотестов
+  tests/          # 119 автотестов
 frontend/
   app/lk/         # личный кабинет: заявки, мастер, поставщики
   app/quote/      # публичная страница КП

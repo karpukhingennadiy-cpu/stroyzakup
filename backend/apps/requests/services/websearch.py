@@ -239,12 +239,17 @@ def search_suppliers_for_material(material_name: str, city: str, category: str =
             logger.info(f"    Found {len(llm_results)}")
 
     # Deduplicate by name
-    seen = set()
+    seen_names = set()
+    seen_sites = set()
     unique = []
     for s in all_suppliers:
         n = s.get("name", "").strip().lower()
-        if n and n not in seen and len(n) > 2:
-            seen.add(n)
+        site = (s.get("url") or s.get("site") or "").strip().lower().rstrip("/")
+        site_key = site.replace("www.", "") if site else ""
+        if n and len(n) > 2 and n not in seen_names and (not site_key or site_key not in seen_sites):
+            seen_names.add(n)
+            if site_key:
+                seen_sites.add(site_key)
             unique.append(s)
 
     return unique
@@ -297,16 +302,11 @@ def discover_suppliers_for_request(request_obj) -> int:
             stype = sup_data.get("supplier_type", "unknown")
             src = sup_data.get("source", "llm")
             email = sup_data.get("email") or ""
-            if not email and site and "://" in site and src != "2gis":
-                try:
-                    email = f"info@{site.split('://')[1].split('/')[0]}"
-                except:
-                    pass
 
             supplier, created = Supplier.objects.get_or_create(
                 name=name[:500],
                 defaults={
-                    "email": email[:254] if email else ("" if src in ("2gis", "dadata", "web") else f"supplier{new_count}@unknown.ru"),
+                    "email": email[:254] if email else "",
                     "phone": (sup_data.get("phone") or "")[:50],
                     "site": site[:200] if site else "",
                     "is_active": True,

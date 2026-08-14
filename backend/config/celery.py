@@ -1,7 +1,7 @@
 import os
 from celery import Celery
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.dev")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", os.environ.get("DJANGO_SETTINGS_MODULE", "config.settings.dev"))
 app = Celery("minitender")
 app.config_from_object("django.conf:settings", namespace="CELERY")
 app.conf.result_backend = getattr(__import__("django.conf", fromlist=["settings"]).settings, "CELERY_RESULT_BACKEND", "redis://localhost:6379/1")
