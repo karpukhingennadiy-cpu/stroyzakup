@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # Export .env secrets to os.environ for service modules that read env directly
 # (decouple.config() does NOT populate os.environ by itself)
 for _env_key in ("LLM_API_KEY", "LLM_MODEL", "LLM_BASE_URL",
-                 "DADATA_TOKEN", "YANDEX_GEOCODER_KEY", "FROM_EMAIL"):
+                 "DADATA_TOKEN", "YANDEX_GEOCODER_KEY", "GEOCODER_API_KEY", "FROM_EMAIL"):
     os.environ.setdefault(_env_key, config(_env_key, default=""))
 
 SECRET_KEY="dev-secret-key"
