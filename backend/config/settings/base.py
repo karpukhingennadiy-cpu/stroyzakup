@@ -15,6 +15,14 @@ SECRET_KEY = config("SECRET_KEY", default="dev-insecure-key-for-local-only")
 DEBUG = config("DEBUG", default=False, cast=bool)
 if not DEBUG and SECRET_KEY in ("dev-insecure-key-for-local-only", "dev-secret-key", "change-me"):
     raise RuntimeError("SECRET_KEY must be set via env in production (DEBUG=False)")
+
+# Guard: никогда не запускать prod с плейсхолдерными внешними ключами
+_PLACEHOLDER_PREFIXES = ("PLACEHOLDER_", "CHANGE_ME", "CHANGE...")
+if not DEBUG:
+    for _k in ("LLM_API_KEY", "DADATA_TOKEN", "GEOCODER_API_KEY"):
+        _v = os.environ.get(_k, "")
+        if _v.startswith(_PLACEHOLDER_PREFIXES) or len(_v) < 10:
+            raise RuntimeError(f"{_k} must be a real key in production (got placeholder/empty)")
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1", cast=Csv())
 
 INSTALLED_APPS = [
