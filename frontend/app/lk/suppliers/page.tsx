@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getSuppliers, getMe, api } from "@/lib/api";
-import { Truck, Search, Plus, Check, X, RotateCcw, Phone, Mail } from "lucide-react";
+import { Truck, Search, Plus, Check, X, RotateCcw, Phone, Mail, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -55,9 +55,12 @@ export default function SuppliersPage() {
   const [addError, setAddError] = useState("");
   const [addLoading, setAddLoading] = useState(false);
   const [notice, setNotice] = useState("");
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
 
   const load = (params?: Record<string, string>) => {
     setLoading(true);
+    setPage(1);
     getSuppliers(params)
       .then((data) => setSuppliers(data.results || data))
       .catch(console.error)
@@ -416,7 +419,7 @@ export default function SuppliersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {suppliers.map((s: any, idx: number) => {
+                {suppliers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE).map((s: any, idx: number) => {
                   const mod = MODERATION_LABELS[s.moderation_status || "unverified"];
                   return (
                     <TableRow
@@ -486,6 +489,27 @@ export default function SuppliersPage() {
                 })}
               </TableBody>
             </Table>
+            {/* Пагинация */}
+            <div className="flex items-center justify-between px-4 py-3 border-t border-separator">
+              <p className="text-sm text-[var(--label-tertiary)]">
+                {suppliers.length > 0
+                  ? `${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, suppliers.length)} из ${suppliers.length}`
+                  : "0 поставщиков"}
+              </p>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>
+                  <ChevronLeft className="w-4 h-4" /> Назад
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page >= Math.ceil(suppliers.length / PAGE_SIZE)}
+                  onClick={() => setPage(page + 1)}
+                >
+                  Вперёд <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
           </div>
         </Card>
       )}

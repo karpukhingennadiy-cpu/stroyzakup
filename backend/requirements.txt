@@ -159,6 +159,8 @@ vine==5.1.0
     #   amqp
     #   celery
     #   kombu
+pydantic==2.13.4
+    # via stroyzakup-backend (pyproject.toml)
 wcwidth==0.8.2
     # via prompt-toolkit
 whitenoise==6.11.0
