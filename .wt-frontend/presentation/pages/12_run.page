@@ -1,0 +1,82 @@
+pageType: content
+background:
+  type: solid
+  color: "#FFFFFF"
+elements:
+  - elementId: title
+    elementType: text
+    bounds: [60, 36, 840, 40]
+    content: {style: "$pagetitle", text: "Запуск и конфигурация"}
+  - elementId: title-bar
+    elementType: shape
+    bounds: [60, 80, 48, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$amber"}
+  - elementId: run-head
+    elementType: text
+    bounds: [60, 108, 430, 22]
+    content: {style: "$h2", text: "Одна команда — оба сервера"}
+  - elementId: run-code
+    elementType: text
+    bounds: [60, 138, 430, 100]
+    content:
+      fontSize: 14
+      fontFamily: "Consolas"
+      color: "$navy"
+      lineHeight: 1.6
+      text: |
+        <p>python start.py</p>
+        <p><span style="color:$gray"># или prod-режим:</span></p>
+        <p>python start.py --prod</p>
+  - elementId: run-body
+    elementType: text
+    bounds: [60, 248, 430, 130]
+    content:
+      style: "$body"
+      text: |
+        <p>Поднимаются Django :8000 и Next.js :3000, скрипт ждёт готовности обоих и показывает статус. Enter или Ctrl+C — корректная остановка.</p>
+        <p style="margin-top:8px">Сайт: <strong>localhost:3000</strong> · API: <strong>localhost:8000/api</strong> · Админка: <strong>/admin</strong></p>
+  - elementId: keys-head
+    elementType: text
+    bounds: [530, 108, 390, 22]
+    content: {style: "$h2", text: "Ключи в .env — все подключены"}
+  - elementId: keys-table
+    elementType: table
+    bounds: [530, 138, 390, 220]
+    columnWidths: [0.46, 0.54]
+    rowHeights: [0.17, 0.166, 0.166, 0.166, 0.166, 0.166]
+    style: "$default"
+    rows:
+      - - text: "Ключ"
+        - text: "Назначение"
+      - - text: "LLM_API_KEY"
+        - text: "DeepSeek — парсинг, поиск"
+      - - text: "DADATA_TOKEN"
+        - text: "верификация компаний"
+      - - text: "NEXT_PUBLIC_2GIS_KEY"
+        - text: "карта на фронте"
+      - - text: "YANDEX_GEOCODER_KEY"
+        - text: "геокодинг адресов"
+      - - text: "EMAIL_HOST_PASSWORD"
+        - text: "SMTP — рассылка RFQ"
+  - elementId: bottom-rule
+    elementType: shape
+    bounds: [60, 396, 840, 1]
+    shapeName: rect
+    fill: {type: solid, color: "$line"}
+  - elementId: bottom-note
+    elementType: text
+    bounds: [60, 410, 840, 70]
+    content:
+      style: "$body"
+      text: |
+        <p><strong>Деградация без ключей предусмотрена:</strong> нет LLM — regex-парсер; нет DaData — поиск через Yandex + LLM; нет ключа геокодера — координаты с карты 2GIS; нет SMTP-пароля — заявка честно остаётся в matched, ошибка показывается пользователю.</p>
+        <p style="margin-top:8px">Демо-вход: <strong>dev@test.com</strong> · создание пользователя — backend/create_user.py (вне релиза).</p>
+  - elementId: footer
+    elementType: text
+    bounds: [60, 505, 400, 18]
+    content: {style: "$small", text: "Минитендер.рф · v1.0.0"}
+  - elementId: pagenum
+    elementType: text
+    bounds: [880, 505, 40, 18]
+    content: {style: "$small", align: [right, top], text: "12"}

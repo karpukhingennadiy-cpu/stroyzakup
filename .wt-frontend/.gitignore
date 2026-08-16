@@ -1,0 +1,95 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+.venv/
+venv/
+env/
+
+# Environment
+.env
+.env.local
+.env.prod
+.env.production
+*.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Docker data
+docker/postgres_data/
+docker/redis_data/
+docker/minio_data/
+
+# Django
+backend/staticfiles/
+backend/media/
+backend/db.sqlite3
+
+# Frontend
+frontend/.next/
+frontend/out/
+frontend/node_modules/
+
+# Tests
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Logs
+*.log
+
+# Secrets
+dkim_private.pem
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+
+# CI (uncomment when token has workflow scope)
+# .github/workflows/
+
+# Hermes
+.hermes/
+.github/workflows/
+db.sqlite3\n*.sqlite3\n*.sqlite3-journal
+
+# --- Release cleanup: dev/test junk ---
+.next/
+webbridge-*.json
+webbridge_*.py
+_tmp*
+screenshot_*.png
+tenders_results.json
+demo_suppliers.html
+login.json
+*.whl
+icon_v*.png
+logo_*.png
+kimi-webbridge-extension/
+.venv_old*/
+fix_email_url.py
+fix_env_vars.py
+fix_settings.py
+build_logos.py
+build_logo_variations.py
+check_db.py
+start_all.py
+start_all_servers.py
+backend/check_*.py
+backend/debug_parse.py
+backend/gis_mock.py
+backend/cleanup.py
+backend/create_user.py
+backend/run_all_tenders.py
+backend/run_tender1.py
+backend/test_parse_api.py
+backend/test_tenders.py
+backend/seed_categories.py

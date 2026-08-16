@@ -1,0 +1,122 @@
+pageType: content
+background:
+  type: solid
+  color: "#FFFFFF"
+elements:
+  - elementId: title
+    elementType: text
+    bounds: [60, 36, 840, 40]
+    content: {style: "$pagetitle", text: "Шаг 5 · RFQ-рассылка поставщикам"}
+  - elementId: title-bar
+    elementType: shape
+    bounds: [60, 80, 48, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$amber"}
+  # flow: select -> invitation -> email -> smtp
+  - elementId: f1-box
+    elementType: shape
+    bounds: [60, 116, 190, 74]
+    shapeName: rect
+    fill: {type: solid, color: "$light"}
+    border: {style: solid, width: 1, color: "$navy"}
+  - elementId: f1-txt
+    elementType: text
+    bounds: [70, 126, 170, 54]
+    content: {style: "$body", fontSize: 12, text: "Заказчик отмечает поставщиков и жмёт «Начать тендер»"}
+  - elementId: fa1
+    elementType: line
+    bounds: [252, 148, 26, 6]
+    viewBox: [26, 6]
+    points: "0,3 26,3"
+    arrow: [null, "arrow"]
+    border: {style: solid, width: 2, color: "$amber"}
+  - elementId: f2-box
+    elementType: shape
+    bounds: [280, 116, 190, 74]
+    shapeName: rect
+    fill: {type: solid, color: "$light"}
+    border: {style: solid, width: 1, color: "$navy"}
+  - elementId: f2-txt
+    elementType: text
+    bounds: [290, 126, 170, 54]
+    content: {style: "$body", fontSize: 12, text: "Приглашение: quote_token + reply-адрес для ответа письмом"}
+  - elementId: fa2
+    elementType: line
+    bounds: [472, 148, 26, 6]
+    viewBox: [26, 6]
+    points: "0,3 26,3"
+    arrow: [null, "arrow"]
+    border: {style: solid, width: 2, color: "$amber"}
+  - elementId: f3-box
+    elementType: shape
+    bounds: [500, 116, 190, 74]
+    shapeName: rect
+    fill: {type: solid, color: "$light"}
+    border: {style: solid, width: 1, color: "$navy"}
+  - elementId: f3-txt
+    elementType: text
+    bounds: [510, 126, 170, 54]
+    content: {style: "$body", fontSize: 12, text: "Письмо: HTML + текст, таблица позиций, кнопка «Заполнить КП»"}
+  - elementId: fa3
+    elementType: line
+    bounds: [692, 148, 26, 6]
+    viewBox: [26, 6]
+    points: "0,3 26,3"
+    arrow: [null, "arrow"]
+    border: {style: solid, width: 2, color: "$amber"}
+  - elementId: f4-box
+    elementType: shape
+    bounds: [720, 116, 200, 74]
+    shapeName: rect
+    fill: {type: solid, color: "$navy"}
+  - elementId: f4-txt
+    elementType: text
+    bounds: [730, 126, 180, 54]
+    content: {fontSize: 12, color: "#FFFFFF", text: "SMTP BeGet, ящик rfq@минитендер.рф (UTF-8 auth, punycode From)"}
+  - elementId: guard-head
+    elementType: text
+    bounds: [60, 224, 420, 22]
+    content: {style: "$h2", text: "Честные статусы вместо «тихих» сбоев"}
+  - elementId: guard-body
+    elementType: text
+    bounds: [60, 252, 420, 150]
+    content:
+      style: "$body"
+      text: |
+        <p>— поставщик без валидного email → <strong>skipped</strong>, с причиной</p>
+        <p>— ошибка SMTP по одному адресу → <strong>error</strong> с текстом, остальные уходят</p>
+        <p>— хотя бы одно письмо ушло → заявка <strong>rfq_sent</strong></p>
+        <p>— не ушло ни одного → <strong>rfq_failed</strong>, а не ложный успех</p>
+        <p style="margin-top:8px">Каждое письмо фиксируется в журнале EmailMessage.</p>
+  - elementId: mail-head
+    elementType: text
+    bounds: [530, 224, 390, 22]
+    content: {style: "$h2", text: "Два канала ответа поставщика"}
+  - elementId: mail-body
+    elementType: text
+    bounds: [530, 252, 390, 150]
+    content:
+      style: "$body"
+      text: |
+        <p><strong>1. Онлайн-форма</strong> — ссылка /quote/{token}: без регистрации, цены по позициям, аналоги, условия.</p>
+        <p style="margin-top:8px"><strong>2. Ответ письмом</strong> — reply-адрес содержит код приглашения: входящее письмо автоматически привязывается к тендеру.</p>
+  - elementId: bottom-rule
+    elementType: shape
+    bounds: [60, 432, 840, 1]
+    shapeName: rect
+    fill: {type: solid, color: "$line"}
+  - elementId: bottom-note
+    elementType: text
+    bounds: [60, 446, 840, 40]
+    content:
+      style: "$body"
+      text: |
+        <p><strong>Проверено вживую:</strong> тестовая рассылка через SMTP BeGet вернула статус <strong>sent</strong>, заявка перешла в rfq_sent. Отправитель — реальный ящик rfq@минитендер.рф.</p>
+  - elementId: footer
+    elementType: text
+    bounds: [60, 505, 400, 18]
+    content: {style: "$small", text: "Минитендер.рф · v1.0.0"}
+  - elementId: pagenum
+    elementType: text
+    bounds: [880, 505, 40, 18]
+    content: {style: "$small", align: [right, top], text: "07"}

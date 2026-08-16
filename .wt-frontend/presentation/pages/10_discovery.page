@@ -1,0 +1,124 @@
+pageType: content
+background:
+  type: solid
+  color: "#FFFFFF"
+elements:
+  - elementId: title
+    elementType: text
+    bounds: [60, 36, 840, 40]
+    content: {style: "$pagetitle", text: "Пополнение базы: поиск и обогащение поставщиков"}
+  - elementId: title-bar
+    elementType: shape
+    bounds: [60, 80, 48, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$amber"}
+  - elementId: pipe-head
+    elementType: text
+    bounds: [60, 108, 840, 22]
+    content: {style: "$h2", text: "Discovery-пайплайн: три источника по цепочке, пока не наберётся достаточно"}
+  - elementId: s1-box
+    elementType: shape
+    bounds: [60, 140, 260, 86]
+    shapeName: rect
+    fill: {type: solid, color: "$light"}
+    border: {style: solid, width: 1, color: "$navy"}
+  - elementId: s1-tag
+    elementType: text
+    bounds: [72, 148, 236, 16]
+    content: {fontSize: 11, bold: true, color: "$amberdark", text: "ИСТОЧНИК 1 · DaData"}
+  - elementId: s1-txt
+    elementType: text
+    bounds: [72, 168, 236, 50]
+    content: {style: "$small", text: "Проверенные компании: ИНН, юр. название, адрес, телефон. Бесплатно до 10 000 запросов/день."}
+  - elementId: sa1
+    elementType: line
+    bounds: [322, 178, 28, 6]
+    viewBox: [28, 6]
+    points: "0,3 28,3"
+    arrow: [null, "arrow"]
+    border: {style: solid, width: 2, color: "$amber"}
+  - elementId: s2-box
+    elementType: shape
+    bounds: [352, 140, 260, 86]
+    shapeName: rect
+    fill: {type: solid, color: "#FFFFFF"}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: s2-tag
+    elementType: text
+    bounds: [364, 148, 236, 16]
+    content: {fontSize: 11, bold: true, color: "$gray", text: "ИСТОЧНИК 2 · Яндекс.Поиск"}
+  - elementId: s2-txt
+    elementType: text
+    bounds: [364, 168, 236, 50]
+    content: {style: "$small", text: "Поиск сайтов поставщиков по запросу «материал + город», LLM извлекает компании из результатов."}
+  - elementId: sa2
+    elementType: line
+    bounds: [614, 178, 28, 6]
+    viewBox: [28, 6]
+    points: "0,3 28,3"
+    arrow: [null, "arrow"]
+    border: {style: solid, width: 2, color: "$amber"}
+  - elementId: s3-box
+    elementType: shape
+    bounds: [644, 140, 276, 86]
+    shapeName: rect
+    fill: {type: solid, color: "#FFFFFF"}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: s3-tag
+    elementType: text
+    bounds: [656, 148, 252, 16]
+    content: {fontSize: 11, bold: true, color: "$gray", text: "ИСТОЧНИК 3 · Знания LLM"}
+  - elementId: s3-txt
+    elementType: text
+    bounds: [656, 168, 252, 50]
+    content: {style: "$small", text: "DeepSeek называет реальные компании из обучающих данных. Метка source=llm — требует верификации."}
+  - elementId: dedupe
+    elementType: text
+    bounds: [60, 240, 860, 40]
+    content:
+      style: "$body"
+      fontSize: 12.5
+      text: |
+        <p>Дедупликация по имени и сайту → создание Supplier + адрес + привязка к категории заявки. Каждый источник помечается: <strong>seed / dadata / web / llm</strong> — видно, кому доверять.</p>
+  - elementId: bottom-rule
+    elementType: shape
+    bounds: [60, 292, 840, 1]
+    shapeName: rect
+    fill: {type: solid, color: "$line"}
+  - elementId: enr-head
+    elementType: text
+    bounds: [60, 310, 500, 22]
+    content: {style: "$h2", text: "Обогащение: профиль → рабочий скоринг"}
+  - elementId: enr-body
+    elementType: text
+    bounds: [60, 338, 500, 130]
+    content:
+      style: "$body"
+      text: |
+        <p>Для каждого поставщика заполняется:</p>
+        <p style="margin-top:6px">— <strong>material_types</strong>: конкретные типы материалов</p>
+        <p>— <strong>product_keywords</strong> и описание ассортимента (скрапинг сайта → LLM, либо по категориям)</p>
+        <p>— верификация через DaData: ИНН, юр. название</p>
+        <p style="margin-top:6px">Без этого фильтр по ассортименту и бонусы скоринга не работают — сейчас заполнено у всех 35 поставщиков.</p>
+  - elementId: stat-head
+    elementType: text
+    bounds: [600, 310, 320, 22]
+    content: {style: "$h2", text: "Текущее состояние базы"}
+  - elementId: stat-body
+    elementType: text
+    bounds: [600, 338, 320, 130]
+    content:
+      style: "$small"
+      text: |
+        <p><strong>35</strong> поставщиков, все активны</p>
+        <p><strong>35/35</strong> с material_types и keywords</p>
+        <p><strong>13</strong> производителей</p>
+        <p>города: Москва и МО, СПб, Пенза, Иркутск, Екатеринбург, Челябинск, Краснодар и др.</p>
+  - elementId: footer
+    elementType: text
+    bounds: [60, 505, 400, 18]
+    content: {style: "$small", text: "Минитендер.рф · v1.0.0"}
+  - elementId: pagenum
+    elementType: text
+    bounds: [880, 505, 40, 18]
+    content: {style: "$small", align: [right, top], text: "10"}

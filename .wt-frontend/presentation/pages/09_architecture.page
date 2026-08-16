@@ -1,0 +1,131 @@
+pageType: content
+background:
+  type: solid
+  color: "#FFFFFF"
+elements:
+  - elementId: title
+    elementType: text
+    bounds: [60, 36, 840, 40]
+    content: {style: "$pagetitle", text: "Архитектура: монолит + 5 внешних сервисов"}
+  - elementId: title-bar
+    elementType: shape
+    bounds: [60, 80, 48, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$amber"}
+  # main boxes
+  - elementId: fe-box
+    elementType: shape
+    bounds: [60, 120, 240, 130]
+    shapeName: rect
+    fill: {type: solid, color: "$light"}
+    border: {style: solid, width: 1, color: "$navy"}
+  - elementId: fe-title
+    elementType: text
+    bounds: [72, 130, 216, 20]
+    content: {style: "$h2", fontSize: 14, text: "Frontend · Next.js 15"}
+  - elementId: fe-body
+    elementType: text
+    bounds: [72, 156, 216, 84]
+    content:
+      style: "$small"
+      text: |
+        <p>:3000 · TypeScript, Tailwind</p>
+        <p>лендинг, ЛК заказчика, мастер заявки, карта 2GIS, форма КП, конкурентный лист</p>
+  - elementId: api-arrow
+    elementType: line
+    bounds: [302, 178, 76, 8]
+    viewBox: [76, 8]
+    points: "0,4 76,4"
+    arrow: [null, "arrow"]
+    border: {style: solid, width: 2.5, color: "$amber"}
+  - elementId: api-label
+    elementType: text
+    bounds: [296, 152, 88, 20]
+    content: {style: "$small", align: [center, top], text: "REST + JWT"}
+  - elementId: be-box
+    elementType: shape
+    bounds: [380, 120, 260, 130]
+    shapeName: rect
+    fill: {type: solid, color: "$light"}
+    border: {style: solid, width: 1, color: "$navy"}
+  - elementId: be-title
+    elementType: text
+    bounds: [392, 130, 236, 20]
+    content: {style: "$h2", fontSize: 14, text: "Backend · Django 5 + DRF"}
+  - elementId: be-body
+    elementType: text
+    bounds: [392, 156, 236, 84]
+    content:
+      style: "$small"
+      text: |
+        <p>:8000 · apps: requests, suppliers, quotes, emails, accounts</p>
+        <p>парсинг, матчинг, рассылка, публичное API КП</p>
+  - elementId: db-arrow
+    elementType: line
+    bounds: [642, 178, 56, 8]
+    viewBox: [56, 8]
+    points: "0,4 56,4"
+    arrow: [null, "arrow"]
+    border: {style: solid, width: 2.5, color: "$amber"}
+  - elementId: db-box
+    elementType: shape
+    bounds: [700, 120, 220, 130]
+    shapeName: rect
+    fill: {type: solid, color: "#FFFFFF"}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: db-title
+    elementType: text
+    bounds: [712, 130, 196, 20]
+    content: {style: "$h2", fontSize: 14, text: "SQLite (dev)"}
+  - elementId: db-body
+    elementType: text
+    bounds: [712, 156, 196, 84]
+    content:
+      style: "$small"
+      text: |
+        <p>35 поставщиков, 30 категорий, заявки, приглашения, КП, журнал писем</p>
+        <p>prod: PostgreSQL</p>
+  # external services
+  - elementId: ext-head
+    elementType: text
+    bounds: [60, 282, 860, 22]
+    content: {style: "$h2", text: "Внешние сервисы — все подключены и проверены вживую 30.07.2026"}
+  - elementId: ext-table
+    elementType: table
+    bounds: [60, 312, 860, 170]
+    columnWidths: [0.17, 0.33, 0.3, 0.2]
+    rowHeights: [0.17, 0.166, 0.166, 0.166, 0.166, 0.166]
+    style: "$default"
+    rows:
+      - - text: "Сервис"
+        - text: "Роль"
+        - text: "Где используется"
+        - text: "Проверка"
+      - - text: "DeepSeek LLM"
+        - text: "парсинг заявок, поиск поставщиков, обогащение"
+        - text: "parser, websearch, enricher"
+        - text: "conf 0.85–0.95"
+      - - text: "DaData"
+        - text: "верификация компаний: ИНН, юр. название, адрес"
+        - text: "websearch, enricher"
+        - text: "suggest OK"
+      - - text: "2GIS"
+        - text: "карта точки доставки"
+        - text: "фронт, мастер заявки"
+        - text: "API 200 OK"
+      - - text: "Яндекс.Геокодер"
+        - text: "адрес строкой → координаты"
+        - text: "geocoder (backend)"
+        - text: "3/3 адреса"
+      - - text: "SMTP BeGet"
+        - text: "отправка RFQ-писем"
+        - text: "emails (UTF-8 backend)"
+        - text: "sent"
+  - elementId: footer
+    elementType: text
+    bounds: [60, 505, 400, 18]
+    content: {style: "$small", text: "Минитендер.рф · v1.0.0"}
+  - elementId: pagenum
+    elementType: text
+    bounds: [880, 505, 40, 18]
+    content: {style: "$small", align: [right, top], text: "09"}

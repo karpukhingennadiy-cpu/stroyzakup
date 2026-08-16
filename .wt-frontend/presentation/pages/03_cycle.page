@@ -1,0 +1,150 @@
+pageType: content
+background:
+  type: solid
+  color: "#FFFFFF"
+elements:
+  - elementId: title
+    elementType: text
+    bounds: [60, 36, 840, 40]
+    content: {style: "$pagetitle", text: "Полный цикл: от текста до выбора поставщика"}
+  - elementId: title-bar
+    elementType: shape
+    bounds: [60, 80, 48, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$amber"}
+  # --- Row of 6 steps ---
+  - elementId: n1-box
+    elementType: shape
+    bounds: [40, 130, 140, 90]
+    shapeName: rect
+    fill: {type: solid, color: "$light"}
+    border: {style: solid, width: 1, color: "$navy"}
+  - elementId: n1-txt
+    elementType: text
+    bounds: [48, 150, 126, 62]
+    content: {style: "$node", text: "01 · Текст заявки своими словами"}
+  - elementId: a1
+    elementType: line
+    bounds: [182, 172, 24, 6]
+    viewBox: [24, 6]
+    points: "0,3 24,3"
+    arrow: [null, "arrow"]
+    border: {style: solid, width: 2, color: "$amber"}
+  - elementId: n2-box
+    elementType: shape
+    bounds: [208, 130, 140, 90]
+    shapeName: rect
+    fill: {type: solid, color: "$light"}
+    border: {style: solid, width: 1, color: "$navy"}
+  - elementId: n2-txt
+    elementType: text
+    bounds: [216, 150, 126, 62]
+    content: {style: "$node", text: "02 · LLM-парсинг позиций"}
+  - elementId: a2
+    elementType: line
+    bounds: [350, 172, 24, 6]
+    viewBox: [24, 6]
+    points: "0,3 24,3"
+    arrow: [null, "arrow"]
+    border: {style: solid, width: 2, color: "$amber"}
+  - elementId: n3-box
+    elementType: shape
+    bounds: [376, 130, 140, 90]
+    shapeName: rect
+    fill: {type: solid, color: "$light"}
+    border: {style: solid, width: 1, color: "$navy"}
+  - elementId: n3-txt
+    elementType: text
+    bounds: [384, 150, 126, 62]
+    content: {style: "$node", text: "03 · Точка доставки на карте"}
+  - elementId: a3
+    elementType: line
+    bounds: [518, 172, 24, 6]
+    viewBox: [24, 6]
+    points: "0,3 24,3"
+    arrow: [null, "arrow"]
+    border: {style: solid, width: 2, color: "$amber"}
+  - elementId: n4-box
+    elementType: shape
+    bounds: [544, 130, 140, 90]
+    shapeName: rect
+    fill: {type: solid, color: "$light"}
+    border: {style: solid, width: 1, color: "$navy"}
+  - elementId: n4-txt
+    elementType: text
+    bounds: [552, 150, 126, 62]
+    content: {style: "$node", text: "04 · Подбор и скоринг поставщиков"}
+  - elementId: a4
+    elementType: line
+    bounds: [686, 172, 24, 6]
+    viewBox: [24, 6]
+    points: "0,3 24,3"
+    arrow: [null, "arrow"]
+    border: {style: solid, width: 2, color: "$amber"}
+  - elementId: n5-box
+    elementType: shape
+    bounds: [712, 130, 140, 90]
+    shapeName: rect
+    fill: {type: solid, color: "$light"}
+    border: {style: solid, width: 1, color: "$navy"}
+  - elementId: n5-txt
+    elementType: text
+    bounds: [720, 150, 126, 62]
+    content: {style: "$node", text: "05 · RFQ-рассылка по email"}
+  - elementId: a5
+    elementType: line
+    bounds: [854, 172, 24, 6]
+    viewBox: [24, 6]
+    points: "0,3 24,3"
+    arrow: [null, "arrow"]
+    border: {style: solid, width: 2, color: "$amber"}
+  - elementId: n6-box
+    elementType: shape
+    bounds: [880, 130, 60, 90]
+    shapeName: rect
+    fill: {type: solid, color: "$navy"}
+  - elementId: n6-txt
+    elementType: text
+    bounds: [884, 140, 52, 70]
+    content: {fontSize: 11.5, bold: true, color: "#FFFFFF", align: [center, middle], text: "КП → выбор"}
+  # --- Status line ---
+  - elementId: status-head
+    elementType: text
+    bounds: [60, 250, 840, 22]
+    content: {style: "$h2", text: "Статусы заявки отражают этап"}
+  - elementId: status-flow
+    elementType: text
+    bounds: [60, 280, 840, 26]
+    content:
+      fontSize: 13
+      color: "#333A47"
+      text: |
+        <p>draft → parsing → confirmed → matching → matched → <strong>rfq_sent</strong> → collecting_quotes → ready</p>
+  - elementId: status-note
+    elementType: text
+    bounds: [60, 312, 840, 60]
+    content:
+      style: "$small"
+      text: |
+        <p>Ошибочные ветки предусмотрены: сбой парсинга возвращает заявку в draft; полный сбой рассылки переводит в rfq_failed (а не выдаёт себя за успех); без адреса подбор не стартует — интерфейс просит указать точку доставки.</p>
+  - elementId: bottom-rule
+    elementType: shape
+    bounds: [60, 392, 840, 1]
+    shapeName: rect
+    fill: {type: solid, color: "$line"}
+  - elementId: roles
+    elementType: text
+    bounds: [60, 406, 840, 80]
+    content:
+      style: "$body"
+      text: |
+        <p><strong>Два участника:</strong> заказчик работает в личном кабинете (заявки, поставщики, конкурентный лист), поставщик — без регистрации, по персональной ссылке из письма.</p>
+        <p style="margin-top:8px">Каждый шаг дальше разобран отдельно: что делает система, какие сервисы участвуют и где заложены запасные пути.</p>
+  - elementId: footer
+    elementType: text
+    bounds: [60, 505, 400, 18]
+    content: {style: "$small", text: "Минитендер.рф · v1.0.0"}
+  - elementId: pagenum
+    elementType: text
+    bounds: [880, 505, 40, 18]
+    content: {style: "$small", align: [right, top], text: "03"}

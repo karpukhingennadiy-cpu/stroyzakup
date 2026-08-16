@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { getCompetitiveSheet, getSuppliers, api } from "@/lib/api";
-import { IconList, IconChart, IconMapPin, IconTruck } from "@/components/icons";
+import { IconList, IconChart, IconMapPin, IconTruck, IconLayers, IconLoader, IconCheckCircle, IconClock } from "@/components/icons";
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                            */
@@ -28,18 +28,22 @@ async function promiseAllSettledBatched<T>(
 const STATUS_GROUPS = [
   {
     key: "total", label: "Всего", tone: "text-label-1",
+    icon: IconLayers, bg: "bg-[var(--fill-1)]",
     match: () => true,
   },
   {
     key: "active", label: "В работе", tone: "text-[var(--accent)]",
+    icon: IconLoader, bg: "bg-[var(--accent-soft)]",
     match: (s: string) => ["confirmed", "matched", "matching", "rfq_sent", "collecting_quotes", "ready"].includes(s),
   },
   {
     key: "done", label: "Завершено", tone: "text-[var(--success)]",
+    icon: IconCheckCircle, bg: "bg-[var(--success-soft)]",
     match: (s: string) => s === "completed",
   },
   {
     key: "pending", label: "Ожидание", tone: "text-[var(--warning)]",
+    icon: IconClock, bg: "bg-[var(--warning-soft)]",
     match: (s: string) => ["draft", "parsing", "cancelled"].includes(s),
   },
 ];
@@ -49,12 +53,18 @@ export function StatusCards({ requests }: { requests: any[] }) {
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3" role="group" aria-label="Статистика заявок">
       {STATUS_GROUPS.map((g) => {
         const count = requests.filter((r) => g.match(r.status)).length;
+        const Icon = g.icon;
         return (
-          <div key={g.key} className="surface-card px-4 py-3.5">
-            <p className="text-xs text-label-3">{g.label}</p>
-            <p className={"mt-1 text-2xl font-semibold leading-8 " + g.tone} aria-label={g.label + ": " + count}>
-              {count}
-            </p>
+          <div key={g.key} className="surface-card px-4 py-3.5 flex items-center gap-3">
+            <div className={"w-10 h-10 rounded-[var(--radius-md)] flex items-center justify-center shrink-0 " + g.bg}>
+              <Icon className={"w-5 h-5 " + g.tone} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs text-label-3">{g.label}</p>
+              <p className={"mt-0.5 text-2xl font-semibold leading-8 " + g.tone} aria-label={g.label + ": " + count}>
+                {count}
+              </p>
+            </div>
           </div>
         );
       })}
@@ -123,9 +133,17 @@ export function SuppliersMapWidget({ lat, lon }: { lat: number; lon: number }) {
       </header>
       <div className="p-4">
         {loading ? (
-          <p className="text-sm text-label-3 py-10 text-center" role="status">Загрузка карты...</p>
+          <div className="py-8 space-y-3" role="status" aria-label="Загрузка карты поставщиков">
+            <div className="h-40 rounded-[var(--radius-md)] bg-[var(--fill-2)] animate-pulse" />
+          </div>
         ) : failed ? (
           <p className="text-sm text-label-3 py-10 text-center">Не удалось загрузить поставщиков</p>
+        ) : total === 0 && points.length === 0 ? (
+          <div className="py-10 text-center">
+            <IconMapPin className="w-10 h-10 mx-auto text-label-4" aria-hidden="true" />
+            <p className="mt-3 text-sm font-medium text-label-1">Карта обновится после первой заявки</p>
+            <p className="mt-1 text-xs text-label-3 max-w-xs mx-auto">Поставщики из вашего региона появятся здесь после создания заявки с точкой доставки</p>
+          </div>
         ) : (
           <svg viewBox="0 0 300 300" className="w-full h-auto" role="img" aria-label={"Поставщики на карте: " + points.length}>
             {/* Кольца радиуса */}
@@ -194,9 +212,12 @@ export function PriceChartWidget({ requestId }: { requestId: number | null }) {
           <p className="text-sm text-label-3 py-10 text-center" role="status">Загрузка цен...</p>
         ) : failed || !requestId || rows.length === 0 ? (
           <div className="py-10 text-center">
-            <IconTruck className="w-8 h-8 mx-auto text-label-4" />
-            <p className="mt-2 text-sm text-label-3">
-              {requestId ? "КП пока нет — график появится после ответов поставщиков" : "Создайте заявку, чтобы сравнивать цены"}
+            <IconChart className="w-10 h-10 mx-auto text-label-4" aria-hidden="true" />
+            <p className="mt-3 text-sm font-medium text-label-1">
+              {requestId ? "Здесь появится график после получения КП" : "Создайте заявку, чтобы сравнивать цены"}
+            </p>
+            <p className="mt-1 text-xs text-label-3 max-w-xs mx-auto">
+              Как только поставщики пришлют коммерческие предложения, цены отобразятся на графике
             </p>
           </div>
         ) : (

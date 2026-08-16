@@ -1,0 +1,38 @@
+# backend/pyproject.toml
+[project]
+name = "stroyzakup-backend"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "django>=5.0,<5.2",
+    "djangorestframework>=3.15",
+    "djangorestframework-simplejwt>=5.3",
+    "django-cors-headers>=4.4",
+    "django-filter>=24.3",
+    "drf-spectacular>=0.28",
+    "celery[redis]>=5.4",
+    "redis>=5.2",
+    "psycopg2-binary>=2.9",
+    "python-decouple>=3.8",
+    "httpx>=0.28",
+    "gunicorn>=23.0",
+    "jsonschema>=4.0",        # FIX-M3: явное указание
+    "django-environ>=0.11",   # FIX-M3: для 12-factor config
+    "whitenoise>=6.8",        # static files serving (was only in requirements.txt)
+    "faker>=30.0",            # demo/seed data generation
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "pytest-django>=4.8",
+    "pytest-cov>=5.0",
+    "black>=24.8",
+    "isort>=5.13",
+    "ruff>=0.6",
+    "factory-boy>=3.3",       # FIX-M3: для тестовых данных
+]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+addopts = "-v --tb=short"

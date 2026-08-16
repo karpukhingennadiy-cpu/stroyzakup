@@ -1,0 +1,26 @@
+# DNS-записи для минитендер.рф (панель Beget -> DNS)
+# Скопируйте эти записи в раздел "DNS" панели управления Beget
+
+# Основной сайт
+A       @               31.31.198.143     # IP вашего сервера (замените на свой)
+A       app             31.31.198.143     # поддомен app.минитендер.рф
+A       www             31.31.198.143     # www.минитендер.рф
+
+# Почтовый сервер для входящих
+A       mail            31.31.198.143
+MX      @               mx1.beget.com     10
+MX      @               mx2.beget.com     20
+
+# Поддомен для reply-адресов (RFQ)
+A       in              31.31.198.143
+MX      in              mx1.beget.com     10
+MX      in              mx2.beget.com     20
+
+# SPF (разрешает отправку с Beget)
+TXT     @               v=spf1 include:spf.beget.com ~all
+
+# DMARC (мониторинг)
+TXT     _dmarc          v=DMARC1; p=none; rua=mailto:admin@минитендер.рф; pct=100
+
+# DKIM (включить в панели Beget автоматически, затем добавить):
+# TXT     mail._domainkey  k=rsa; p=...ПОЛУЧИТЬ_В_ПАНЕЛИ_BEGET...

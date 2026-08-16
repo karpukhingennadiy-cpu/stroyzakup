@@ -92,19 +92,35 @@ async function pollUntilDone(requestId: number, pendingStatuses: string[], timeo
 /** Индикатор шагов мастера — a11y: ol + aria-current */
 function Stepper({ step }: { step: number }) {
   return (
-    <ol className="flex flex-wrap gap-x-6 gap-y-2 mt-4" aria-label="Шаги создания заявки">
+    <ol className="flex items-center mt-4" aria-label="Шаги создания заявки">
       {STEP_LABELS.map((label, i) => {
         const n = i + 1;
-        const active = step >= n;
+        const done = step > n;
+        const current = step === n;
         return (
-          <li key={n} aria-current={step === n ? "step" : undefined}
-            className={"flex items-center gap-2 " + (active ? "text-label-1" : "text-label-4")}>
-            <span className={"w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold " +
-              (active ? "bg-[var(--label-primary)] text-[var(--bg-primary)]" : "bg-[var(--fill-2)] text-label-4")}>
-              {n}
+          <li key={n} aria-current={current ? "step" : undefined}
+            className={"flex items-center flex-1 last:flex-none min-w-0 " + (current ? "text-label-1" : done ? "text-[var(--success)]" : "text-label-4")}>
+            <span className={
+              "w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ring-2 transition-colors duration-150 " +
+              (current
+                ? "bg-brand text-brand-ink ring-brand/40 shadow-glow-brand"
+                : done
+                ? "bg-[var(--success-soft)] text-[var(--success)] ring-[var(--success)]/30"
+                : "bg-[var(--fill-2)] text-label-4 ring-transparent")
+            }>
+              {done ? (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+              ) : (
+                n
+              )}
             </span>
-            <span className="text-sm font-medium">{label}</span>
-            {n < 3 && <span className="text-label-4 ml-2" aria-hidden="true">→</span>}
+            <span className={"text-sm font-medium mx-3 hidden sm:inline " + (current ? "text-label-1" : done ? "text-[var(--success)]" : "text-label-4")}>
+              {label}
+            </span>
+            {n < STEP_LABELS.length && (
+              <span className="flex-1 h-0.5 rounded-full min-w-4 mr-1" aria-hidden="true"
+                style={{ background: done ? "linear-gradient(90deg, var(--status-success), var(--brand))" : "var(--fill-2)" }} />
+            )}
           </li>
         );
       })}
@@ -122,6 +138,7 @@ export default function NewRequestPage() {
   const [rows, setRows] = useState<MaterialRow[]>([
     { id: 1, name: "", specs: "", quantity: "", unit: "m2" },
   ]);
+  const [touched, setTouched] = useState(false);
   const [comment, setComment] = useState("");
   const [draftRestored, setDraftRestored] = useState(false);
 
@@ -181,7 +198,8 @@ export default function NewRequestPage() {
 
   const handleStep1Next = async () => {
     const filled = rows.filter(r => r.name.trim());
-    if (filled.length === 0) { setError("Добавьте хотя бы один материал"); return; }
+    if (filled.length === 0) { setTouched(true); setError("Добавьте хотя бы один материал"); return; }
+    setTouched(false);
     setError("");
     setLoading(true);
     try {
@@ -346,22 +364,23 @@ export default function NewRequestPage() {
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead><tr className="border-b border-separator text-left">
-                <th scope="col" className="py-2 pr-2 font-medium text-label-3 text-xs w-1/3">Материал</th>
-                <th scope="col" className="py-2 px-2 font-medium text-label-3 text-xs w-1/3">Габариты / Спецификация</th>
-                <th scope="col" className="py-2 px-2 font-medium text-label-3 text-xs w-1/6">Кол-во</th>
-                <th scope="col" className="py-2 px-2 font-medium text-label-3 text-xs w-20">Ед.</th>
+                <th scope="col" className="sticky top-0 bg-[var(--bg-primary)] py-2 pr-2 font-semibold text-label-3 text-xs uppercase tracking-wide w-1/3">Материал</th>
+                <th scope="col" className="sticky top-0 bg-[var(--bg-primary)] py-2 px-2 font-semibold text-label-3 text-xs uppercase tracking-wide w-1/3">Габариты / Спецификация</th>
+                <th scope="col" className="sticky top-0 bg-[var(--bg-primary)] py-2 px-2 font-semibold text-label-3 text-xs uppercase tracking-wide w-1/6">Кол-во</th>
+                <th scope="col" className="sticky top-0 bg-[var(--bg-primary)] py-2 px-2 font-semibold text-label-3 text-xs uppercase tracking-wide w-20">Ед.</th>
                 <th scope="col" className="py-2 w-10"><span className="sr-only">Действия</span></th>
               </tr></thead>
               <tbody>
                 {rows.map((row) => (
-                  <tr key={row.id} className="border-b border-[var(--fill-1)]">
+                  <tr key={row.id} className="border-b border-separator">
                     <td className="py-1.5 pr-2">
                       <label htmlFor={"mat-name-" + row.id} className="sr-only">Материал, строка</label>
-                      <input id={"mat-name-" + row.id} value={row.name} onChange={e => updateRow(row.id, "name", e.target.value)} placeholder="Керамогранит, Доска, Бетон..." className="field-input" />
+                      <input id={"mat-name-" + row.id} value={row.name} onChange={e => updateRow(row.id, "name", e.target.value)} placeholder="Керамогранит серый 600×600" aria-invalid={touched && !row.name.trim()}
+                        className={"field-input " + (touched && !row.name.trim() ? "border-[var(--danger)] ring-1 ring-[var(--danger)]/30" : "")} />
                     </td>
                     <td className="py-1.5 px-2">
                       <label htmlFor={"mat-specs-" + row.id} className="sr-only">Спецификация</label>
-                      <input id={"mat-specs-" + row.id} value={row.specs} onChange={e => updateRow(row.id, "specs", e.target.value)} placeholder="600x600 серый, 25x150x6000, М300..." className="field-input" />
+                      <input id={"mat-specs-" + row.id} value={row.specs} onChange={e => updateRow(row.id, "specs", e.target.value)} placeholder="GF-001, матовая" className="field-input" />
                     </td>
                     <td className="py-1.5 px-2">
                       <label htmlFor={"mat-qty-" + row.id} className="sr-only">Количество</label>
@@ -390,11 +409,11 @@ export default function NewRequestPage() {
                 <legend className="text-xs text-label-3 px-1">Позиция {i + 1}</legend>
                 <div>
                   <label htmlFor={"m-name-" + row.id} className="block text-xs font-medium text-label-2 mb-1">Материал</label>
-                  <input id={"m-name-" + row.id} value={row.name} onChange={e => updateRow(row.id, "name", e.target.value)} placeholder="Керамогранит, Доска, Бетон..." className="field-input" />
+                  <input id={"m-name-" + row.id} value={row.name} onChange={e => updateRow(row.id, "name", e.target.value)} placeholder="Керамогранит серый 600×600" className="field-input" />
                 </div>
                 <div>
                   <label htmlFor={"m-specs-" + row.id} className="block text-xs font-medium text-label-2 mb-1">Габариты / Спецификация</label>
-                  <input id={"m-specs-" + row.id} value={row.specs} onChange={e => updateRow(row.id, "specs", e.target.value)} placeholder="600x600 серый, М300..." className="field-input" />
+                  <input id={"m-specs-" + row.id} value={row.specs} onChange={e => updateRow(row.id, "specs", e.target.value)} placeholder="GF-001, матовая" className="field-input" />
                 </div>
                 <div className="flex gap-2">
                   <div className="flex-1">
@@ -416,21 +435,27 @@ export default function NewRequestPage() {
             ))}
           </div>
 
-          <Button variant="outline" size={32} onClick={addRow} leftIcon={<IconPlus className="w-[18px] h-[18px]" />} className="mt-3">
+          <Button variant="accent" size={32} onClick={addRow} leftIcon={<IconPlus className="w-[18px] h-[18px]" />} className="mt-3">
             Добавить строку
           </Button>
           <div className="mt-4">
             <label htmlFor="request-comment" className="sr-only">Комментарий к заявке</label>
             <input id="request-comment" value={comment} onChange={e => setComment(e.target.value)} placeholder="Комментарий к заявке (необязательно)" className="field-input" />
           </div>
-          <Button
-            variant="primary" size={44} className="mt-6 w-full"
-            onClick={handleStep1Next}
-            loading={loading}
-            disabled={!rows.some(r => r.name.trim())}
-          >
-            {loading ? "Создаём..." : "Далее: точка доставки →"}
-          </Button>
+          <div className="mt-6 sticky bottom-0 z-10 -mx-6 -mb-6 p-4 bg-[var(--bg-primary)]/95 backdrop-blur-md border-t border-separator rounded-b-[var(--radius-lg)] md:static md:mx-0 md:mb-0 md:bg-transparent md:border-0 md:p-0 md:rounded-none">
+            <Button
+              variant="brand" size={44} className="w-full"
+              onClick={handleStep1Next}
+              loading={loading}
+            >
+              {loading ? "Создаём..." : "Далее: точка доставки →"}
+            </Button>
+            {touched && !rows.some(r => r.name.trim()) && (
+              <p className="mt-2 text-xs text-[var(--danger)] text-center md:text-left" role="alert">
+                Заполните хотя бы одну строку с названием материала
+              </p>
+            )}
+          </div>
         </Card>
       )}
 
@@ -487,7 +512,7 @@ export default function NewRequestPage() {
                   placeholder="Например: Подольск, Московская обл."
                   className="field-input flex-1 bg-[var(--bg-primary)]"
                 />
-                <Button size={32} variant="primary" onClick={handleCitySearch} loading={cityLoading} disabled={!cityInput.trim()}>
+                <Button size={32} variant="accent" onClick={handleCitySearch} loading={cityLoading} disabled={!cityInput.trim()}>
                   {cityLoading ? "..." : "Найти"}
                 </Button>
               </div>
@@ -504,7 +529,7 @@ export default function NewRequestPage() {
             <div className="p-6 flex flex-col sm:flex-row gap-3">
               <Button variant="outline" size={44} onClick={() => setStep(1)}>← Назад к материалам</Button>
               <Button
-                variant="primary" size={44} className="flex-1"
+                variant="brand" size={44} className="flex-1"
                 onClick={handleStep2Next}
                 loading={loading}
                 disabled={!deliveryLat}
@@ -644,7 +669,7 @@ export default function NewRequestPage() {
                 <div className="mt-6 flex flex-col sm:flex-row gap-3">
                   <Button variant="outline" size={44} onClick={() => setStep(2)}>← Назад к карте</Button>
                   <Button
-                    variant="primary" size={44} className="flex-1"
+                    variant="brand" size={44} className="flex-1"
                     onClick={handleSendRfq}
                     loading={loading}
                     disabled={selectedSuppliers.size === 0}

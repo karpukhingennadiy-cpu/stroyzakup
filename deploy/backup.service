@@ -1,0 +1,18 @@
+[Unit]
+Description=Daily Minitender PostgreSQL backup job
+Documentation=file:///opt/minitender/deploy/BACKUP.md
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/minitender/deploy/backup.sh
+StandardOutput=append:/var/log/minitender-backup.log
+StandardError=append:/var/log/minitender-backup.log
+Environment="DB_NAME=minitender"
+Environment="DB_USER=minitender"
+Environment="DB_HOST=db"
+Environment="BACKUP_DIR=/opt/backups/minitender"
+Environment="KEEP_DAYS=7"
+
+# Если БД в Docker, используйте:
+# ExecStart=/bin/bash -c 'docker compose -f /opt/minitender/docker-compose.prod.yml exec -T db pg_dump -U minitender minitender | gzip > /opt/backups/minitender/minitender_$(date +%%Y%%m%%d_%%H%%M%%S).sql.gz'

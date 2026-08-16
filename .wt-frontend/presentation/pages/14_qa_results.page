@@ -1,0 +1,79 @@
+pageType: content
+background:
+  type: solid
+  color: "#FFFFFF"
+elements:
+  - elementId: title
+    elementType: text
+    bounds: [60, 36, 840, 40]
+    content: {style: "$pagetitle", text: "База поставщиков и результаты QA (v2.0.0)"}
+  - elementId: title-bar
+    elementType: shape
+    bounds: [60, 80, 48, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$amber"}
+  - elementId: k1-num
+    elementType: text
+    bounds: [60, 108, 190, 40]
+    content: {fontSize: 30, bold: true, color: "$amberdark", text: "192"}
+  - elementId: k1-cap
+    elementType: text
+    bounds: [60, 150, 190, 52]
+    content: {style: "$small", text: "поставщиков в базе после автодiscovery 10 регионов × 10 категорий"}
+  - elementId: k2-num
+    elementType: text
+    bounds: [280, 108, 190, 40]
+    content: {fontSize: 30, bold: true, color: "$amberdark", text: "134"}
+  - elementId: k2-cap
+    elementType: text
+    bounds: [280, 150, 190, 52]
+    content: {style: "$small", text: "верифицированы через DaData (ИНН, юр. данные) — участвуют в подборе сразу"}
+  - elementId: k3-num
+    elementType: text
+    bounds: [500, 108, 190, 40]
+    content: {fontSize: 30, bold: true, color: "$amberdark", text: "85"}
+  - elementId: k3-cap
+    elementType: text
+    bounds: [500, 150, 190, 52]
+    content: {style: "$small", text: "автотестов pytest: позитив + негатив + eval LLM-писем, внешние API замоканы"}
+  - elementId: k4-num
+    elementType: text
+    bounds: [720, 108, 180, 40]
+    content: {fontSize: 30, bold: true, color: "$amberdark", text: "0.75с"}
+  - elementId: k4-cap
+    elementType: text
+    bounds: [720, 150, 180, 52]
+    content: {style: "$small", text: "p95 создания заявки под нагрузкой 20 параллельных (цель < 3с)"}
+  - elementId: q-head
+    elementType: text
+    bounds: [60, 212, 840, 22]
+    content: {style: "$h2", text: "Что проверено перед релизом"}
+  - elementId: q-table
+    elementType: table
+    bounds: [60, 242, 840, 190]
+    columnWidths: [0.32, 0.47, 0.21]
+    rowHeights: [0.167, 0.167, 0.167, 0.167, 0.166, 0.166]
+    style: "$default"
+    rows:
+      - - text: "Проверка"
+        - text: "Результат"
+        - text: "Артефакт"
+      - - text: "Парсинг граничных данных"
+        - text: "100% (20/20): опечатки, латиница, разговорные единицы"
+        - text: "QA_PARSE_MATRIX.md"
+      - - text: "Нагрузочный sanity"
+        - text: "p95: создание 0.75с, подбор 0.47с; 0 ошибок 5xx"
+        - text: "QA_LOAD.md"
+      - - text: "Безопасность"
+        - text: "IDOR закрыт, XSS экранирован, throttle, needs_review"
+        - text: "QA_SECURITY.md"
+      - - text: "E2E почтовый контур"
+        - text: "RFQ в Mail.ru → КП по ссылке → ответ письмом → LLM обновил КП"
+        - text: "QA_E2E_PROTOCOL.md"
+      - - text: "Качество данных"
+        - text: "Дедупликация слияниями; LLM-поставщики верифицированы DaData"
+        - text: "DEDUP_REPORT.md"
+  - elementId: q-note
+    elementType: text
+    bounds: [60, 448, 840, 52]
+    content: {style: "$small", text: "Найденные в E2E дефекты закрыты кодом: LLM больше не теряет позиции заявки в письмах (пост-проверка фактов + регресс-тесты), чужие КП не видны (IDOR), цены ≤ 0 отклоняются. Модерация: отклонённые поставщики исключаются из подбора, непроверенные понижаются в выдаче."}

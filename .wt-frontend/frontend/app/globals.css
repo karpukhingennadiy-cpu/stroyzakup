@@ -1,0 +1,158 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Дизайн-токены Kimi (tokens.json v0.2.0) → CSS-переменные.
+ * Семантические пути: color.background.*, color.labels.*, color.fills.*,
+ * color.separator.s1, color.status.*, radius.*, effect.shadow.*
+ * Светлая тема — :root, тёмная — html.dark.
+ */
+@layer base {
+  :root {
+    /* color.background */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f5f5f5;
+    --bg-tertiary: #ffffff;
+    --bg-ground: #f9fbfc;
+    /* color.labels */
+    --label-primary: rgba(0, 0, 0, 0.9);
+    --label-secondary: rgba(0, 0, 0, 0.6);
+    --label-tertiary: rgba(0, 0, 0, 0.45);
+    --label-quaternary: rgba(0, 0, 0, 0.3);
+    /* color.fills */
+    --fill-1: rgba(0, 0, 0, 0.03);
+    --fill-2: rgba(0, 0, 0, 0.05);
+    --fill-3: rgba(0, 0, 0, 0.15);
+    /* color.separator.s1 */
+    --separator: rgba(0, 0, 0, 0.13);
+    /* color.status */
+    --accent: #1783ff;
+    --accent-hover: #167ff7;
+    --accent-soft: rgba(23, 131, 255, 0.1);
+    --danger: #e03131; /* скорректировано под контраст AA на белом (токен #ff3849 = 3.9:1 — gap зафиксирован) */
+    --danger-soft: rgba(255, 77, 77, 0.1);
+    --success: #14954b; /* скорректировано под контраст AA (токен #16c456 = 2.3:1 — gap зафиксирован) */
+    --success-soft: rgba(22, 196, 86, 0.1);
+    --warning: #b8620a; /* скорректировано под контраст AA (токен #ff9500 = 2.5:1 — gap зафиксирован) */
+    --warning-soft: rgba(255, 149, 0, 0.1);
+    /* Бренд продукта «Минитендер» (боковая панель, логотип) */
+    --brand: #f0a500;
+    --brand-hover: #d99500;
+    --brand-ink: #1a1a2e;
+    --sidebar-bg: #1a1a2e;
+    /* effect.shadow */
+    --shadow-small: 0 4px 16.4px rgba(0, 0, 0, 0.1);
+    --shadow-input: 0 5px 16px -4px rgba(0, 0, 0, 0.07);
+    /* radius */
+    --radius-xs: 4px;
+    --radius-sm: 8px;
+    --radius-md: 10px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    /* z-index layers (web-best-practices §14) */
+    --z-header: 500;
+    --z-modal-backdrop: 800;
+    --z-modal: 810;
+    --z-tooltip: 900;
+    --z-toast: 1000;
+  }
+
+  html.dark {
+    --bg-primary: #121212;
+    --bg-secondary: #1f1f1f;
+    --bg-tertiary: #292929;
+    --bg-ground: #161717;
+    --label-primary: rgba(255, 255, 255, 0.84);
+    --label-secondary: rgba(255, 255, 255, 0.56);
+    --label-tertiary: rgba(255, 255, 255, 0.42);
+    --label-quaternary: rgba(255, 255, 255, 0.26);
+    --fill-1: rgba(255, 255, 255, 0.05);
+    --fill-2: rgba(255, 255, 255, 0.1);
+    --fill-3: rgba(255, 255, 255, 0.18);
+    --separator: rgba(255, 255, 255, 0.12);
+    --accent: #1a88ff;
+    --accent-hover: #258eff;
+    --accent-soft: rgba(26, 136, 255, 0.1);
+    --danger: #ff4756;
+    --danger-soft: rgba(255, 82, 82, 0.1);
+    --success: #16c456;
+    --success-soft: rgba(22, 196, 86, 0.1);
+    --warning: #ff9f0a;
+    --warning-soft: rgba(255, 159, 10, 0.1);
+    --brand: #f0a500;
+    --brand-hover: #ffb61a;
+    --brand-ink: #1a1a2e;
+    --sidebar-bg: #1a1a2e;
+    --shadow-small: 0 4px 16.4px rgba(0, 0, 0, 0.4);
+    --shadow-input: 0 5px 16px -4px rgba(0, 0, 0, 0.4);
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    @apply antialiased;
+    background-color: var(--bg-ground);
+    color: var(--label-primary);
+  }
+
+  /* Purposeful Motion: уважение prefers-reduced-motion (animation.md §9.1) */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    html { scroll-behavior: auto; }
+  }
+
+  /* focus-visible: color.status.kimiBlue, без сдвига раскладки */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-xs);
+  }
+
+  ::selection { background-color: rgba(23, 131, 255, 0.2); }
+}
+
+@layer components {
+  /* Поверхности и текст — семантические утилиты на токенах */
+  .surface-card {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--separator);
+    border-radius: var(--radius-lg);
+  }
+  .text-label-1 { color: var(--label-primary); }
+  .text-label-2 { color: var(--label-secondary); }
+  .text-label-3 { color: var(--label-tertiary); }
+  .text-label-4 { color: var(--label-quaternary); }
+  .border-separator { border-color: var(--separator); }
+
+  /* Поля ввода: fill f1, border separator, focus — accent (без тяжёлых рамок) */
+  .field-input {
+    width: 100%;
+    padding: 8px 12px;
+    background-color: var(--fill-1);
+    border: 1px solid var(--separator);
+    border-radius: var(--radius-md);
+    color: var(--label-primary);
+    font-size: 14px;
+    line-height: 20px;
+    transition: border-color 150ms ease, background-color 150ms ease;
+  }
+  .field-input::placeholder { color: var(--label-quaternary); }
+  .field-input:hover { background-color: var(--fill-2); }
+  .field-input:focus {
+    background-color: var(--bg-primary);
+    border-color: var(--accent);
+    outline: none;
+  }
+  .field-input:disabled {
+    color: var(--label-quaternary);
+    cursor: not-allowed;
+  }
+}
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+}

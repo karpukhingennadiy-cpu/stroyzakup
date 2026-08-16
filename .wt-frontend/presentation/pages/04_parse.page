@@ -1,0 +1,97 @@
+pageType: content
+background:
+  type: solid
+  color: "#FFFFFF"
+elements:
+  - elementId: title
+    elementType: text
+    bounds: [60, 36, 840, 40]
+    content: {style: "$pagetitle", text: "Шаг 1–2 · LLM-парсинг: текст превращается в структуру"}
+  - elementId: title-bar
+    elementType: shape
+    bounds: [60, 80, 48, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$amber"}
+  - elementId: in-head
+    elementType: text
+    bounds: [60, 108, 430, 22]
+    content: {style: "$h2", text: "Что пишет заказчик"}
+  - elementId: in-body
+    elementType: text
+    bounds: [60, 138, 430, 100]
+    content:
+      fontSize: 13.5
+      color: "#333A47"
+      lineHeight: 1.5
+      text: |
+        <p>«Брусчатка 200х100х60 серая — 200 м²</p>
+        <p>Резиновая плитка 600х600 зелёная — 150 м²</p>
+        <p>Бетон М300 — 12 м³»</p>
+  - elementId: in-note
+    elementType: text
+    bounds: [60, 246, 430, 70]
+    content:
+      style: "$small"
+      text: |
+        <p>Никаких форм и справочников для пользователя: вольный текст, как в блокноте или письме поставщику.</p>
+  - elementId: arrow-mid
+    elementType: line
+    bounds: [498, 176, 34, 8]
+    viewBox: [34, 8]
+    points: "0,4 34,4"
+    arrow: [null, "arrow"]
+    border: {style: solid, width: 2.5, color: "$amber"}
+  - elementId: out-head
+    elementType: text
+    bounds: [548, 108, 372, 22]
+    content: {style: "$h2", text: "Что получает система (DeepSeek)"}
+  - elementId: out-body
+    elementType: text
+    bounds: [548, 138, 372, 180]
+    content:
+      style: "$body"
+      fontSize: 12.5
+      text: |
+        <p>По каждой позиции извлекается:</p>
+        <p style="margin-top:6px">— наименование, категория, количество, единица</p>
+        <p>— <strong>material_type</strong>: «брусчатка» ≠ «тротуарная плитка» ≠ «резиновая плитка» — у них разные производители</p>
+        <p>— характеристики: размер, цвет, марка</p>
+        <p>— <strong>confidence 0–1</strong>: достаточно ли данных, чтобы поставщик назвал точную цену</p>
+  - elementId: bottom-rule
+    elementType: shape
+    bounds: [60, 340, 840, 1]
+    shapeName: rect
+    fill: {type: solid, color: "$line"}
+  - elementId: clar-head
+    elementType: text
+    bounds: [60, 356, 500, 22]
+    content: {style: "$h2", text: "Если данных мало — система спрашивает сама"}
+  - elementId: clar-body
+    elementType: text
+    bounds: [60, 384, 500, 90]
+    content:
+      style: "$body"
+      text: |
+        <p>Пример из реального запуска:</p>
+        <p style="margin-top:6px"><em>«Бетон М300: уточните подвижность (П1–П4) и наличие противоморозных добавок?»</em></p>
+        <p style="margin-top:6px">Позиции с confidence &lt; 0.65 помечаются флагом needs_clarification.</p>
+  - elementId: fb-head
+    elementType: text
+    bounds: [600, 356, 320, 22]
+    content: {style: "$h2", text: "Запасной путь"}
+  - elementId: fb-body
+    elementType: text
+    bounds: [600, 384, 320, 90]
+    content:
+      style: "$body"
+      fontSize: 12.5
+      text: |
+        <p>Нет ключа LLM или API недоступен — включается regex-парсер: строки → позиции, категория и material_type угадываются по словарю ключевых слов.</p>
+  - elementId: footer
+    elementType: text
+    bounds: [60, 505, 400, 18]
+    content: {style: "$small", text: "Минитендер.рф · v1.0.0"}
+  - elementId: pagenum
+    elementType: text
+    bounds: [880, 505, 40, 18]
+    content: {style: "$small", align: [right, top], text: "04"}

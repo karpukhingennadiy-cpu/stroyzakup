@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getSuppliers, getMe, api } from "@/lib/api";
-import { Truck, Search, Plus, Check, X, RotateCcw } from "lucide-react";
+import { Truck, Search, Plus, Check, X, RotateCcw, Phone, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,11 +17,21 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const MODERATION_LABELS: Record<string, { text: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-  verified: { text: "Подтверждён", variant: "default" },
-  unverified: { text: "На проверке", variant: "secondary" },
-  rejected: { text: "Отклонён", variant: "destructive" },
+const MODERATION_LABELS: Record<
+  string,
+  { text: string; variant: "default" | "secondary" | "destructive" | "outline" | "info" | "success" | "warning" | "danger" | "neutral" }
+> = {
+  verified: { text: "Подтверждён", variant: "success" },
+  unverified: { text: "На проверке", variant: "neutral" },
+  rejected: { text: "Отклонён", variant: "danger" },
 };
+
+const MODERATION_TABS = [
+  { key: "", label: "Все" },
+  { key: "verified", label: "Подтверждён" },
+  { key: "unverified", label: "На проверке" },
+  { key: "rejected", label: "Отклонён" },
+];
 
 export default function SuppliersPage() {
   const [suppliers, setSuppliers] = useState<any[]>([]);
@@ -144,7 +154,11 @@ export default function SuppliersPage() {
             База проверенных поставщиков стройматериалов
           </p>
         </div>
-        <Button onClick={() => setShowAddForm(!showAddForm)}>
+        <Button
+          variant="outline"
+          className="border-[var(--accent)]/60 text-[var(--accent)] hover:bg-[var(--accent-light)] hover:text-[var(--accent)]"
+          onClick={() => setShowAddForm(!showAddForm)}
+        >
           <Plus className="w-4 h-4 mr-2" aria-hidden="true" />
           Добавить поставщика
         </Button>
@@ -341,22 +355,28 @@ export default function SuppliersPage() {
                 />
               </div>
               <div className="space-y-2">
-                <label htmlFor="supplier-moderation" className="text-sm font-medium">
-                  Статус
-                </label>
-                <select
-                  id="supplier-moderation"
-                  value={moderationFilter}
-                  onChange={(e) => setModerationFilter(e.target.value)}
-                  className="h-8 w-full sm:w-auto rounded-md border border-[var(--separator)] bg-[var(--bg-primary)] px-3 text-sm text-[var(--label-primary)]"
-                >
-                  <option value="">Любой статус</option>
-                  <option value="verified">Подтверждённые</option>
-                  <option value="unverified">На проверке</option>
-                  <option value="rejected">Отклонённые</option>
-                </select>
+                <span className="text-sm font-medium block">Статус</span>
+                <div className="flex gap-1 bg-[var(--fill-1)] rounded-[var(--radius-lg)] p-1 flex-wrap" role="tablist" aria-label="Фильтр по статусу модерации">
+                  {MODERATION_TABS.map((tab) => (
+                    <button
+                      key={tab.key}
+                      type="button"
+                      role="tab"
+                      aria-selected={moderationFilter === tab.key}
+                      onClick={() => setModerationFilter(tab.key)}
+                      className={
+                        "px-3 py-1.5 rounded-[var(--radius-md)] text-sm font-medium transition-colors duration-150 " +
+                        (moderationFilter === tab.key
+                          ? "bg-[var(--bg-primary)] text-[var(--label-primary)] shadow-sm"
+                          : "text-[var(--label-secondary)] hover:text-[var(--label-primary)]")
+                      }
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <Button type="submit">Найти</Button>
+              <Button type="submit" variant="brand">Найти</Button>
             </div>
           </CardContent>
         </Card>
@@ -396,19 +416,32 @@ export default function SuppliersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {suppliers.map((s: any) => {
+                {suppliers.map((s: any, idx: number) => {
                   const mod = MODERATION_LABELS[s.moderation_status || "unverified"];
                   return (
-                    <TableRow key={s.id}>
-                      <TableCell className="font-medium text-[var(--label-primary)]">
+                    <TableRow
+                      key={s.id}
+                      className={(idx % 2 === 1 ? "bg-[var(--bg-secondary)]/60 " : "") + "hover:bg-[var(--fill-2)] transition-colors"}
+                    >
+                      <TableCell className="font-semibold text-[var(--label-primary)]">
                         {s.name}
                       </TableCell>
-                      <TableCell className="hidden sm:table-cell text-[var(--label-tertiary)]">
+                      <TableCell className="hidden sm:table-cell text-[var(--label-secondary)]">
                         {s.city || "—"}
                       </TableCell>
-                      <TableCell className="hidden md:table-cell text-sm text-[var(--label-tertiary)]">
-                        {s.phone && <div>{s.phone}</div>}
-                        {s.email && <div>{s.email}</div>}
+                      <TableCell className="hidden md:table-cell text-sm text-[var(--label-secondary)]">
+                        {s.phone && (
+                          <div className="flex items-center gap-1.5">
+                            <Phone className="w-3.5 h-3.5 text-[var(--label-quaternary)] shrink-0" aria-hidden="true" />
+                            {s.phone}
+                          </div>
+                        )}
+                        {s.email && (
+                          <div className="flex items-center gap-1.5">
+                            <Mail className="w-3.5 h-3.5 text-[var(--label-quaternary)] shrink-0" aria-hidden="true" />
+                            <span className="truncate">{s.email}</span>
+                          </div>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Badge variant={mod.variant}>{mod.text}</Badge>

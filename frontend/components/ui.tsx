@@ -5,7 +5,7 @@ import { forwardRef, type ButtonHTMLAttributes, type InputHTMLAttributes, type R
  * Централизованные метрики: высота, радиус, типографика, иконки, отступы.
  */
 
-type ButtonVariant = "primary" | "secondary" | "outline";
+type ButtonVariant = "primary" | "secondary" | "outline" | "accent" | "brand";
 type ButtonSize = 26 | 32 | 44;
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -37,6 +37,12 @@ function variantStyles(variant: ButtonVariant, danger: boolean): string {
     case "primary":
       // color.labels.primary fill + инверсный текст (brand.kimiDark)
       return "bg-[var(--label-primary)] text-[var(--bg-primary)] hover:opacity-85 active:opacity-90";
+    case "accent":
+      // Интерактивные действия (синий акцент)
+      return "bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] active:brightness-95";
+    case "brand":
+      // CTA: янтарный бренд + свечение
+      return "bg-[var(--brand)] text-[var(--brand-ink)] shadow-glow-brand hover:bg-[var(--brand-hover)] hover:shadow-[0_0_28px_rgba(240,165,0,0.45)] active:brightness-95";
     case "outline":
       return "border border-[var(--separator)] bg-transparent text-[var(--label-primary)] hover:bg-[var(--fill-1)]";
     default:

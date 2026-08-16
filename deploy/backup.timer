@@ -1,0 +1,12 @@
+[Unit]
+Description=Daily Minitender PostgreSQL backup
+Documentation=file:///opt/minitender/deploy/BACKUP.md
+
+[Timer]
+# Ежедневно в 03:23
+OnCalendar=*-*-* 03:23:00
+# Запустить сразу при первой загрузке, если пропущено
+Persistent=true
+
+[Install]
+WantedBy=timers.target

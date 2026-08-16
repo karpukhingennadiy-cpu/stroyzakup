@@ -1,0 +1,102 @@
+pageType: content
+background:
+  type: solid
+  color: "#FFFFFF"
+elements:
+  - elementId: title
+    elementType: text
+    bounds: [60, 36, 840, 40]
+    content: {style: "$pagetitle", text: "Шаг 3 · Точка доставки: карта 2GIS + два запасных пути"}
+  - elementId: title-bar
+    elementType: shape
+    bounds: [60, 80, 48, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$amber"}
+  - elementId: p1-box
+    elementType: shape
+    bounds: [60, 120, 250, 96]
+    shapeName: rect
+    fill: {type: solid, color: "$light"}
+    border: {style: solid, width: 1, color: "$navy"}
+  - elementId: p1-tag
+    elementType: text
+    bounds: [72, 130, 226, 18]
+    content: {fontSize: 11, bold: true, color: "$amberdark", text: "ОСНОВНОЙ ПУТЬ"}
+  - elementId: p1-txt
+    elementType: text
+    bounds: [72, 152, 226, 56]
+    content: {style: "$body", fontSize: 12.5, text: "Клик по карте 2GIS — координаты приходят с фронта сразу, без запросов к геокодеру"}
+  - elementId: p2-box
+    elementType: shape
+    bounds: [355, 120, 250, 96]
+    shapeName: rect
+    fill: {type: solid, color: "#FFFFFF"}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: p2-tag
+    elementType: text
+    bounds: [367, 130, 226, 18]
+    content: {fontSize: 11, bold: true, color: "$gray", text: "ЗАПАСНОЙ ПУТЬ 1"}
+  - elementId: p2-txt
+    elementType: text
+    bounds: [367, 152, 226, 56]
+    content: {style: "$body", fontSize: 12.5, text: "Текстовый ввод города — если карта не загрузилась, пользователь не застревает"}
+  - elementId: p3-box
+    elementType: shape
+    bounds: [650, 120, 250, 96]
+    shapeName: rect
+    fill: {type: solid, color: "#FFFFFF"}
+    border: {style: solid, width: 1, color: "$line"}
+  - elementId: p3-tag
+    elementType: text
+    bounds: [662, 130, 226, 18]
+    content: {fontSize: 11, bold: true, color: "$gray", text: "ЗАПАСНОЙ ПУТЬ 2"}
+  - elementId: p3-txt
+    elementType: text
+    bounds: [662, 152, 226, 56]
+    content: {style: "$body", fontSize: 12.5, text: "Яндекс.Геокодер на бэкенде: адрес строкой → lat/lon + город"}
+  - elementId: why-head
+    elementType: text
+    bounds: [60, 252, 840, 22]
+    content: {style: "$h2", text: "Зачем координаты: радиус поиска зависит от категории материала"}
+  - elementId: why-body
+    elementType: text
+    bounds: [60, 282, 500, 130]
+    content:
+      style: "$body"
+      text: |
+        <p>У каждой категории свой радиус по умолчанию:</p>
+        <p style="margin-top:6px">— нерудные материалы, плиточный клей — <strong>100 км</strong></p>
+        <p>— бетон, кирпич, гипсокартон — <strong>150 км</strong></p>
+        <p>— пиломатериалы, кровля, брусчатка — <strong>200 км</strong></p>
+        <p>— металлопрокат, инженерные системы — <strong>300 км</strong></p>
+        <p style="margin-top:6px">Тяжёлые и дешёвые в перевозке материалы ищутся ближе к объекту — это честная экономика доставки.</p>
+  - elementId: geo-example
+    elementType: text
+    bounds: [600, 282, 320, 130]
+    content:
+      style: "$small"
+      text: |
+        <p><strong>Проверено вживую (30.07.2026):</strong></p>
+        <p style="margin-top:6px">«г. Пенза, ул. Лермонтова, 5» → 53.1834, 45.0053 — Пенза</p>
+        <p>«Иркутск» → 52.2896, 104.2806 — Иркутск</p>
+        <p>«г. Подольск, ул. Парковая, 10» → 55.4301, 37.5187 — Подольск</p>
+  - elementId: bottom-rule
+    elementType: shape
+    bounds: [60, 432, 840, 1]
+    shapeName: rect
+    fill: {type: solid, color: "$line"}
+  - elementId: bottom-note
+    elementType: text
+    bounds: [60, 446, 840, 40]
+    content:
+      style: "$body"
+      text: |
+        <p>Без координат кнопка «Подобрать поставщиков» недоступна, а API отвечает понятной подсказкой — подбор по расстоянию невозможен без точки отсчёта.</p>
+  - elementId: footer
+    elementType: text
+    bounds: [60, 505, 400, 18]
+    content: {style: "$small", text: "Минитендер.рф · v1.0.0"}
+  - elementId: pagenum
+    elementType: text
+    bounds: [880, 505, 40, 18]
+    content: {style: "$small", align: [right, top], text: "05"}

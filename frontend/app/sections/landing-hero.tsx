@@ -2,11 +2,16 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Zap } from "lucide-react";
+import { Zap, CheckCircle2 } from "lucide-react";
 
 export function LandingHero() {
   const router = useRouter();
   const [text, setText] = useState("");
+  const trustItems = [
+    "Без регистрации для демо",
+    "50 первых заявок бесплатно",
+    "Поставщики отвечают с почты",
+  ];
   return (
     <section className="relative overflow-hidden bg-brand-sidebar text-white">
       <div
@@ -19,11 +24,11 @@ export function LandingHero() {
       />
       <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
         <div className="mx-auto max-w-3xl text-center animate-fade-in">
-          <div className="mb-6 inline-flex items-center rounded-full border border-brand/30 bg-brand/10 px-3 py-1 text-sm font-medium text-brand">
-            <span className="mr-2 flex h-2 w-2 rounded-full bg-brand animate-pulse" aria-hidden="true" />
+          <div className="mb-6 inline-flex items-center rounded-full border border-brand/40 bg-brand-light px-3 py-1 text-sm font-medium text-brand animate-pulse">
+            <span className="mr-2 flex h-2 w-2 rounded-full bg-brand" aria-hidden="true" />
             MVP запущен — первые 50 заявок бесплатно
           </div>
-          <h1 className="text-balance text-4xl font-extrabold tracking-tight sm:text-6xl animate-slide-up">
+          <h1 className="text-balance text-[2rem] font-extrabold tracking-tight leading-tight sm:text-6xl animate-slide-up">
             Строительные закупки <span className="text-brand">без посредников</span>
           </h1>
           <p className="mt-6 text-lg leading-8 text-white/60 animate-slide-up [animation-delay:150ms]">
@@ -47,19 +52,27 @@ export function LandingHero() {
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center animate-slide-up [animation-delay:300ms]">
             <button
               onClick={() => router.push("/lk/requests/new")}
-              className="inline-flex items-center justify-center gap-2 rounded-[var(--radius-lg)] bg-brand px-8 py-3.5 text-base font-semibold text-brand-ink hover:bg-brand-hover active:scale-[0.97] transition-all duration-150"
+              className="inline-flex items-center justify-center gap-2 rounded-[var(--radius-lg)] bg-brand px-8 py-3.5 text-base font-semibold text-brand-ink shadow-glow-brand hover:bg-brand-hover hover:shadow-[0_0_28px_rgba(240,165,0,0.45)] active:scale-[0.97] transition-all duration-150 w-full sm:w-auto"
             >
               <Zap className="h-5 w-5" />
               Разослать заявку
             </button>
             <button
               onClick={() => document.getElementById("how")?.scrollIntoView({ behavior: "smooth" })}
-              className="inline-flex items-center justify-center gap-2 rounded-[var(--radius-lg)] bg-white/5 px-8 py-3.5 text-base font-semibold text-white ring-1 ring-white/10 hover:bg-white/10 active:scale-[0.97] transition-all duration-150"
+              className="inline-flex items-center justify-center gap-2 rounded-[var(--radius-lg)] bg-white/5 px-8 py-3.5 text-base font-semibold text-white ring-1 ring-white/10 hover:bg-white/10 active:scale-[0.97] transition-all duration-150 w-full sm:w-auto"
             >
               Посмотреть демо
             </button>
           </div>
-          <p className="mt-4 text-xs text-white/40">Не нужна регистрация для просмотра демо. Данные обрабатываются AI.</p>
+          <ul className="mt-8 flex flex-col items-center gap-2 sm:flex-row sm:justify-center sm:gap-6 animate-slide-up [animation-delay:450ms]" aria-label="Преимущества">
+            {trustItems.map((item) => (
+              <li key={item} className="flex items-center gap-1.5 text-sm text-white/50">
+                <CheckCircle2 className="h-4 w-4 text-brand shrink-0" aria-hidden="true" />
+                {item}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-4 text-xs text-white/40">Данные обрабатываются AI. Не нужна регистрация для просмотра демо.</p>
         </div>
       </div>
     </section>

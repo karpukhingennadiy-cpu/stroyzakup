@@ -34,28 +34,53 @@
     --separator: rgba(0, 0, 0, 0.13);
     /* color.status */
     --accent: #1783ff;
-    --accent-hover: #167ff7;
+    --accent-hover: #0f6ad4;
     --accent-soft: rgba(23, 131, 255, 0.1);
+    --accent-light: rgba(23, 131, 255, 0.12);
     --danger: #e03131;
     --danger-soft: rgba(255, 77, 77, 0.1);
     --success: #14954b;
     --success-soft: rgba(22, 196, 86, 0.1);
     --warning: #b8620a;
     --warning-soft: rgba(255, 149, 0, 0.1);
+    /* color.status — расширенные статус-токены */
+    --status-success: #14954b;
+    --status-success-bg: rgba(20, 149, 75, 0.12);
+    --status-warning: #b8620a;
+    --status-warning-bg: rgba(184, 98, 10, 0.12);
+    --status-danger: #e03131;
+    --status-danger-bg: rgba(224, 49, 49, 0.12);
+    --status-info: #1783ff;
+    --status-info-bg: rgba(23, 131, 255, 0.12);
+    --status-neutral: #6b7280;
+    --status-neutral-bg: rgba(107, 114, 128, 0.12);
     /* Бренд продукта «Минитендер» */
     --brand: #f0a500;
     --brand-hover: #d99500;
+    --brand-light: rgba(240, 165, 0, 0.12);
     --brand-ink: #1a1a2e;
     --sidebar-bg: #1a1a2e;
+    /* Тёмные поверхности */
+    --bg-dark: #1a1a2e;
+    --bg-dark-elevated: #252542;
+    --bg-input-dark: rgba(255, 255, 255, 0.08);
+    /* Инверсный текст */
+    --text-inverse: #ffffff;
+    --text-inverse-secondary: rgba(255, 255, 255, 0.7);
     /* effect.shadow */
     --shadow-small: 0 4px 16.4px rgba(0, 0, 0, 0.1);
     --shadow-input: 0 5px 16px -4px rgba(0, 0, 0, 0.07);
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.08);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08);
+    --shadow-glow-brand: 0 0 20px rgba(240, 165, 0, 0.3);
     /* radius */
     --radius-xs: 4px;
     --radius-sm: 8px;
     --radius-md: 10px;
     --radius-lg: 12px;
     --radius-xl: 16px;
+    --radius-full: 9999px;
     /* z-index layers */
     --z-header: 500;
     --z-modal-backdrop: 800;
@@ -86,10 +111,10 @@
   }
 
   html.dark {
-    --bg-primary: #121212;
-    --bg-secondary: #1f1f1f;
-    --bg-tertiary: #292929;
-    --bg-ground: #161717;
+    --bg-primary: #1a1a2e;
+    --bg-secondary: #12121c;
+    --bg-tertiary: #252542;
+    --bg-ground: #0a0a0f;
     --label-primary: rgba(255, 255, 255, 0.84);
     --label-secondary: rgba(255, 255, 255, 0.56);
     --label-tertiary: rgba(255, 255, 255, 0.42);
@@ -101,18 +126,43 @@
     --accent: #1a88ff;
     --accent-hover: #258eff;
     --accent-soft: rgba(26, 136, 255, 0.1);
+    --accent-light: rgba(26, 136, 255, 0.14);
     --danger: #ff4756;
     --danger-soft: rgba(255, 82, 82, 0.1);
     --success: #16c456;
     --success-soft: rgba(22, 196, 86, 0.1);
     --warning: #ff9f0a;
     --warning-soft: rgba(255, 159, 10, 0.1);
+    /* color.status — расширенные статус-токены (dark) */
+    --status-success: #16c456;
+    --status-success-bg: rgba(22, 196, 86, 0.12);
+    --status-warning: #ff9f0a;
+    --status-warning-bg: rgba(255, 159, 10, 0.12);
+    --status-danger: #ff4756;
+    --status-danger-bg: rgba(255, 71, 86, 0.12);
+    --status-info: #1a88ff;
+    --status-info-bg: rgba(26, 136, 255, 0.12);
+    --status-neutral: #8b93a1;
+    --status-neutral-bg: rgba(139, 147, 161, 0.12);
     --brand: #f0a500;
     --brand-hover: #ffb61a;
+    --brand-light: rgba(240, 165, 0, 0.14);
     --brand-ink: #1a1a2e;
     --sidebar-bg: #1a1a2e;
+    /* Тёмные поверхности */
+    --bg-dark: #1a1a2e;
+    --bg-dark-elevated: #252542;
+    --bg-input-dark: rgba(255, 255, 255, 0.08);
+    /* Инверсный текст */
+    --text-inverse: #ffffff;
+    --text-inverse-secondary: rgba(255, 255, 255, 0.7);
     --shadow-small: 0 4px 16.4px rgba(0, 0, 0, 0.4);
     --shadow-input: 0 5px 16px -4px rgba(0, 0, 0, 0.4);
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+    --shadow-glow-brand: 0 0 20px rgba(240, 165, 0, 0.3);
+    --radius-full: 9999px;
 
     --background: var(--bg-primary);
     --foreground: var(--label-primary);
@@ -233,7 +283,7 @@
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent-s);
+  --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-border: var(--border);
@@ -246,4 +296,52 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* === Семантические токены (были в tailwind.config.ts — Tailwind 4 его не читает) === */
+  --color-surface-primary: var(--bg-primary);
+  --color-surface-secondary: var(--bg-secondary);
+  --color-surface-tertiary: var(--bg-tertiary);
+  --color-surface-ground: var(--bg-ground);
+  --color-label-primary: var(--label-primary);
+  --color-label-secondary: var(--label-secondary);
+  --color-label-tertiary: var(--label-tertiary);
+  --color-label-quaternary: var(--label-quaternary);
+  --color-separator: var(--separator);
+  --color-fill-1: var(--fill-1);
+  --color-fill-2: var(--fill-2);
+  --color-fill-3: var(--fill-3);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-light: var(--accent-light);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-light: var(--brand-light);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-sidebar: var(--sidebar-bg);
+  --color-status-success: var(--status-success);
+  --color-status-success-bg: var(--status-success-bg);
+  --color-status-warning: var(--status-warning);
+  --color-status-warning-bg: var(--status-warning-bg);
+  --color-status-danger: var(--status-danger);
+  --color-status-danger-bg: var(--status-danger-bg);
+  --color-status-info: var(--status-info);
+  --color-status-info-bg: var(--status-info-bg);
+  --color-status-neutral: var(--status-neutral);
+  --color-status-neutral-bg: var(--status-neutral-bg);
+  --color-dark: var(--bg-dark);
+  --color-dark-elevated: var(--bg-dark-elevated);
+  --color-dark-input: var(--bg-input-dark);
+  --color-text-inverse: var(--text-inverse);
+  --color-text-inverse-secondary: var(--text-inverse-secondary);
+  --shadow-small: var(--shadow-small);
+  --shadow-input: var(--shadow-input);
+  --shadow-glow-brand: var(--shadow-glow-brand);
+  --radius-xs: var(--radius-xs);
+  --radius-full: var(--radius-full);
 }

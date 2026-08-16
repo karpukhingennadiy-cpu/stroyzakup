@@ -1,0 +1,2646 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "hermes-agent",
+  "elements": [
+    {
+      "type": "text",
+      "id": "1",
+      "x": 500,
+      "y": 15,
+      "text": "Минитендер.рф — Полная блок-схема процесса закупки",
+      "fontSize": 26,
+      "fontFamily": 1,
+      "strokeColor": "#1a1a2e",
+      "originalText": "Минитендер.рф — Полная блок-схема процесса закупки",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "2",
+      "x": 510,
+      "y": 52,
+      "text": "Шаг за шагом: от заявки клиента до выбора лучшего поставщика",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#666",
+      "originalText": "Шаг за шагом: от заявки клиента до выбора лучшего поставщика",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "3",
+      "x": 60,
+      "y": 95,
+      "width": 22,
+      "height": 14,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#a5d8ff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "boundElements": [
+        {
+          "id": "4",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "4",
+      "x": 65,
+      "y": 103,
+      "width": 12,
+      "height": -2,
+      "text": "",
+      "fontSize": 1,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "3",
+      "originalText": "",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "5",
+      "x": 88,
+      "y": 93,
+      "text": "Действие пользователя",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#555",
+      "originalText": "Действие пользователя",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "6",
+      "x": 295,
+      "y": 95,
+      "width": 22,
+      "height": 14,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#d0bfff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "boundElements": [
+        {
+          "id": "7",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "7",
+      "x": 300,
+      "y": 103,
+      "width": 12,
+      "height": -2,
+      "text": "",
+      "fontSize": 1,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "6",
+      "originalText": "",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "8",
+      "x": 323,
+      "y": 93,
+      "text": "Искусственный интеллект",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#555",
+      "originalText": "Искусственный интеллект",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "9",
+      "x": 530,
+      "y": 95,
+      "width": 22,
+      "height": 14,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#ffd8a8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "boundElements": [
+        {
+          "id": "10",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "10",
+      "x": 535,
+      "y": 103,
+      "width": 12,
+      "height": -2,
+      "text": "",
+      "fontSize": 1,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "9",
+      "originalText": "",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "11",
+      "x": 558,
+      "y": 93,
+      "text": "Email / внешние системы",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#555",
+      "originalText": "Email / внешние системы",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "12",
+      "x": 765,
+      "y": 95,
+      "width": 22,
+      "height": 14,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#fff3bf",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "boundElements": [
+        {
+          "id": "13",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "13",
+      "x": 770,
+      "y": 103,
+      "width": 12,
+      "height": -2,
+      "text": "",
+      "fontSize": 1,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "12",
+      "originalText": "",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "14",
+      "x": 793,
+      "y": 93,
+      "text": "Решение / развилка",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#555",
+      "originalText": "Решение / развилка",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "15",
+      "x": 1000,
+      "y": 95,
+      "width": 22,
+      "height": 14,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#b2f2bb",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "boundElements": [
+        {
+          "id": "16",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "16",
+      "x": 1005,
+      "y": 103,
+      "width": 12,
+      "height": -2,
+      "text": "",
+      "fontSize": 1,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "15",
+      "originalText": "",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "17",
+      "x": 1028,
+      "y": 93,
+      "text": "Результат / успех",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#555",
+      "originalText": "Результат / успех",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "18",
+      "x": 1235,
+      "y": 95,
+      "width": 22,
+      "height": 14,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#ffc9c9",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "boundElements": [
+        {
+          "id": "19",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "19",
+      "x": 1240,
+      "y": 103,
+      "width": 12,
+      "height": -2,
+      "text": "",
+      "fontSize": 1,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "18",
+      "originalText": "",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "20",
+      "x": 1263,
+      "y": 93,
+      "text": "Отмена / ошибка",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#555",
+      "originalText": "Отмена / ошибка",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "21",
+      "x": 330,
+      "y": 140,
+      "width": 80,
+      "height": 40,
+      "strokeColor": "#868e96",
+      "backgroundColor": "#e9ecef",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "boundElements": [
+        {
+          "id": "22",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "22",
+      "x": 335,
+      "y": 148,
+      "width": 70,
+      "height": 24,
+      "text": "СТАРТ",
+      "fontSize": 16,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "21",
+      "originalText": "СТАРТ",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "23",
+      "x": 370,
+      "y": 180,
+      "width": 0,
+      "height": 30,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          30
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#1e1e1e",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100
+    },
+    {
+      "type": "rectangle",
+      "id": "24",
+      "x": 185,
+      "y": 230,
+      "width": 370,
+      "height": 78,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#a5d8ff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "25",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "25",
+      "x": 190,
+      "y": 238,
+      "width": 360,
+      "height": 62,
+      "text": "1. Создание заявки\nКлиент вводит список материалов\nСтатус: Черновик",
+      "fontSize": 16,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "24",
+      "originalText": "1. Создание заявки\nКлиент вводит список материалов\nСтатус: Черновик",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "26",
+      "x": 600,
+      "y": 240,
+      "text": "POST /api/requests/",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#888",
+      "originalText": "POST /api/requests/",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "27",
+      "x": 600,
+      "y": 260,
+      "text": "Код RFQ-XXXXXX",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#aaa",
+      "originalText": "Код RFQ-XXXXXX",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "28",
+      "x": 600,
+      "y": 278,
+      "text": "генерируется автоматом",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#aaa",
+      "originalText": "генерируется автоматом",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "29",
+      "x": 370,
+      "y": 308,
+      "width": 0,
+      "height": 24,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#1e1e1e",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100
+    },
+    {
+      "type": "rectangle",
+      "id": "30",
+      "x": 185,
+      "y": 332,
+      "width": 370,
+      "height": 78,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#d0bfff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "31",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "31",
+      "x": 190,
+      "y": 340,
+      "width": 360,
+      "height": 62,
+      "text": "2. ИИ-парсинг материалов\nDeepSeek распознаёт: название,\nкатегорию, количество, ед.изм.",
+      "fontSize": 16,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "30",
+      "originalText": "2. ИИ-парсинг материалов\nDeepSeek распознаёт: название,\nкатегорию, количество, ед.изм.",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "32",
+      "x": 600,
+      "y": 342,
+      "text": "POST /api/requests/{id}/parse/",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#888",
+      "originalText": "POST /api/requests/{id}/parse/",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "33",
+      "x": 600,
+      "y": 362,
+      "text": "Статус: Распознано",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#aaa",
+      "originalText": "Статус: Распознано",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "34",
+      "x": 600,
+      "y": 380,
+      "text": "Создаются строки RequestItem",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#aaa",
+      "originalText": "Создаются строки RequestItem",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "35",
+      "x": 370,
+      "y": 410,
+      "width": 0,
+      "height": 24,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#1e1e1e",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100
+    },
+    {
+      "type": "rectangle",
+      "id": "36",
+      "x": 185,
+      "y": 434,
+      "width": 370,
+      "height": 78,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#a5d8ff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "37",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "37",
+      "x": 190,
+      "y": 442,
+      "width": 360,
+      "height": 62,
+      "text": "3. Проверка и подтверждение\nКлиент проверяет результат ИИ,\nисправляет ошибки и подтверждает",
+      "fontSize": 16,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "36",
+      "originalText": "3. Проверка и подтверждение\nКлиент проверяет результат ИИ,\nисправляет ошибки и подтверждает",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "38",
+      "x": 600,
+      "y": 444,
+      "text": "POST /api/requests/{id}/confirm/",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#888",
+      "originalText": "POST /api/requests/{id}/confirm/",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "39",
+      "x": 600,
+      "y": 464,
+      "text": "POST .../update_item/",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#888",
+      "originalText": "POST .../update_item/",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "40",
+      "x": 600,
+      "y": 482,
+      "text": "Статус: Подтверждено",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#aaa",
+      "originalText": "Статус: Подтверждено",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "41",
+      "x": 370,
+      "y": 512,
+      "width": 0,
+      "height": 24,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#1e1e1e",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100
+    },
+    {
+      "type": "diamond",
+      "id": "42",
+      "x": 315,
+      "y": 536,
+      "width": 110,
+      "height": 70,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#fff3bf",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "boundElements": [
+        {
+          "id": "43",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "43",
+      "x": 320,
+      "y": 551,
+      "width": 100,
+      "height": 40,
+      "text": "Всё\nверно?",
+      "fontSize": 16,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "42",
+      "originalText": "Всё\nверно?",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "44",
+      "x": 315,
+      "y": 571,
+      "width": -130,
+      "height": 0,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          -130,
+          0
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#1e1e1e",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "dashed",
+      "boundElements": [
+        {
+          "id": "45",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "45",
+      "x": 200,
+      "y": 559,
+      "width": 100,
+      "height": 24,
+      "text": "Нет",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "44",
+      "originalText": "Нет",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "46",
+      "x": 35,
+      "y": 554,
+      "text": "Вернуться\nк редактированию",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#e03131",
+      "originalText": "Вернуться\nк редактированию",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "47",
+      "x": 370,
+      "y": 606,
+      "width": 0,
+      "height": 24,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#1e1e1e",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "boundElements": [
+        {
+          "id": "48",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "48",
+      "x": 320,
+      "y": 606,
+      "width": 100,
+      "height": 24,
+      "text": "Да",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "47",
+      "originalText": "Да",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "49",
+      "x": 185,
+      "y": 630,
+      "width": 370,
+      "height": 96,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#d0bfff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "50",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "50",
+      "x": 190,
+      "y": 638,
+      "width": 360,
+      "height": 80,
+      "text": "4. Подбор поставщиков\nСистема оценивает каждого по 4 критериям\nВозвращает топ-20 с детальными баллами",
+      "fontSize": 16,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "49",
+      "originalText": "4. Подбор поставщиков\nСистема оценивает каждого по 4 критериям\nВозвращает топ-20 с детальными баллами",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "51",
+      "x": 570,
+      "y": 630,
+      "width": 260,
+      "height": 96,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#f8f9fa",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "52",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "52",
+      "x": 575,
+      "y": 638,
+      "width": 250,
+      "height": 80,
+      "text": "Формула оценки:\n▶ Совпадение категорий: 50 баллов\n▶ Близость доставки: 30 баллов\n▶ Рейтинг поставщика: 10 баллов\n▶ Полнота профиля: 10 баллов\nИтого: 0–100 баллов",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "51",
+      "originalText": "Формула оценки:\n▶ Совпадение категорий: 50 баллов\n▶ Близость доставки: 30 баллов\n▶ Рейтинг поставщика: 10 баллов\n▶ Полнота профиля: 10 баллов\nИтого: 0–100 баллов",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "53",
+      "x": 840,
+      "y": 640,
+      "text": "POST .../match_suppliers/",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#888",
+      "originalText": "POST .../match_suppliers/",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "54",
+      "x": 840,
+      "y": 660,
+      "text": "Статус: Подобрано",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#aaa",
+      "originalText": "Статус: Подобрано",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "55",
+      "x": 370,
+      "y": 726,
+      "width": 0,
+      "height": 24,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#1e1e1e",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100
+    },
+    {
+      "type": "rectangle",
+      "id": "56",
+      "x": 185,
+      "y": 750,
+      "width": 370,
+      "height": 78,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#a5d8ff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "57",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "57",
+      "x": 190,
+      "y": 758,
+      "width": 360,
+      "height": 62,
+      "text": "5. Выбор поставщиков\nОператор изучает топ-20,\nотмечает кому отправлять запрос",
+      "fontSize": 16,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "56",
+      "originalText": "5. Выбор поставщиков\nОператор изучает топ-20,\nотмечает кому отправлять запрос",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "58",
+      "x": 600,
+      "y": 760,
+      "text": "Ручной шаг",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#888",
+      "originalText": "Ручной шаг",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "59",
+      "x": 600,
+      "y": 780,
+      "text": "Оператор видит:",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#aaa",
+      "originalText": "Оператор видит:",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "60",
+      "x": 600,
+      "y": 798,
+      "text": "баллы, город, категории",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#aaa",
+      "originalText": "баллы, город, категории",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "61",
+      "x": 370,
+      "y": 828,
+      "width": 0,
+      "height": 24,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#1e1e1e",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100
+    },
+    {
+      "type": "diamond",
+      "id": "62",
+      "x": 310,
+      "y": 852,
+      "width": 120,
+      "height": 70,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#fff3bf",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "boundElements": [
+        {
+          "id": "63",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "63",
+      "x": 315,
+      "y": 867,
+      "width": 110,
+      "height": 40,
+      "text": "Выбраны\nпоставщики?",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "62",
+      "originalText": "Выбраны\nпоставщики?",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "64",
+      "x": 430,
+      "y": 887,
+      "width": 120,
+      "height": 0,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          120,
+          0
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#1e1e1e",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "dashed",
+      "boundElements": [
+        {
+          "id": "65",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "65",
+      "x": 440,
+      "y": 875,
+      "width": 100,
+      "height": 24,
+      "text": "Нет",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "64",
+      "originalText": "Нет",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "66",
+      "x": 450,
+      "y": 870,
+      "text": "Отмена\nзаявки",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#e03131",
+      "originalText": "Отмена\nзаявки",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "67",
+      "x": 370,
+      "y": 922,
+      "width": 0,
+      "height": 24,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#1e1e1e",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "boundElements": [
+        {
+          "id": "68",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "68",
+      "x": 320,
+      "y": 922,
+      "width": 100,
+      "height": 24,
+      "text": "Да",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "67",
+      "originalText": "Да",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "69",
+      "x": 185,
+      "y": 946,
+      "width": 370,
+      "height": 78,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#ffd8a8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "70",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "70",
+      "x": 190,
+      "y": 954,
+      "width": 360,
+      "height": 62,
+      "text": "6. Отправка запросов КП\nФормируется email со списком позиций\nи уникальным адресом для ответа",
+      "fontSize": 15,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "69",
+      "originalText": "6. Отправка запросов КП\nФормируется email со списком позиций\nи уникальным адресом для ответа",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "71",
+      "x": 600,
+      "y": 956,
+      "text": "POST .../send_rfq/",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#888",
+      "originalText": "POST .../send_rfq/",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "72",
+      "x": 600,
+      "y": 976,
+      "text": "Тело: {supplier_ids: [...]}",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#888",
+      "originalText": "Тело: {supplier_ids: [...]}",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "73",
+      "x": 600,
+      "y": 994,
+      "text": "Статус: Запрос отправлен",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#aaa",
+      "originalText": "Статус: Запрос отправлен",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "74",
+      "x": 370,
+      "y": 1024,
+      "width": 0,
+      "height": 24,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#1e1e1e",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100
+    },
+    {
+      "type": "rectangle",
+      "id": "75",
+      "x": 185,
+      "y": 1048,
+      "width": 370,
+      "height": 96,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#ffd8a8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "76",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "76",
+      "x": 190,
+      "y": 1056,
+      "width": 360,
+      "height": 80,
+      "text": "7. Сбор коммерческих предложений\nПоставщики отвечают на email\nили заполняют форму на сайте",
+      "fontSize": 16,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "75",
+      "originalText": "7. Сбор коммерческих предложений\nПоставщики отвечают на email\nили заполняют форму на сайте",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "77",
+      "x": 570,
+      "y": 1048,
+      "width": 260,
+      "height": 96,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#f8f9fa",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "78",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "78",
+      "x": 575,
+      "y": 1056,
+      "width": 250,
+      "height": 80,
+      "text": "3 канала получения КП:\n▶ Ответ на email → webhook\n▶ Веб-форма на сайте\n▶ Ручной ввод оператором\nСтатус: Сбор предложений",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "77",
+      "originalText": "3 канала получения КП:\n▶ Ответ на email → webhook\n▶ Веб-форма на сайте\n▶ Ручной ввод оператором\nСтатус: Сбор предложений",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "79",
+      "x": 370,
+      "y": 1144,
+      "width": 0,
+      "height": 24,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#1e1e1e",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100
+    },
+    {
+      "type": "rectangle",
+      "id": "80",
+      "x": 185,
+      "y": 1168,
+      "width": 370,
+      "height": 78,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#d0bfff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "81",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "81",
+      "x": 190,
+      "y": 1176,
+      "width": 360,
+      "height": 62,
+      "text": "8. Конкурентный лист\nСистема сравнивает цены, доставку\nи строит рейтинг поставщиков",
+      "fontSize": 16,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "80",
+      "originalText": "8. Конкурентный лист\nСистема сравнивает цены, доставку\nи строит рейтинг поставщиков",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "82",
+      "x": 600,
+      "y": 1178,
+      "text": "GET /api/quotes/competitive_sheet/",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#888",
+      "originalText": "GET /api/quotes/competitive_sheet/",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "83",
+      "x": 600,
+      "y": 1198,
+      "text": "Ранжированный список",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#aaa",
+      "originalText": "Ранжированный список",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "84",
+      "x": 600,
+      "y": 1216,
+      "text": "по лучшей цене + доставке",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#aaa",
+      "originalText": "по лучшей цене + доставке",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "85",
+      "x": 370,
+      "y": 1246,
+      "width": 0,
+      "height": 24,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#1e1e1e",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100
+    },
+    {
+      "type": "diamond",
+      "id": "86",
+      "x": 315,
+      "y": 1270,
+      "width": 110,
+      "height": 70,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#fff3bf",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "boundElements": [
+        {
+          "id": "87",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "87",
+      "x": 320,
+      "y": 1285,
+      "width": 100,
+      "height": 40,
+      "text": "Найден\nлучший?",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "86",
+      "originalText": "Найден\nлучший?",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "88",
+      "x": 425,
+      "y": 1305,
+      "width": 120,
+      "height": 0,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          120,
+          0
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#1e1e1e",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "strokeStyle": "dashed",
+      "boundElements": [
+        {
+          "id": "89",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "89",
+      "x": 435,
+      "y": 1293,
+      "width": 100,
+      "height": 24,
+      "text": "Нет",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "88",
+      "originalText": "Нет",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "90",
+      "x": 445,
+      "y": 1288,
+      "text": "Ждать ещё\nпредложения",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#e03131",
+      "originalText": "Ждать ещё\nпредложения",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "91",
+      "x": 370,
+      "y": 1340,
+      "width": 0,
+      "height": 24,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          24
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#1e1e1e",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "boundElements": [
+        {
+          "id": "92",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "92",
+      "x": 320,
+      "y": 1340,
+      "width": 100,
+      "height": 24,
+      "text": "Да",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "91",
+      "originalText": "Да",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "93",
+      "x": 185,
+      "y": 1364,
+      "width": 370,
+      "height": 78,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#b2f2bb",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "94",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "94",
+      "x": 190,
+      "y": 1372,
+      "width": 360,
+      "height": 62,
+      "text": "9. Завершение закупки\nЗаявка выполнена,\nпобедитель зафиксирован",
+      "fontSize": 16,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "93",
+      "originalText": "9. Завершение закупки\nЗаявка выполнена,\nпобедитель зафиксирован",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "95",
+      "x": 600,
+      "y": 1374,
+      "text": "Статус: Завершено",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#2f9e44",
+      "originalText": "Статус: Завершено",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "96",
+      "x": 600,
+      "y": 1394,
+      "text": "Конкурентный лист сохранён",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#aaa",
+      "originalText": "Конкурентный лист сохранён",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "97",
+      "x": 600,
+      "y": 1412,
+      "text": "Победитель отмечен",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#aaa",
+      "originalText": "Победитель отмечен",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "98",
+      "x": 1000,
+      "y": 140,
+      "text": "ЦЕПОЧКА СТАТУСОВ",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#1a1a2e",
+      "originalText": "ЦЕПОЧКА СТАТУСОВ",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "99",
+      "x": 1000,
+      "y": 168,
+      "width": 200,
+      "height": 28,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#e9ecef",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "100",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "100",
+      "x": 1005,
+      "y": 176,
+      "width": 190,
+      "height": 12,
+      "text": "Черновик",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "99",
+      "originalText": "Черновик",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "101",
+      "x": 1100,
+      "y": 196,
+      "width": 0,
+      "height": 8,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          8
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#1e1e1e",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100
+    },
+    {
+      "type": "rectangle",
+      "id": "102",
+      "x": 1000,
+      "y": 206,
+      "width": 200,
+      "height": 28,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#d0bfff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "103",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "103",
+      "x": 1005,
+      "y": 214,
+      "width": 190,
+      "height": 12,
+      "text": "Распознано",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "102",
+      "originalText": "Распознано",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "104",
+      "x": 1100,
+      "y": 234,
+      "width": 0,
+      "height": 8,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          8
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#1e1e1e",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100
+    },
+    {
+      "type": "rectangle",
+      "id": "105",
+      "x": 1000,
+      "y": 244,
+      "width": 200,
+      "height": 28,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#a5d8ff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "106",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "106",
+      "x": 1005,
+      "y": 252,
+      "width": 190,
+      "height": 12,
+      "text": "Подтверждено",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "105",
+      "originalText": "Подтверждено",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "107",
+      "x": 1100,
+      "y": 272,
+      "width": 0,
+      "height": 8,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          8
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#1e1e1e",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100
+    },
+    {
+      "type": "rectangle",
+      "id": "108",
+      "x": 1000,
+      "y": 282,
+      "width": 200,
+      "height": 28,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#d0bfff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "109",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "109",
+      "x": 1005,
+      "y": 290,
+      "width": 190,
+      "height": 12,
+      "text": "Подобрано",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "108",
+      "originalText": "Подобрано",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "110",
+      "x": 1100,
+      "y": 310,
+      "width": 0,
+      "height": 8,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          8
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#1e1e1e",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100
+    },
+    {
+      "type": "rectangle",
+      "id": "111",
+      "x": 1000,
+      "y": 320,
+      "width": 200,
+      "height": 28,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#ffd8a8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "112",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "112",
+      "x": 1005,
+      "y": 328,
+      "width": 190,
+      "height": 12,
+      "text": "Запрос отправлен",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "111",
+      "originalText": "Запрос отправлен",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "113",
+      "x": 1100,
+      "y": 348,
+      "width": 0,
+      "height": 8,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          8
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#1e1e1e",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100
+    },
+    {
+      "type": "rectangle",
+      "id": "114",
+      "x": 1000,
+      "y": 358,
+      "width": 200,
+      "height": 28,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#ffd8a8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "115",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "115",
+      "x": 1005,
+      "y": 366,
+      "width": 190,
+      "height": 12,
+      "text": "Сбор предложений",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "114",
+      "originalText": "Сбор предложений",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "116",
+      "x": 1100,
+      "y": 386,
+      "width": 0,
+      "height": 8,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          8
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#1e1e1e",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100
+    },
+    {
+      "type": "rectangle",
+      "id": "117",
+      "x": 1000,
+      "y": 396,
+      "width": 200,
+      "height": 28,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#b2f2bb",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "118",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "118",
+      "x": 1005,
+      "y": 404,
+      "width": 190,
+      "height": 12,
+      "text": "Готово",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "117",
+      "originalText": "Готово",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "119",
+      "x": 1100,
+      "y": 424,
+      "width": 0,
+      "height": 8,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          8
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#1e1e1e",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100
+    },
+    {
+      "type": "rectangle",
+      "id": "120",
+      "x": 1000,
+      "y": 434,
+      "width": 200,
+      "height": 28,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#b2f2bb",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "121",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "121",
+      "x": 1005,
+      "y": 442,
+      "width": 190,
+      "height": 12,
+      "text": "Завершено",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "120",
+      "originalText": "Завершено",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "122",
+      "x": 1100,
+      "y": 462,
+      "width": 0,
+      "height": 8,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          8
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#1e1e1e",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100
+    },
+    {
+      "type": "text",
+      "id": "123",
+      "x": 995,
+      "y": 472,
+      "text": "В ЛЮБОЙ МОМЕНТ →",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#e03131",
+      "originalText": "В ЛЮБОЙ МОМЕНТ →",
+      "autoResize": true
+    },
+    {
+      "type": "arrow",
+      "id": "124",
+      "x": 1195,
+      "y": 476,
+      "width": 50,
+      "height": 0,
+      "points": [
+        [
+          0,
+          0
+        ],
+        [
+          50,
+          0
+        ]
+      ],
+      "endArrowhead": "arrow",
+      "strokeColor": "#1e1e1e",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100
+    },
+    {
+      "type": "rectangle",
+      "id": "125",
+      "x": 1250,
+      "y": 466,
+      "width": 140,
+      "height": 28,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#ffc9c9",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "126",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "126",
+      "x": 1255,
+      "y": 474,
+      "width": 130,
+      "height": 12,
+      "text": "Отменено",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "125",
+      "originalText": "Отменено",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "127",
+      "x": 1000,
+      "y": 542,
+      "text": "API ЭНДПОИНТЫ",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#1a1a2e",
+      "originalText": "API ЭНДПОИНТЫ",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "128",
+      "x": 1000,
+      "y": 570,
+      "text": "POST /api/requests/",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#555",
+      "originalText": "POST /api/requests/",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "129",
+      "x": 1000,
+      "y": 592,
+      "text": "POST /api/requests/{id}/parse/",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#555",
+      "originalText": "POST /api/requests/{id}/parse/",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "130",
+      "x": 1000,
+      "y": 614,
+      "text": "POST /api/requests/{id}/confirm/",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#555",
+      "originalText": "POST /api/requests/{id}/confirm/",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "131",
+      "x": 1000,
+      "y": 636,
+      "text": "POST /api/requests/{id}/update_item/",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#555",
+      "originalText": "POST /api/requests/{id}/update_item/",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "132",
+      "x": 1000,
+      "y": 658,
+      "text": "POST /api/requests/{id}/match_suppliers/",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#555",
+      "originalText": "POST /api/requests/{id}/match_suppliers/",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "133",
+      "x": 1000,
+      "y": 680,
+      "text": "POST /api/requests/{id}/send_rfq/",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#555",
+      "originalText": "POST /api/requests/{id}/send_rfq/",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "134",
+      "x": 1000,
+      "y": 702,
+      "text": "GET  /api/quotes/competitive_sheet/",
+      "fontSize": 12,
+      "fontFamily": 1,
+      "strokeColor": "#555",
+      "originalText": "GET  /api/quotes/competitive_sheet/",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "135",
+      "x": 1000,
+      "y": 744,
+      "text": "КАК СЧИТАЕТСЯ РЕЙТИНГ",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#1a1a2e",
+      "originalText": "КАК СЧИТАЕТСЯ РЕЙТИНГ",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "136",
+      "x": 1000,
+      "y": 772,
+      "width": 90,
+      "height": 24,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#a5d8ff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "137",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "137",
+      "x": 1005,
+      "y": 780,
+      "width": 80,
+      "height": 8,
+      "text": "50 баллов",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "136",
+      "originalText": "50 баллов",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "138",
+      "x": 1100,
+      "y": 774,
+      "text": "Совпадение категорий",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#555",
+      "originalText": "Совпадение категорий",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "139",
+      "x": 1000,
+      "y": 804,
+      "width": 90,
+      "height": 24,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#b2f2bb",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "140",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "140",
+      "x": 1005,
+      "y": 812,
+      "width": 80,
+      "height": 8,
+      "text": "30 баллов",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "139",
+      "originalText": "30 баллов",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "141",
+      "x": 1100,
+      "y": 806,
+      "text": "Близость доставки",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#555",
+      "originalText": "Близость доставки",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "142",
+      "x": 1000,
+      "y": 836,
+      "width": 90,
+      "height": 24,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#d0bfff",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "143",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "143",
+      "x": 1005,
+      "y": 844,
+      "width": 80,
+      "height": 8,
+      "text": "10 баллов",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "142",
+      "originalText": "10 баллов",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "144",
+      "x": 1100,
+      "y": 838,
+      "text": "Рейтинг поставщика",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#555",
+      "originalText": "Рейтинг поставщика",
+      "autoResize": true
+    },
+    {
+      "type": "rectangle",
+      "id": "145",
+      "x": 1000,
+      "y": 868,
+      "width": 90,
+      "height": 24,
+      "strokeColor": "#1e1e1e",
+      "backgroundColor": "#ffd8a8",
+      "fillStyle": "solid",
+      "strokeWidth": 2,
+      "roughness": 1,
+      "opacity": 100,
+      "roundness": {
+        "type": 3
+      },
+      "boundElements": [
+        {
+          "id": "146",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "146",
+      "x": 1005,
+      "y": 876,
+      "width": 80,
+      "height": 8,
+      "text": "10 баллов",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#1e1e1e",
+      "textAlign": "center",
+      "verticalAlign": "middle",
+      "containerId": "145",
+      "originalText": "10 баллов",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "147",
+      "x": 1100,
+      "y": 870,
+      "text": "Полнота профиля",
+      "fontSize": 13,
+      "fontFamily": 1,
+      "strokeColor": "#555",
+      "originalText": "Полнота профиля",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "148",
+      "x": 1000,
+      "y": 904,
+      "text": "Итого: 0–100 баллов",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "strokeColor": "#1a1a2e",
+      "originalText": "Итого: 0–100 баллов",
+      "autoResize": true
+    },
+    {
+      "type": "text",
+      "id": "149",
+      "x": 185,
+      "y": 1444,
+      "text": "Hermes Agent • Minitender.rf • Блок-схема процесса v2.0 • Июль 2026",
+      "fontSize": 11,
+      "fontFamily": 1,
+      "strokeColor": "#ccc",
+      "originalText": "Hermes Agent • Minitender.rf • Блок-схема процесса v2.0 • Июль 2026",
+      "autoResize": true
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#ffffff",
+    "gridSize": null
+  }
+}

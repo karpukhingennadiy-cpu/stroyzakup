@@ -1,0 +1,74 @@
+pageType: content
+background:
+  type: solid
+  color: "#FFFFFF"
+elements:
+  - elementId: title
+    elementType: text
+    bounds: [60, 36, 840, 40]
+    content: {style: "$pagetitle", text: "Проверено в работе: сквозные сценарии 30.07.2026"}
+  - elementId: title-bar
+    elementType: shape
+    bounds: [60, 80, 48, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$amber"}
+  - elementId: tenders-head
+    elementType: text
+    bounds: [60, 106, 840, 22]
+    content: {style: "$h2", text: "Три реальных тендера: парсинг → подбор → производитель на первом месте"}
+  - elementId: tenders-table
+    elementType: table
+    bounds: [60, 136, 860, 150]
+    columnWidths: [0.34, 0.15, 0.34, 0.17]
+    rowHeights: [0.25, 0.25, 0.25, 0.25]
+    style: "$default"
+    rows:
+      - - text: "Заявка"
+        - text: "Город"
+        - text: "Победитель подбора"
+        - text: "Балл · км"
+      - - text: "Брусчатка 200×100×60 серая — 200 м²"
+        - text: "Подольск"
+        - text: "ООО «ЮгБрусчатка» · производитель"
+        - text: "135.1 · 2.7"
+      - - text: "Резиновая плитка 600×600 — 150 м²"
+        - text: "Пенза"
+        - text: "ООО «ПензаРезПлит» · производитель"
+        - text: "135.3 · 1.8"
+      - - text: "Бетон М200 — 50 м³"
+        - text: "Иркутск"
+        - text: "ООО «ИркутскБетон» · производитель"
+        - text: "135.0 · 2.6"
+  - elementId: checks-head
+    elementType: text
+    bounds: [60, 310, 840, 22]
+    content: {style: "$h2", text: "Полный цикл и инфраструктура"}
+  - elementId: checks-body
+    elementType: text
+    bounds: [60, 340, 560, 140]
+    content:
+      style: "$body"
+      text: |
+        <p><span style="color:$green"><strong>✓</strong></span> API-цикл: создание → парсинг → подбор → RFQ → КП → конкурентный лист</p>
+        <p><span style="color:$green"><strong>✓</strong></span> Письмо через SMTP BeGet — статус sent</p>
+        <p><span style="color:$green"><strong>✓</strong></span> Публичная форма КП: GET позиций, POST цен, повторное редактирование</p>
+        <p><span style="color:$green"><strong>✓</strong></span> Автотесты backend: 30/30</p>
+        <p><span style="color:$green"><strong>✓</strong></span> Сборка фронта: 12 страниц, все отвечают 200</p>
+        <p><span style="color:$green"><strong>✓</strong></span> Геокодер, DaData, DeepSeek, 2GIS — живые вызовы</p>
+  - elementId: note-box
+    elementType: text
+    bounds: [660, 340, 260, 140]
+    content:
+      style: "$small"
+      text: |
+        <p><strong>Границы проверки:</strong></p>
+        <p style="margin-top:6px">Демо-поставщики в новых городах — тестовые записи с пометкой seed.</p>
+        <p style="margin-top:6px">Входящие ответы поставщиков по email требуют настройки MX-записи — см. дорожную карту.</p>
+  - elementId: footer
+    elementType: text
+    bounds: [60, 505, 400, 18]
+    content: {style: "$small", text: "Минитендер.рф · v1.0.0"}
+  - elementId: pagenum
+    elementType: text
+    bounds: [880, 505, 40, 18]
+    content: {style: "$small", align: [right, top], text: "11"}

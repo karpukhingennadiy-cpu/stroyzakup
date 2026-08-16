@@ -107,7 +107,9 @@ export function LkLayoutClient({ children }: { children: React.ReactNode }) {
               <Link key={item.href} href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={"flex items-center gap-3 px-3 py-2.5 rounded-[var(--radius-lg)] transition-colors duration-150 text-sm font-medium " +
-                  (active ? "bg-white/10 text-white" : "text-white/60 hover:text-white hover:bg-white/10")}>
+                  (active
+                    ? "bg-white/5 text-brand border-l-2 border-brand rounded-l-none"
+                    : "text-white/60 hover:text-white hover:bg-white/10")}>
                 <item.icon className="w-5 h-5" />
                 {item.label}
               </Link>
@@ -115,13 +117,27 @@ export function LkLayoutClient({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        <div className="p-4 border-t border-white/10">
-          <div className="px-3 py-2 text-sm text-white/40 truncate" title={user?.email || ""}>{user?.email || ""}</div>
-          <button type="button" onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-[var(--radius-lg)] text-white/40 hover:text-white/70 hover:bg-white/5 transition-colors duration-150 text-sm mt-1">
-            <IconLogOut className="w-5 h-5" />
-            Выйти
-          </button>
+        <div className="p-4 border-t border-white/10 space-y-2">
+          <Link href="/lk/requests/new"
+            className="flex items-center justify-center gap-2 w-full px-3 py-2.5 rounded-[var(--radius-lg)] bg-brand text-brand-ink font-semibold text-sm hover:bg-brand-hover shadow-glow-brand transition-all duration-150">
+            <IconPlus className="w-4 h-4" />
+            Новая заявка
+          </Link>
+          <div className="flex items-center gap-3 px-2 py-2">
+            <div className="w-9 h-9 rounded-full bg-brand/20 border border-brand/40 flex items-center justify-center text-brand font-semibold text-sm shrink-0" aria-hidden="true">
+              {user?.first_name?.[0] || user?.email?.[0] || "U"}
+            </div>
+            <div className="min-w-0">
+              <div className="text-sm text-white/80 truncate" title={user?.email || ""}>
+                {user?.first_name || user?.email || ""}
+              </div>
+              <button type="button" onClick={handleLogout}
+                className="flex items-center gap-1.5 text-xs text-white/40 hover:text-white/70 transition-colors duration-150 mt-0.5">
+                <IconLogOut className="w-3.5 h-3.5" />
+                Выйти
+              </button>
+            </div>
+          </div>
         </div>
       </aside>
       <main id="lk-main" className="flex-1 md:ml-64 p-4 pt-20 md:p-8 w-full min-w-0">{children}</main>

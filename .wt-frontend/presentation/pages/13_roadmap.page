@@ -1,0 +1,67 @@
+pageType: final
+background:
+  type: solid
+  color: "#FFFFFF"
+elements:
+  - elementId: title
+    elementType: text
+    bounds: [60, 36, 840, 40]
+    content: {style: "$pagetitle", text: "Что дальше: дорожная карта после релиза"}
+  - elementId: title-bar
+    elementType: shape
+    bounds: [60, 80, 48, 3]
+    shapeName: rect
+    fill: {type: solid, color: "$amber"}
+  - elementId: near-head
+    elementType: text
+    bounds: [60, 110, 420, 22]
+    content: {style: "$h2", text: "Ближайшие шаги"}
+  - elementId: near-body
+    elementType: text
+    bounds: [60, 140, 420, 200]
+    content:
+      style: "$body"
+      text: |
+        <p><strong>1. Приём ответов по email.</strong> MX-запись для in.минитендер.рф + обработчик входящих — тогда КП из писем будут попадать в систему автоматически.</p>
+        <p style="margin-top:10px"><strong>2. Реальные поставщики в новых регионах.</strong> Запуск discovery-пайплайна по категориям с верификацией DaData.</p>
+        <p style="margin-top:10px"><strong>3. Асинхронность.</strong> Celery + Redis: парсинг и рассылка в фоне, без ожидания в интерфейсе.</p>
+  - elementId: far-head
+    elementType: text
+    bounds: [530, 110, 390, 22]
+    content: {style: "$h2", text: "Прод-контур"}
+  - elementId: far-body
+    elementType: text
+    bounds: [530, 140, 390, 200]
+    content:
+      style: "$body"
+      text: |
+        <p><strong>4. PostgreSQL</strong> вместо SQLite, миграция данных.</p>
+        <p style="margin-top:10px"><strong>5. Модерация поставщиков</strong> — очередь на проверку для source=llm.</p>
+        <p style="margin-top:10px"><strong>6. Деплой</strong> по DEPLOY.md: Docker Compose, nginx, TLS.</p>
+  - elementId: divider-v
+    elementType: shape
+    bounds: [500, 110, 1, 230]
+    shapeName: rect
+    fill: {type: solid, color: "$line"}
+  - elementId: bottom-rule
+    elementType: shape
+    bounds: [60, 376, 840, 1]
+    shapeName: rect
+    fill: {type: solid, color: "$line"}
+  - elementId: final-note
+    elementType: text
+    bounds: [60, 398, 840, 80]
+    content:
+      fontSize: 15
+      color: "$navy"
+      lineHeight: 1.5
+      text: |
+        <p><strong>Релиз v1.0.0 — рабочий:</strong> заявка своими словами превращается в тендер с живыми письмами, онлайн-КП и конкурентным листом. Каждый шаг проверен сквозными сценариями на реальных сервисах.</p>
+  - elementId: footer
+    elementType: text
+    bounds: [60, 505, 400, 18]
+    content: {style: "$small", text: "Минитендер.рф · v1.0.0 · 30.07.2026"}
+  - elementId: pagenum
+    elementType: text
+    bounds: [880, 505, 40, 18]
+    content: {style: "$small", align: [right, top], text: "13"}

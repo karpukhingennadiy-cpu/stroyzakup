@@ -1,0 +1,14 @@
+# deploy/crontab.production — Cron-задание для бэкапа Минитендер.рф
+# =============================================================================
+# Установка: скопировать содержимое в crontab пользователя на сервере:
+#   crontab -e
+# Или разместить файл в /etc/cron.d/minitender (требует root):
+#   sudo cp deploy/crontab.production /etc/cron.d/minitender
+#   sudo chmod 644 /etc/cron.d/minitender
+# =============================================================================
+
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# Ежедневный бэкап БД в 03:23 (низкая нагрузка, после ночных задач)
+23 3 * * * /opt/minitender/deploy/backup.sh >> /var/log/minitender-backup.log 2>&1

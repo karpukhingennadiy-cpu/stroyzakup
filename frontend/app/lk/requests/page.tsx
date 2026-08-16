@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { getRequests } from "@/lib/api";
-import { Plus, List, Search, Filter } from "lucide-react";
+import { Plus, List, Search, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -30,20 +30,45 @@ const statusLabels: Record<string, string> = {
   ready: "Готов к сравнению",
   completed: "Завершена",
   cancelled: "Отменена",
+  rfq_failed: "Ошибка отправки РФК",
 };
 
-const statusBadgeVariant: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  draft: "secondary",
-  parsing: "secondary",
-  confirmed: "default",
-  matched: "default",
-  matching: "secondary",
-  rfq_sent: "default",
-  collecting_quotes: "default",
-  ready: "default",
-  completed: "outline",
-  cancelled: "destructive",
+const statusBadgeVariant: Record<
+  string,
+  "default" | "secondary" | "destructive" | "outline" | "info" | "success" | "warning" | "danger" | "neutral"
+> = {
+  draft: "neutral",
+  parsing: "neutral",
+  confirmed: "success",
+  matched: "info",
+  matching: "neutral",
+  rfq_sent: "info",
+  collecting_quotes: "info",
+  ready: "success",
+  completed: "success",
+  cancelled: "danger",
+  rfq_failed: "danger",
 };
+
+const statusTabs = [
+  { key: "", label: "Все" },
+  { key: "active", label: "В работе" },
+  { key: "done", label: "Завершено" },
+  { key: "error", label: "Ошибка" },
+];
+
+function matchesTab(status: string, tab: string): boolean {
+  switch (tab) {
+    case "active":
+      return ["parsing", "confirmed", "matched", "matching", "rfq_sent", "collecting_quotes", "ready"].includes(status);
+    case "done":
+      return status === "completed";
+    case "error":
+      return status === "rfq_failed" || status.includes("fail") || status.includes("error");
+    default:
+      return true;
+  }
+}
 
 const DEFAULT_LAT = 55.7558;
 const DEFAULT_LON = 37.6173;
@@ -54,6 +79,8 @@ export default function RequestsPage() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
 
   useEffect(() => {
     getRequests()
@@ -72,11 +99,13 @@ export default function RequestsPage() {
           r.raw_text?.toLowerCase().includes(q)
       );
     }
-    if (statusFilter) {
-      result = result.filter((r) => r.status === statusFilter);
-    }
+    result = result.filter((r) => matchesTab(r.status, statusFilter));
     return result;
   }, [requests, search, statusFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredRequests.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const paginated = filteredRequests.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   if (loading) {
     return (
@@ -135,6 +164,12 @@ export default function RequestsPage() {
         </div>
       </div>
 
+      {/* Баннер */}
+      <div className="mb-4 flex items-center gap-2 px-4 h-12 rounded-[var(--radius-lg)] bg-[var(--accent-soft)] border border-[var(--separator)]">
+        <Sparkles className="w-4 h-4 text-[var(--accent)] shrink-0" aria-hidden="true" />
+        <p className="text-sm text-[var(--label-primary)]">База поставщиков пополняется автоматически</p>
+      </div>
+
       {/* Filters */}
       {requests.length > 0 && (
         <div className="flex flex-wrap gap-3 mb-4">
@@ -143,26 +178,29 @@ export default function RequestsPage() {
             <Input
               placeholder="Поиск по коду или содержимому..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
               className="pl-9"
               aria-label="Поиск заявок"
             />
           </div>
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-[var(--label-tertiary)]" aria-hidden="true" />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="h-8 rounded-md border border-[var(--separator)] bg-[var(--bg-primary)] px-3 text-sm text-[var(--label-primary)]"
-              aria-label="Фильтр по статусу"
-            >
-              <option value="">Все статусы</option>
-              {Object.entries(statusLabels).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
+          <div className="flex items-center gap-1 bg-[var(--fill-1)] rounded-[var(--radius-lg)] p-1" role="tablist" aria-label="Фильтр по статусу">
+            {statusTabs.map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                role="tab"
+                aria-selected={statusFilter === tab.key}
+                onClick={() => { setStatusFilter(tab.key); setPage(1); }}
+                className={
+                  "px-3 py-1.5 rounded-[var(--radius-md)] text-sm font-medium transition-colors duration-150 " +
+                  (statusFilter === tab.key
+                    ? "bg-[var(--bg-primary)] text-[var(--label-primary)] shadow-sm"
+                    : "text-[var(--label-secondary)] hover:text-[var(--label-primary)]")
+                }
+              >
+                {tab.label}
+              </button>
+            ))}
           </div>
         </div>
       )}
@@ -211,7 +249,7 @@ export default function RequestsPage() {
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="[&>th]:bg-[var(--bg-secondary)] [&>th]:text-[var(--label-tertiary)] [&>th]:text-xs [&>th]:uppercase [&>th]:font-semibold">
                   <TableHead className="w-[120px]">Код</TableHead>
                   <TableHead>Статус</TableHead>
                   <TableHead className="hidden sm:table-cell">Описание</TableHead>
@@ -219,8 +257,8 @@ export default function RequestsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredRequests.map((req: any) => (
-                  <TableRow key={req.id} className="cursor-pointer hover:bg-[var(--fill-1)]">
+                {paginated.map((req: any) => (
+                  <TableRow key={req.id} className="cursor-pointer hover:bg-[var(--bg-secondary)] transition-colors">
                     <TableCell>
                       <Link
                         href={`/lk/requests/${req.id}`}
@@ -246,6 +284,22 @@ export default function RequestsPage() {
                 ))}
               </TableBody>
             </Table>
+          </div>
+          {/* Пагинация */}
+          <div className="flex items-center justify-between px-4 py-3 border-t border-separator">
+            <p className="text-sm text-[var(--label-tertiary)]">
+              {filteredRequests.length > 0
+                ? `${(safePage - 1) * PAGE_SIZE + 1}–${Math.min(safePage * PAGE_SIZE, filteredRequests.length)} из ${filteredRequests.length}`
+                : "0 заявок"}
+            </p>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" disabled={safePage <= 1} onClick={() => setPage(safePage - 1)}>
+                <ChevronLeft className="w-4 h-4" /> Назад
+              </Button>
+              <Button variant="outline" size="sm" disabled={safePage >= totalPages} onClick={() => setPage(safePage + 1)}>
+                Вперёд <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </div>
       )}

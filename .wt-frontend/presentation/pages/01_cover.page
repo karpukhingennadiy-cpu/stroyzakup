@@ -1,0 +1,81 @@
+pageType: cover
+background:
+  type: solid
+  color: "#FFFFFF"
+elements:
+  - elementId: accent-bar
+    elementType: shape
+    bounds: [80, 120, 6, 200]
+    shapeName: rect
+    fill: {type: solid, color: "$amber"}
+  - elementId: kicker
+    elementType: text
+    bounds: [110, 118, 700, 24]
+    content:
+      fontSize: 14
+      color: "$amberdark"
+      bold: true
+      letterSpacing: 2
+      text: РЕЛИЗ v1.0.0 · 30 ИЮЛЯ 2026
+  - elementId: title
+    elementType: text
+    bounds: [106, 148, 760, 80]
+    content:
+      fontSize: 54
+      bold: true
+      color: "$navy"
+      wrap: false
+      text: Минитендер.рф
+  - elementId: subtitle
+    elementType: text
+    bounds: [110, 236, 760, 60]
+    content:
+      fontSize: 20
+      color: "#333A47"
+      lineHeight: 1.4
+      text: |
+        <p>Платформа мини-тендеров на стройматериалы.</p>
+        <p>От текста заявки до конкурентного листа — за минуты, без звонков.</p>
+  - elementId: divider
+    elementType: shape
+    bounds: [110, 330, 740, 1]
+    shapeName: rect
+    fill: {type: solid, color: "$line"}
+  - elementId: stat1-label
+    elementType: text
+    bounds: [110, 352, 170, 20]
+    content: {fontSize: 26, bold: true, color: "$navy", text: "35"}
+  - elementId: stat1-desc
+    elementType: text
+    bounds: [110, 382, 170, 36]
+    content: {style: "$small", text: "поставщиков в базе с полным ассортиментом"}
+  - elementId: stat2-label
+    elementType: text
+    bounds: [300, 352, 170, 20]
+    content: {fontSize: 26, bold: true, color: "$navy", text: "30"}
+  - elementId: stat2-desc
+    elementType: text
+    bounds: [300, 382, 170, 36]
+    content: {style: "$small", text: "категорий стройматериалов"}
+  - elementId: stat3-label
+    elementType: text
+    bounds: [490, 352, 170, 20]
+    content: {fontSize: 26, bold: true, color: "$navy", text: "5"}
+  - elementId: stat3-desc
+    elementType: text
+    bounds: [490, 382, 170, 36]
+    content: {style: "$small", text: "внешних сервисов подключено и проверено"}
+  - elementId: stat4-label
+    elementType: text
+    bounds: [680, 352, 170, 20]
+    content: {fontSize: 26, bold: true, color: "$green", text: "30/30"}
+  - elementId: stat4-desc
+    elementType: text
+    bounds: [680, 382, 170, 36]
+    content: {style: "$small", text: "автотестов backend проходят"}
+  - elementId: footer
+    elementType: text
+    bounds: [80, 495, 600, 20]
+    content:
+      style: "$small"
+      text: Django 5 + DRF · Next.js 15 · SQLite · DeepSeek · DaData · 2GIS · Яндекс.Геокодер · SMTP BeGet
